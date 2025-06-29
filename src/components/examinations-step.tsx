@@ -11,6 +11,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import type { Invigilator, Examination, Assignment } from '@/types';
 import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft, Plus, Trash2 } from 'lucide-react';
@@ -22,6 +23,13 @@ const formSchema = z.object({
   subject: z.string().min(1, 'Subject is required'),
   timings: z.string().min(1, 'Timings are required'),
 });
+
+const subjects = [
+  "English", "Kannada", "Hindi", "Sanskrit", "Physics", "Chemistry",
+  "Mathematics", "Biology", "Computer Science", "Electronics",
+  "Basic Maths", "Economics", "Business Studies", "Accountancy",
+  "Statistics", "Other"
+];
 
 type ExaminationsStepProps = {
   invigilators: Invigilator[];
@@ -147,9 +155,20 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Subject</FormLabel>
-                <FormControl>
-                  <Input placeholder="Subject Name" {...field} />
-                </FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a subject" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {subjects.map((subject) => (
+                      <SelectItem key={subject} value={subject}>
+                        {subject}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

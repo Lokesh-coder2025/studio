@@ -4,15 +4,12 @@
 import { useEffect, useState } from 'react';
 import type { Examination, SavedAllotment } from '@/types';
 import { AllotmentSheet } from '@/components/allotment-sheet';
-import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { ArrowLeft } from 'lucide-react';
-import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 
-export default function HistoryPage({}) {
+export default function HistoryPage() {
   const [history, setHistory] = useState<SavedAllotment[]>([]);
   const [selectedAllotment, setSelectedAllotment] = useState<SavedAllotment | null>(null);
 
@@ -22,18 +19,13 @@ export default function HistoryPage({}) {
   }, []);
 
   return (
-    <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <header className="flex justify-between items-center mb-8">
+        <header className="mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-primary font-headline">DutyFlow History</h1>
+            <h1 className="text-4xl font-bold text-primary font-headline">History</h1>
             <p className="text-muted-foreground mt-2">Previously generated duty allotments.</p>
           </div>
-          <Link href="/">
-            <Button variant="outline">
-              <ArrowLeft className="mr-2" /> Back to Home
-            </Button>
-          </Link>
         </header>
 
         <Card>
@@ -91,6 +83,6 @@ export default function HistoryPage({}) {
           )}
         </Dialog>
       </div>
-    </main>
+    </div>
   );
 }

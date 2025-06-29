@@ -7,9 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { InvigilatorsStep } from '@/components/invigilators-step';
 import { ExaminationsStep } from '@/components/examinations-step';
 import { ResultsStep } from '@/components/results-step';
-import { Workflow, BookUser, FileSpreadsheet, History } from 'lucide-react';
-import Link from 'next/link';
-import { Button } from '@/components/ui/button';
+import { Workflow, BookUser, FileSpreadsheet } from 'lucide-react';
 
 const STEPS = [
   { step: 1, title: "Invigilators' Details", description: "Add all available invigilators.", icon: BookUser },
@@ -17,7 +15,7 @@ const STEPS = [
   { step: 3, title: "Duty Allotment", description: "View and export the generated schedule.", icon: FileSpreadsheet },
 ];
 
-export default function Home({}) {
+export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [invigilators, setInvigilators] = useState<Invigilator[]>([]);
   const [examinations, setExaminations] = useState<Examination[]>([]);
@@ -62,10 +60,10 @@ export default function Home({}) {
   };
 
   return (
-    <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-8">
-            <h1 className="text-4xl font-bold text-primary font-headline">DutyFlow</h1>
+            <h1 className="text-4xl font-bold font-headline">New Allotment</h1>
             <p className="text-muted-foreground mt-2">Automated Invigilation Duty Allotment System</p>
         </header>
 
@@ -90,18 +88,7 @@ export default function Home({}) {
             {renderStep()}
           </CardContent>
         </Card>
-
-        <footer className="text-center mt-8 text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} DutyFlow. All rights reserved.</p>
-        </footer>
       </div>
-      <div className="fixed bottom-8 right-8">
-        <Link href="/history">
-          <Button variant="outline">
-            <History className="mr-2 h-4 w-4" /> View History
-          </Button>
-        </Link>
-      </div>
-    </main>
+    </div>
   );
 }

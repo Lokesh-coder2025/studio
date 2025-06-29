@@ -19,6 +19,7 @@ import { optimizeDutyAssignments } from '@/ai/flows/optimize-duty-assignments';
 const formSchema = z.object({
   examinations: z.array(z.object({
     date: z.date().optional(),
+    day: z.string().optional(),
     subject: z.string().min(1, 'Required'),
     timings: z.string().min(1, 'Required'),
     rooms: z.coerce.number().min(1).max(35),
@@ -38,7 +39,7 @@ type ExaminationsStepProps = {
   setIsGenerating: Dispatch<SetStateAction<boolean>>;
 };
 
-export function ExaminationsStep({ invigilators, setExaminations, setAssignments, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
+export function ExaminationsStep({ invigilators, examinations, setExaminations, setAssignments, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -145,7 +146,7 @@ export function ExaminationsStep({ invigilators, setExaminations, setAssignments
                   </Popover>
                 </TableCell>
                 <TableCell>
-                  <Input readOnly value={form.watch(`examinations.${index}.day`)} placeholder="Day" />
+                  <Input readOnly value={form.watch(`examinations.${index}.day`) || ''} placeholder="Day" />
                 </TableCell>
                 <TableCell><Input placeholder="Subject Name" {...form.register(`examinations.${index}.subject`)} /></TableCell>
                 <TableCell><Input placeholder="10 AM to 1 PM" {...form.register(`examinations.${index}.timings`)} /></TableCell>

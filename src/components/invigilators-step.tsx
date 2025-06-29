@@ -52,7 +52,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
               <FormItem>
                 <FormLabel>Invigilator’s Name</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. John Doe" {...field} />
+                  <Input placeholder="e.g. Lokesh D" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>
@@ -65,7 +65,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
               <FormItem>
                 <FormLabel>Designation</FormLabel>
                 <FormControl>
-                  <Input placeholder="e.g. Lecturer in Physics" {...field} />
+                  <Input placeholder="e.g. Lecturer in English" {...field} />
                 </FormControl>
                 <FormMessage />
               </FormItem>

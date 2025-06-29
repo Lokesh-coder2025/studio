@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
@@ -189,7 +190,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                           className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
                         >
                           <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                          {field.value ? format(field.value, "PPP") : <span>Select a date</span>}
                         </Button>
                       </FormControl>
                     </PopoverTrigger>

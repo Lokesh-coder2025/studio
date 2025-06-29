@@ -1,12 +1,15 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import type { Invigilator, Assignment } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
-import { Search } from 'lucide-react';
+import { Search, Download } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 type InvigilatorDutySummaryProps = {
   invigilators: Invigilator[];
@@ -15,6 +18,7 @@ type InvigilatorDutySummaryProps = {
 
 export function InvigilatorDutySummary({ invigilators, assignments }: InvigilatorDutySummaryProps) {
   const [selectedInvigilatorId, setSelectedInvigilatorId] = useState<string | null>(null);
+  const summaryCardRef = useRef<HTMLDivElement>(null);
 
   const selectedInvigilator = useMemo(() => {
     return invigilators.find(inv => inv.id === selectedInvigilatorId) || null;
@@ -33,6 +37,33 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
       .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [selectedInvigilator, assignments]);
 
+  const handleDownloadPdf = () => {
+    const input = summaryCardRef.current;
+    if (input && selectedInvigilator) {
+      const button = input.querySelector('button');
+      if (button) {
+        button.style.display = 'none';
+      }
+
+      html2canvas(input, { scale: 2 }).then((canvas) => {
+        if (button) {
+          button.style.display = '';
+        }
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+        const imgWidth = pdfWidth - 20;
+        const imgHeight = imgWidth / ratio;
+        
+        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+        pdf.save(`${selectedInvigilator.name}-duty-summary.pdf`);
+      });
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="max-w-md">
@@ -50,9 +81,15 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
       </div>
 
       {selectedInvigilator ? (
-        <Card>
+        <Card ref={summaryCardRef}>
           <CardHeader>
-            <CardTitle>Invigilator's Duty Summary</CardTitle>
+            <div className="flex justify-between items-center">
+              <CardTitle>Invigilator's Duty Summary</CardTitle>
+              <Button onClick={handleDownloadPdf} variant="outline" size="sm">
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+              </Button>
+            </div>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm">

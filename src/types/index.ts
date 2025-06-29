@@ -11,6 +11,7 @@ export interface Examination {
   subject: string;
   startTime: string;
   endTime: string;
+  roomsAllotted: number;
 }
 
 export interface Assignment {

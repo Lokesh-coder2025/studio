@@ -28,6 +28,7 @@ const formSchema = z.object({
   endHour: z.string({required_error: "Hour is required."}),
   endMinute: z.string({required_error: "Minute is required."}),
   endPeriod: z.enum(['AM', 'PM']),
+  roomsAllotted: z.string({ required_error: 'Number of rooms is required.' }),
 });
 
 const subjects = [
@@ -40,6 +41,7 @@ const subjects = [
 const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
 const minutes = ['00', '15', '30', '45'];
 const periods = ['AM', 'PM'];
+const roomNumbers = Array.from({ length: 50 }, (_, i) => (i + 1).toString());
 
 type ExaminationsStepProps = {
   examTitle: string;
@@ -66,6 +68,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
       endHour: '12',
       endMinute: '00',
       endPeriod: 'PM',
+      roomsAllotted: '1',
     },
   });
   
@@ -80,6 +83,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
       day: format(values.date, 'EEE'),
       startTime,
       endTime,
+      roomsAllotted: parseInt(values.roomsAllotted, 10),
     };
 
     setExaminations((prev) => [...prev, newExamination].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
@@ -107,8 +111,8 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
         date: format(parseISO(exam.date), 'yyyy-MM-dd'),
         subject: exam.subject,
         time: `${exam.startTime} - ${exam.endTime}`,
-        rooms: 1,
-        invigilatorsNeeded: 1,
+        rooms: exam.roomsAllotted,
+        invigilatorsNeeded: exam.roomsAllotted,
         relieversNeeded: 0,
       }));
 
@@ -171,7 +175,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <FormField
               control={form.control}
               name="date"
@@ -219,6 +223,30 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                       {subjects.map((subject) => (
                         <SelectItem key={subject} value={subject}>
                           {subject}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="roomsAllotted"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>No of Rooms</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select rooms" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {roomNumbers.map((num) => (
+                        <SelectItem key={num} value={num}>
+                          {num}
                         </SelectItem>
                       ))}
                     </SelectContent>
@@ -308,6 +336,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
               <TableHead>Subject</TableHead>
               <TableHead>Start Time</TableHead>
               <TableHead>End Time</TableHead>
+              <TableHead>No of Rooms</TableHead>
               <TableHead className="text-right w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -321,6 +350,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                   <TableCell className="font-medium">{exam.subject}</TableCell>
                   <TableCell>{exam.startTime}</TableCell>
                   <TableCell>{exam.endTime}</TableCell>
+                  <TableCell className="text-center">{exam.roomsAllotted}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => deleteExamination(exam.id)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -331,7 +361,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   No examinations added yet.
                 </TableCell>
               </TableRow>

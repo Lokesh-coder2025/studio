@@ -8,15 +8,41 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
+import { Button } from '@/components/ui/button';
+import { Trash2 } from 'lucide-react';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<SavedAllotment[]>([]);
   const [selectedAllotment, setSelectedAllotment] = useState<SavedAllotment | null>(null);
+  const [allotmentToDeleteId, setAllotmentToDeleteId] = useState<string | null>(null);
+  const { toast } = useToast();
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('dutyHistory') || '[]');
     setHistory(savedHistory);
   }, []);
+
+  const handleDelete = (idToDelete: string) => {
+    const updatedHistory = history.filter((item) => item.id !== idToDelete);
+    setHistory(updatedHistory);
+    localStorage.setItem('dutyHistory', JSON.stringify(updatedHistory));
+    setAllotmentToDeleteId(null);
+    toast({
+      title: "Allotment Deleted",
+      description: "The saved allotment has been successfully removed.",
+    });
+  };
 
   return (
     <div className="p-4 sm:p-6 md:p-8">
@@ -31,7 +57,7 @@ export default function HistoryPage() {
         <Card>
           <CardHeader>
             <CardTitle>Saved Allotments</CardTitle>
-            <CardDescription>Click on an examination to view its duty allotment details.</CardDescription>
+            <CardDescription>Click on a row to view allotment details. Use the delete icon to remove an entry.</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="rounded-md border">
@@ -41,20 +67,27 @@ export default function HistoryPage() {
                     <TableHead className="w-[80px]">Sl No</TableHead>
                     <TableHead>Date of First Examination</TableHead>
                     <TableHead>Name of the Examination</TableHead>
+                    <TableHead className="text-right w-[100px]">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
                   {history.length > 0 ? (
                     history.map((item, index) => (
-                      <TableRow key={item.id} className="cursor-pointer" onClick={() => setSelectedAllotment(item)}>
-                        <TableCell>{index + 1}</TableCell>
-                        <TableCell>{format(parseISO(item.firstExamDate), 'd-MMM-yy')}</TableCell>
-                        <TableCell className="font-medium">{item.examTitle}</TableCell>
+                      <TableRow key={item.id}>
+                        <TableCell className="cursor-pointer" onClick={() => setSelectedAllotment(item)}>{index + 1}</TableCell>
+                        <TableCell className="cursor-pointer" onClick={() => setSelectedAllotment(item)}>{format(parseISO(item.firstExamDate), 'd-MMM-yy')}</TableCell>
+                        <TableCell className="font-medium cursor-pointer" onClick={() => setSelectedAllotment(item)}>{item.examTitle}</TableCell>
+                        <TableCell className="text-right">
+                          <Button variant="ghost" size="icon" onClick={() => setAllotmentToDeleteId(item.id)}>
+                            <Trash2 className="h-4 w-4 text-destructive" />
+                            <span className="sr-only">Delete</span>
+                          </Button>
+                        </TableCell>
                       </TableRow>
                     ))
                   ) : (
                     <TableRow>
-                      <TableCell colSpan={3} className="h-24 text-center">
+                      <TableCell colSpan={4} className="h-24 text-center">
                         No history found.
                       </TableCell>
                     </TableRow>
@@ -82,6 +115,30 @@ export default function HistoryPage() {
             </DialogContent>
           )}
         </Dialog>
+
+        <AlertDialog open={!!allotmentToDeleteId} onOpenChange={(isOpen) => !isOpen && setAllotmentToDeleteId(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+              <AlertDialogDescription>
+                This action cannot be undone. This will permanently delete this allotment from your history.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction
+                className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                onClick={() => {
+                  if (allotmentToDeleteId) {
+                    handleDelete(allotmentToDeleteId);
+                  }
+                }}
+              >
+                Delete
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </div>
   );

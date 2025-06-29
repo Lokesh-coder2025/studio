@@ -88,7 +88,11 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
     };
 
     setExaminations((prev) => [...prev, newExamination].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
-    form.reset();
+    form.reset({
+      ...values,
+      date: undefined,
+      subject: '',
+    });
   }
 
   function deleteExamination(id: string) {

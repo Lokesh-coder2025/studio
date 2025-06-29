@@ -1,7 +1,7 @@
 'use client';
 
 import type { Invigilator, Examination, Assignment } from '@/types';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { useMemo } from 'react';
@@ -45,6 +45,20 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
     });
   }, [invigilators, assignments, examDates]);
 
+  const { columnTotals, grandTotal } = useMemo(() => {
+    const totals: { [key: string]: number } = {};
+    let grand = 0;
+    
+    examDates.forEach(date => {
+      const dateTotal = dutyData.reduce((sum, inv) => sum + (inv.duties[date] || 0), 0);
+      totals[date] = dateTotal;
+    });
+
+    grand = dutyData.reduce((sum, inv) => sum + inv.totalDuties, 0);
+    
+    return { columnTotals: totals, grandTotal: grand };
+  }, [dutyData, examDates]);
+
   const handleExport = () => {
     const exportData = dutyData.map((inv, index) => {
       const row: {[key: string]: any} = {
@@ -59,6 +73,19 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
       row['Total'] = inv.totalDuties;
       return row;
     });
+
+    // Add the total row for export
+    const totalRow: { [key: string]: any } = {
+        'Sl No': '',
+        'Invigilator’s Name': '',
+        'Designation': 'Total',
+    };
+    examDates.forEach(date => {
+        const formattedDate = format(parseISO(date), "dd-MMM");
+        totalRow[formattedDate] = columnTotals[date];
+    });
+    totalRow['Total'] = grandTotal;
+    exportData.push(totalRow);
 
     exportToExcel(exportData, 'Duty Allotment', 'duty-allotment-sheet');
   }
@@ -116,6 +143,19 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
               </TableRow>
             )}
           </TableBody>
+          {dutyData.length > 0 && (
+            <TableFooter>
+                <TableRow className="bg-muted/50 font-medium hover:bg-muted/50">
+                <TableCell colSpan={3} className="text-right font-bold">Total Duties</TableCell>
+                {examDates.map(date => (
+                    <TableCell key={`total-${date}`} className="text-center font-bold">
+                    {columnTotals[date]}
+                    </TableCell>
+                ))}
+                <TableCell className="text-center font-bold">{grandTotal}</TableCell>
+                </TableRow>
+            </TableFooter>
+          )}
         </Table>
       </div>
     </div>

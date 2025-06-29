@@ -6,7 +6,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { InvigilatorsStep } from '@/components/invigilators-step';
 import { ExaminationsStep } from '@/components/examinations-step';
 import { ResultsStep } from '@/components/results-step';
-import { Workflow, BookUser, FileSpreadsheet } from 'lucide-react';
+import { Workflow, BookUser, FileSpreadsheet, History } from 'lucide-react';
+import Link from 'next/link';
+import { Button } from '@/components/ui/button';
 
 const STEPS = [
   { step: 1, title: "Invigilators' Details", description: "Add all available invigilators.", icon: BookUser },
@@ -61,9 +63,16 @@ export default function Home() {
   return (
     <main className="min-h-screen bg-background p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <header className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-primary font-headline">DutyFlow</h1>
-          <p className="text-muted-foreground mt-2">Automated Invigilation Duty Allotment System</p>
+        <header className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-4xl font-bold text-primary font-headline">DutyFlow</h1>
+            <p className="text-muted-foreground mt-2">Automated Invigilation Duty Allotment System</p>
+          </div>
+          <Link href="/history" passHref>
+            <Button variant="outline">
+              <History className="mr-2 h-4 w-4" /> View History
+            </Button>
+          </Link>
         </header>
 
         <div className="w-full max-w-4xl mx-auto mb-8">

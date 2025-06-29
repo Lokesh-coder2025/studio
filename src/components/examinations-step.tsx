@@ -4,7 +4,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { format } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -14,7 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import type { Invigilator, Examination, Assignment } from '@/types';
+import type { Invigilator, Examination, Assignment, SavedAllotment } from '@/types';
 import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { optimizeDutyAssignments } from '@/ai/flows/optimize-duty-assignments';
@@ -75,14 +75,14 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
     
     const newExamination: Examination = {
       id: new Date().getTime().toString(),
-      date: values.date,
+      date: values.date.toISOString(),
       subject: values.subject,
       day: format(values.date, 'EEE'),
       startTime,
       endTime,
     };
 
-    setExaminations((prev) => [...prev, newExamination]);
+    setExaminations((prev) => [...prev, newExamination].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
     form.reset();
   }
 
@@ -104,7 +104,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
 
     try {
       const formattedExams = examinations.map(exam => ({
-        date: format(exam.date, 'yyyy-MM-dd'),
+        date: format(parseISO(exam.date), 'yyyy-MM-dd'),
         subject: exam.subject,
         time: `${exam.startTime} - ${exam.endTime}`,
         rooms: 1,
@@ -119,6 +119,22 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
 
       const result = await optimizeDutyAssignments(aiInput);
       setAssignments(result);
+      
+      if (result.length > 0) {
+        const firstExamDate = examinations[0].date;
+        const savedAllotment: SavedAllotment = {
+          id: new Date().toISOString(),
+          examTitle: examTitle || `Examination from ${format(parseISO(firstExamDate), 'd-MMM-yy')}`,
+          firstExamDate: firstExamDate,
+          invigilators,
+          examinations,
+          assignments: result,
+        };
+        const history = JSON.parse(localStorage.getItem('dutyHistory') || '[]');
+        history.unshift(savedAllotment);
+        localStorage.setItem('dutyHistory', JSON.stringify(history));
+      }
+
       toast({
         title: "Success!",
         description: "Duty allotment generated successfully.",
@@ -300,7 +316,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
               examinations.map((exam, index) => (
                 <TableRow key={exam.id}>
                   <TableCell>{index + 1}</TableCell>
-                  <TableCell>{format(exam.date, "dd-MMM-yyyy")}</TableCell>
+                  <TableCell>{format(parseISO(exam.date), "dd-MMM-yyyy")}</TableCell>
                   <TableCell>{exam.day}</TableCell>
                   <TableCell className="font-medium">{exam.subject}</TableCell>
                   <TableCell>{exam.startTime}</TableCell>

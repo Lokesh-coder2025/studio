@@ -6,7 +6,7 @@ export interface Invigilator {
 
 export interface Examination {
   id: string;
-  date: Date;
+  date: string;
   day: string;
   subject: string;
   startTime: string;
@@ -18,4 +18,13 @@ export interface Assignment {
   subject: string;
   time: string;
   invigilators: string[];
+}
+
+export interface SavedAllotment {
+  id: string;
+  examTitle: string;
+  firstExamDate: string;
+  invigilators: Invigilator[];
+  examinations: Examination[];
+  assignments: Assignment[];
 }

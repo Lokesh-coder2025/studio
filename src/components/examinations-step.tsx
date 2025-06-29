@@ -11,6 +11,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { Invigilator, Examination, Assignment } from '@/types';
 import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft, Plus, Trash2 } from 'lucide-react';
@@ -40,6 +42,8 @@ const minutes = ['00', '15', '30', '45'];
 const periods = ['AM', 'PM'];
 
 type ExaminationsStepProps = {
+  examTitle: string;
+  setExamTitle: Dispatch<SetStateAction<string>>;
   invigilators: Invigilator[];
   examinations: Examination[];
   setExaminations: Dispatch<SetStateAction<Examination[]>>;
@@ -50,7 +54,7 @@ type ExaminationsStepProps = {
   setIsGenerating: Dispatch<SetStateAction<boolean>>;
 };
 
-export function ExaminationsStep({ invigilators, examinations, setExaminations, setAssignments, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
+export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examinations, setExaminations, setAssignments, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -136,6 +140,19 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
 
   return (
     <div className="space-y-8">
+      <div className="flex justify-end">
+        <div className="w-full max-w-sm">
+          <Label htmlFor="exam-title" className="text-sm font-medium">Name of the Examination</Label>
+          <Input
+            id="exam-title"
+            placeholder="e.g. Final Examinations, June 2024"
+            value={examTitle}
+            onChange={(e) => setExamTitle(e.target.value)}
+            className="mt-2"
+          />
+        </div>
+      </div>
+
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

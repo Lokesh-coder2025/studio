@@ -20,6 +20,7 @@ export default function Home() {
   const [examinations, setExaminations] = useState<Examination[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [examTitle, setExamTitle] = useState('');
 
   const nextStep = () => setCurrentStep((prev) => prev + 1);
   const prevStep = () => setCurrentStep((prev) => prev - 1);
@@ -28,6 +29,7 @@ export default function Home() {
     setInvigilators([]);
     setExaminations([]);
     setAssignments([]);
+    setExamTitle('');
   };
 
   const renderStep = () => {
@@ -37,6 +39,8 @@ export default function Home() {
       case 2:
         return (
           <ExaminationsStep
+            examTitle={examTitle}
+            setExamTitle={setExamTitle}
             invigilators={invigilators}
             examinations={examinations}
             setExaminations={setExaminations}

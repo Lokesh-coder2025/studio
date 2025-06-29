@@ -23,9 +23,6 @@ export default function Home() {
       day: '',
       subject: '',
       timings: '',
-      rooms: 1,
-      invigilators: 1,
-      relievers: 0,
     }))
   );
   const [assignments, setAssignments] = useState<Assignment[]>([]);
@@ -42,9 +39,6 @@ export default function Home() {
         day: '',
         subject: '',
         timings: '',
-        rooms: 1,
-        invigilators: 1,
-        relievers: 0,
       }))
     );
     setAssignments([]);

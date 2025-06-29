@@ -10,9 +10,6 @@ export interface Examination {
   day: string;
   subject: string;
   timings: string;
-  rooms: number;
-  invigilators: number;
-  relievers: number;
 }
 
 export interface Assignment {

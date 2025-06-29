@@ -22,9 +22,6 @@ const formSchema = z.object({
     day: z.string().optional(),
     subject: z.string().min(1, 'Required'),
     timings: z.string().min(1, 'Required'),
-    rooms: z.coerce.number().min(1).max(35),
-    invigilators: z.coerce.number().min(1).max(35),
-    relievers: z.coerce.number().min(0).max(10),
   })),
 });
 
@@ -43,7 +40,7 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { examinations: examinations.map(e => ({...e, rooms: e.rooms || 1, invigilators: e.invigilators || 1, relievers: e.relievers || 0 })) },
+    defaultValues: { examinations },
   });
 
   const { fields } = useFieldArray({
@@ -69,9 +66,9 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
         date: format(exam.date!, 'yyyy-MM-dd'),
         subject: exam.subject,
         time: exam.timings,
-        rooms: exam.rooms,
-        invigilatorsNeeded: exam.invigilators,
-        relieversNeeded: exam.relievers,
+        rooms: 1,
+        invigilatorsNeeded: 1,
+        relieversNeeded: 0,
       }));
 
       const aiInput = {
@@ -112,9 +109,6 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
               <TableHead className="min-w-[80px]">Day</TableHead>
               <TableHead className="min-w-[150px]">Subject</TableHead>
               <TableHead className="min-w-[150px]">Timings</TableHead>
-              <TableHead>Rooms</TableHead>
-              <TableHead>Invigilators</TableHead>
-              <TableHead>Relievers</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -150,9 +144,6 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
                 </TableCell>
                 <TableCell><Input placeholder="Subject Name" {...form.register(`examinations.${index}.subject`)} /></TableCell>
                 <TableCell><Input placeholder="10 AM to 1 PM" {...form.register(`examinations.${index}.timings`)} /></TableCell>
-                <TableCell><Input type="number" {...form.register(`examinations.${index}.rooms`)} /></TableCell>
-                <TableCell><Input type="number" {...form.register(`examinations.${index}.invigilators`)} /></TableCell>
-                <TableCell><Input type="number" {...form.register(`examinations.${index}.relievers`)} /></TableCell>
               </TableRow>
             ))}
           </TableBody>

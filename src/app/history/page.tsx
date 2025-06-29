@@ -12,7 +12,7 @@ import { ArrowLeft } from 'lucide-react';
 import Link from 'next/link';
 import { format, parseISO } from 'date-fns';
 
-export default function HistoryPage() {
+export default function HistoryPage({}) {
   const [history, setHistory] = useState<SavedAllotment[]>([]);
   const [selectedAllotment, setSelectedAllotment] = useState<SavedAllotment | null>(null);
 
@@ -29,7 +29,7 @@ export default function HistoryPage() {
             <h1 className="text-4xl font-bold text-primary font-headline">DutyFlow History</h1>
             <p className="text-muted-foreground mt-2">Previously generated duty allotments.</p>
           </div>
-          <Link href="/" passHref>
+          <Link href="/">
             <Button variant="outline">
               <ArrowLeft className="mr-2" /> Back to Home
             </Button>

@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState } from 'react';
@@ -16,7 +17,7 @@ const STEPS = [
   { step: 3, title: "Duty Allotment", description: "View and export the generated schedule.", icon: FileSpreadsheet },
 ];
 
-export default function Home() {
+export default function Home({}) {
   const [currentStep, setCurrentStep] = useState(1);
   const [invigilators, setInvigilators] = useState<Invigilator[]>([]);
   const [examinations, setExaminations] = useState<Examination[]>([]);
@@ -95,7 +96,7 @@ export default function Home() {
         </footer>
       </div>
       <div className="fixed bottom-8 right-8">
-        <Link href="/history" passHref>
+        <Link href="/history">
           <Button variant="outline">
             <History className="mr-2 h-4 w-4" /> View History
           </Button>

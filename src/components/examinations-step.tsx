@@ -1,28 +1,26 @@
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useForm, useFieldArray } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import type { Invigilator, Examination, Assignment } from '@/types';
-import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { optimizeDutyAssignments } from '@/ai/flows/optimize-duty-assignments';
 
 const formSchema = z.object({
-  examinations: z.array(z.object({
-    date: z.date().optional(),
-    day: z.string().optional(),
-    subject: z.string().min(1, 'Required'),
-    timings: z.string().min(1, 'Required'),
-  })),
+  date: z.date({ required_error: 'Date is required.' }),
+  subject: z.string().min(1, 'Subject is required'),
+  timings: z.string().min(1, 'Timings are required'),
 });
 
 type ExaminationsStepProps = {
@@ -40,21 +38,32 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { examinations },
-  });
-
-  const { fields } = useFieldArray({
-    control: form.control,
-    name: "examinations",
+    defaultValues: {
+      subject: '',
+      timings: '',
+    },
   });
   
-  const onSubmit = async (data: z.infer<typeof formSchema>) => {
+  function onSubmit(values: z.infer<typeof formSchema>) {
+    const newExamination: Examination = {
+      id: new Date().getTime().toString(),
+      ...values,
+      day: format(values.date, 'EEE'),
+    };
+    setExaminations((prev) => [...prev, newExamination]);
+    form.reset();
+  }
+
+  function deleteExamination(id: string) {
+    setExaminations((prev) => prev.filter((exam) => exam.id !== id));
+  }
+  
+  const handleGenerate = async () => {
     setIsGenerating(true);
-    const validExams = data.examinations.filter(exam => exam.date && exam.subject);
-    if(validExams.length === 0) {
+    if (examinations.length === 0) {
       toast({
         title: "No Examinations Added",
-        description: "Please add at least one examination with a date and subject.",
+        description: "Please add at least one examination.",
         variant: 'destructive',
       });
       setIsGenerating(false);
@@ -62,8 +71,8 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
     }
 
     try {
-      const formattedExams = validExams.map(exam => ({
-        date: format(exam.date!, 'yyyy-MM-dd'),
+      const formattedExams = examinations.map(exam => ({
+        date: format(exam.date, 'yyyy-MM-dd'),
         subject: exam.subject,
         time: exam.timings,
         rooms: 1,
@@ -78,7 +87,6 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
 
       const result = await optimizeDutyAssignments(aiInput);
       setAssignments(result);
-      setExaminations(data.examinations.map((e, i) => ({...e, id: i, day: e.date ? format(e.date, 'EEE') : '' })));
       toast({
         title: "Success!",
         description: "Duty allotment generated successfully.",
@@ -99,61 +107,117 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
   };
 
   return (
-    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-      <div className="rounded-md border overflow-x-auto">
+    <div className="space-y-8">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start md:items-end">
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className="flex flex-col">
+                <FormLabel>Date</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <FormControl>
+                      <Button
+                        variant={"outline"}
+                        className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </FormControl>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="subject"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Subject</FormLabel>
+                <FormControl>
+                  <Input placeholder="Subject Name" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <FormField
+            control={form.control}
+            name="timings"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Timings</FormLabel>
+                <FormControl>
+                  <Input placeholder="10 AM to 1 PM" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+          <Button type="submit">
+            <Plus className="mr-2" /> Add Examination
+          </Button>
+        </form>
+      </Form>
+      
+      <div className="rounded-md border">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">Sl.No</TableHead>
-              <TableHead className="min-w-[180px]">Date</TableHead>
-              <TableHead className="min-w-[80px]">Day</TableHead>
-              <TableHead className="min-w-[150px]">Subject</TableHead>
-              <TableHead className="min-w-[150px]">Timings</TableHead>
+              <TableHead>Date</TableHead>
+              <TableHead>Day</TableHead>
+              <TableHead>Subject</TableHead>
+              <TableHead>Timings</TableHead>
+              <TableHead className="text-right w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {fields.map((field, index) => (
-              <TableRow key={field.id}>
-                <TableCell>{index + 1}</TableCell>
-                <TableCell>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn("w-full justify-start text-left font-normal", !form.watch(`examinations.${index}.date`) && "text-muted-foreground")}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {form.watch(`examinations.${index}.date`) ? format(form.watch(`examinations.${index}.date`)!, "PPP") : <span>Pick a date</span>}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={form.watch(`examinations.${index}.date`)}
-                        onSelect={(date) => {
-                           form.setValue(`examinations.${index}.date`, date);
-                           form.setValue(`examinations.${index}.day`, date ? format(date, 'EEE') : '');
-                        }}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
+            {examinations.length > 0 ? (
+              examinations.map((exam, index) => (
+                <TableRow key={exam.id}>
+                  <TableCell>{index + 1}</TableCell>
+                  <TableCell>{format(exam.date, "dd-MMM-yyyy")}</TableCell>
+                  <TableCell>{exam.day}</TableCell>
+                  <TableCell className="font-medium">{exam.subject}</TableCell>
+                  <TableCell>{exam.timings}</TableCell>
+                  <TableCell className="text-right">
+                    <Button variant="ghost" size="icon" onClick={() => deleteExamination(exam.id)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                      <span className="sr-only">Delete</span>
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            ) : (
+              <TableRow>
+                <TableCell colSpan={6} className="h-24 text-center">
+                  No examinations added yet.
                 </TableCell>
-                <TableCell>
-                  <Input readOnly value={form.watch(`examinations.${index}.day`) || ''} placeholder="Day" />
-                </TableCell>
-                <TableCell><Input placeholder="Subject Name" {...form.register(`examinations.${index}.subject`)} /></TableCell>
-                <TableCell><Input placeholder="10 AM to 1 PM" {...form.register(`examinations.${index}.timings`)} /></TableCell>
               </TableRow>
-            ))}
+            )}
           </TableBody>
         </Table>
       </div>
+
       <div className="flex justify-between">
         <Button type="button" variant="outline" onClick={prevStep} disabled={isGenerating}>
           <ArrowLeft className="mr-2" /> Back to Invigilators
         </Button>
-        <Button type="submit" disabled={isGenerating}>
+        <Button onClick={handleGenerate} disabled={isGenerating || examinations.length === 0}>
           {isGenerating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...
@@ -165,6 +229,6 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
           )}
         </Button>
       </div>
-    </form>
+    </div>
   );
 }

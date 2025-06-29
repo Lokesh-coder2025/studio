@@ -17,14 +17,7 @@ const STEPS = [
 export default function Home() {
   const [currentStep, setCurrentStep] = useState(1);
   const [invigilators, setInvigilators] = useState<Invigilator[]>([]);
-  const [examinations, setExaminations] = useState<Examination[]>(
-    Array.from({ length: 20 }, (_, i) => ({
-      id: i,
-      day: '',
-      subject: '',
-      timings: '',
-    }))
-  );
+  const [examinations, setExaminations] = useState<Examination[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
@@ -33,14 +26,7 @@ export default function Home() {
   const resetApp = () => {
     setCurrentStep(1);
     setInvigilators([]);
-    setExaminations(
-      Array.from({ length: 20 }, (_, i) => ({
-        id: i,
-        day: '',
-        subject: '',
-        timings: '',
-      }))
-    );
+    setExaminations([]);
     setAssignments([]);
   };
 

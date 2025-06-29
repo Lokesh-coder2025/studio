@@ -5,8 +5,8 @@ export interface Invigilator {
 }
 
 export interface Examination {
-  id: number;
-  date?: Date;
+  id: string;
+  date: Date;
   day: string;
   subject: string;
   timings: string;

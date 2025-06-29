@@ -113,7 +113,6 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
         time: `${exam.startTime} - ${exam.endTime}`,
         rooms: exam.roomsAllotted,
         invigilatorsNeeded: exam.roomsAllotted,
-        relieversNeeded: 0,
       }));
 
       const aiInput = {

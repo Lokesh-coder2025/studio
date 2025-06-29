@@ -9,7 +9,8 @@ export interface Examination {
   date: Date;
   day: string;
   subject: string;
-  timings: string;
+  startTime: string;
+  endTime: string;
 }
 
 export interface Assignment {

@@ -20,7 +20,12 @@ import { optimizeDutyAssignments } from '@/ai/flows/optimize-duty-assignments';
 const formSchema = z.object({
   date: z.date({ required_error: 'Date is required.' }),
   subject: z.string().min(1, 'Subject is required'),
-  timings: z.string().min(1, 'Timings are required'),
+  startHour: z.string({required_error: "Hour is required."}),
+  startMinute: z.string({required_error: "Minute is required."}),
+  startPeriod: z.enum(['AM', 'PM']),
+  endHour: z.string({required_error: "Hour is required."}),
+  endMinute: z.string({required_error: "Minute is required."}),
+  endPeriod: z.enum(['AM', 'PM']),
 });
 
 const subjects = [
@@ -30,13 +35,9 @@ const subjects = [
   "Statistics", "Other"
 ];
 
-const timingsList = [
-    "09:00 AM - 12:00 PM",
-    "09:30 AM - 12:30 PM",
-    "10:00 AM - 01:00 PM",
-    "01:30 PM - 04:30 PM",
-    "02:00 PM - 05:00 PM",
-];
+const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2, '0'));
+const minutes = ['00', '15', '30', '45'];
+const periods = ['AM', 'PM'];
 
 type ExaminationsStepProps = {
   invigilators: Invigilator[];
@@ -55,16 +56,28 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
     resolver: zodResolver(formSchema),
     defaultValues: {
       subject: '',
-      timings: '',
+      startHour: '09',
+      startMinute: '00',
+      startPeriod: 'AM',
+      endHour: '12',
+      endMinute: '00',
+      endPeriod: 'PM',
     },
   });
   
   function onSubmit(values: z.infer<typeof formSchema>) {
+    const startTime = `${values.startHour}:${values.startMinute} ${values.startPeriod}`;
+    const endTime = `${values.endHour}:${values.endMinute} ${values.endPeriod}`;
+    
     const newExamination: Examination = {
       id: new Date().getTime().toString(),
-      ...values,
+      date: values.date,
+      subject: values.subject,
       day: format(values.date, 'EEE'),
+      startTime,
+      endTime,
     };
+
     setExaminations((prev) => [...prev, newExamination]);
     form.reset();
   }
@@ -89,7 +102,7 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
       const formattedExams = examinations.map(exam => ({
         date: format(exam.date, 'yyyy-MM-dd'),
         subject: exam.subject,
-        time: exam.timings,
+        time: `${exam.startTime} - ${exam.endTime}`,
         rooms: 1,
         invigilatorsNeeded: 1,
         relieversNeeded: 0,
@@ -124,89 +137,131 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
   return (
     <div className="space-y-8">
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-4 gap-4 items-start md:items-end">
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className="flex flex-col">
-                <FormLabel>Date</FormLabel>
-                <Popover>
-                  <PopoverTrigger asChild>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="subject"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Subject</FormLabel>
+                  <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
-                      <Button
-                        variant={"outline"}
-                        className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? format(field.value, "PPP") : <span>Pick a date</span>}
-                      </Button>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a subject" />
+                      </SelectTrigger>
                     </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={field.onChange}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="subject"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Subject</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a subject" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {subjects.map((subject) => (
-                      <SelectItem key={subject} value={subject}>
-                        {subject}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <FormField
-            control={form.control}
-            name="timings"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Timings</FormLabel>
-                <Select onValueChange={field.onChange} value={field.value}>
-                  <FormControl>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select timings" />
-                    </SelectTrigger>
-                  </FormControl>
-                  <SelectContent>
-                    {timingsList.map((time) => (
-                      <SelectItem key={time} value={time}>
-                        {time}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-          <Button type="submit">
-            <Plus className="mr-2" /> Add Examination
-          </Button>
+                    <SelectContent>
+                      {subjects.map((subject) => (
+                        <SelectItem key={subject} value={subject}>
+                          {subject}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormItem>
+              <FormLabel>Start Time</FormLabel>
+              <div className="flex gap-2">
+                <FormField control={form.control} name="startHour" render={({ field }) => (
+                    <FormItem className="flex-1">
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
+                            <SelectContent>{hours.map(h => <SelectItem key={`start-h-${h}`} value={h}>{h}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </FormItem>
+                )} />
+                <FormField control={form.control} name="startMinute" render={({ field }) => (
+                    <FormItem className="flex-1">
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                            <SelectContent>{minutes.map(m => <SelectItem key={`start-m-${m}`} value={m}>{m}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </FormItem>
+                )} />
+                <FormField control={form.control} name="startPeriod" render={({ field }) => (
+                    <FormItem>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                            <SelectContent>{periods.map(p => <SelectItem key={`start-p-${p}`} value={p}>{p}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </FormItem>
+                )} />
+              </div>
+            </FormItem>
+             <FormItem>
+              <FormLabel>End Time</FormLabel>
+              <div className="flex gap-2">
+                <FormField control={form.control} name="endHour" render={({ field }) => (
+                    <FormItem className="flex-1">
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                            <SelectContent>{hours.map(h => <SelectItem key={`end-h-${h}`} value={h}>{h}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </FormItem>
+                )} />
+                <FormField control={form.control} name="endMinute" render={({ field }) => (
+                    <FormItem className="flex-1">
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                            <SelectContent>{minutes.map(m => <SelectItem key={`end-m-${m}`} value={m}>{m}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </FormItem>
+                )} />
+                <FormField control={form.control} name="endPeriod" render={({ field }) => (
+                    <FormItem>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                            <SelectContent>{periods.map(p => <SelectItem key={`end-p-${p}`} value={p}>{p}</SelectItem>)}</SelectContent>
+                        </Select>
+                    </FormItem>
+                )} />
+              </div>
+            </FormItem>
+          </div>
+
+          <div className='flex justify-end'>
+            <Button type="submit">
+              <Plus className="mr-2" /> Add Examination
+            </Button>
+          </div>
         </form>
       </Form>
       
@@ -218,7 +273,8 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
               <TableHead>Date</TableHead>
               <TableHead>Day</TableHead>
               <TableHead>Subject</TableHead>
-              <TableHead>Timings</TableHead>
+              <TableHead>Start Time</TableHead>
+              <TableHead>End Time</TableHead>
               <TableHead className="text-right w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -230,7 +286,8 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
                   <TableCell>{format(exam.date, "dd-MMM-yyyy")}</TableCell>
                   <TableCell>{exam.day}</TableCell>
                   <TableCell className="font-medium">{exam.subject}</TableCell>
-                  <TableCell>{exam.timings}</TableCell>
+                  <TableCell>{exam.startTime}</TableCell>
+                  <TableCell>{exam.endTime}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => deleteExamination(exam.id)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -241,7 +298,7 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   No examinations added yet.
                 </TableCell>
               </TableRow>

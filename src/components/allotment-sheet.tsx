@@ -74,13 +74,23 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">Sl.No</TableHead>
-              <TableHead>Invigilator’s Name</TableHead>
-              <TableHead>Designation</TableHead>
+              <TableHead rowSpan={2} className="w-[50px] align-middle">Sl.No</TableHead>
+              <TableHead rowSpan={2} className="align-middle">Invigilator’s Name</TableHead>
+              <TableHead rowSpan={2} className="align-middle">Designation</TableHead>
               {examDates.map(date => (
                 <TableHead key={date} className="text-center">{format(parseISO(date), 'dd-MMM')}</TableHead>
               ))}
-              <TableHead className="text-center">Total</TableHead>
+              <TableHead rowSpan={2} className="text-center align-middle">Total</TableHead>
+            </TableRow>
+            <TableRow>
+              {examDates.map(date => {
+                const subject = assignments.find(a => a.date === date)?.subject || '';
+                return (
+                  <TableHead key={`${date}-subject`} className="text-center font-normal whitespace-nowrap">
+                    {subject}
+                  </TableHead>
+                );
+              })}
             </TableRow>
           </TableHeader>
           <TableBody>

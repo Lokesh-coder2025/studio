@@ -74,20 +74,36 @@ const optimizeDutyAssignmentsPrompt = ai.definePrompt({
   input: { schema: OptimizeDutyAssignmentsInputSchema },
   output: { schema: OptimizeDutyAssignmentsOutputSchema },
   tools: [checkInvigilatorAvailability],
-  prompt: `You are an expert at creating fair and optimized invigilation duty schedules. Given the list of invigilators and examinations, generate the duty assignments by adhering to the following rules in order of priority:
+  system: `You are an expert at creating fair and optimized invigilation duty schedules. Your task is to generate duty assignments based on a list of invigilators and examinations. You must produce a valid JSON array matching the output schema.`,
+  prompt: `Please generate a duty schedule by following these steps and rules precisely:
 
-**1. Hard Constraints:**
-- Each examination must have the exact number of invigilators specified by 'invigilatorsNeeded'.
-- An invigilator cannot be assigned to more than one exam on the same day. You must ensure you do not assign the same invigilator to two different exams on the same day within the generated schedule.
+**Step 1: Calculate Total Duties and Distribution**
+1.  Calculate the total number of duties required. This is the sum of 'invigilatorsNeeded' for all examinations.
+2.  Calculate the base number of duties per invigilator by performing integer division of total duties by the number of invigilators.
+3.  Calculate the number of excess duties, which is the remainder from the division.
 
-**2. Duty Distribution Principles:**
-- **Primary Goal:** Distribute the total number of duties as equally as possible among all available invigilators.
-- **Handling Excess Duties:** After an even distribution, if there are remaining duties to be assigned, allocate them one by one to invigilators starting from the **bottom** of the provided list and moving upwards. For example, if there are 2 extra duties, the last invigilator on the list gets one, and the second-to-last gets the other.
+**Step 2: Assign Duties based on Strict Rules**
+You must generate a duty schedule that adheres to the following rules, in this exact order of priority:
 
-**3. Assignment Preferences (Soft Constraints):**
-- **Subject Conflict Avoidance:** It is highly preferred to avoid assigning an invigilator to an exam for a subject they teach. You can infer their subject from their 'designation' (e.g., a "Lecturer in English" teaches "English"). Only violate this preference if it is absolutely necessary to fulfill the hard constraints.
+**Rule 1: Fulfill Examination Needs (Hard Constraint)**
+- Every examination must have exactly the number of invigilators specified by 'invigilatorsNeeded'.
 
-Invigilators (The order is important for handling excess duties):
+**Rule 2: No Same-Day Double Duty (Hard Constraint)**
+- An invigilator CANNOT be assigned to more than one examination on the same day.
+
+**Rule 3: Equal Distribution (Primary Goal)**
+- Distribute duties so that most invigilators have the base number of duties calculated in Step 1.
+
+**Rule 4: Assign Excess Duties (Strict Order)**
+- Assign the excess duties one by one to invigilators starting from the **VERY END** of the provided invigilator list and moving upwards. For example, if there are 3 excess duties and 10 invigilators, invigilator #10 gets an extra duty, invigilator #9 gets an extra duty, and invigilator #8 gets an extra duty. The order of the invigilator list provided below is crucial for this rule.
+
+**Rule 5: Avoid Subject Conflicts (Soft Constraint / Preference)**
+- As a preference, AVOID assigning an invigilator to an exam for a subject they teach. You can infer their subject from their 'designation' (e.g., a "Lecturer in English" teaches "English").
+- You should only break this rule if it is absolutely necessary to meet the hard constraints (Rules 1 and 2) and distribution principles (Rules 3 and 4).
+
+**Input Data:**
+
+Invigilators (The order is important for Rule 4):
 {{#each invigilators}}
 - Name: {{this.name}}, Designation: {{this.designation}}
 {{/each}}

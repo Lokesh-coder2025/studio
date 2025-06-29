@@ -6,7 +6,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -29,6 +28,14 @@ const subjects = [
   "Mathematics", "Biology", "Computer Science", "Electronics",
   "Basic Maths", "Economics", "Business Studies", "Accountancy",
   "Statistics", "Other"
+];
+
+const timingsList = [
+    "09:00 AM - 12:00 PM",
+    "09:30 AM - 12:30 PM",
+    "10:00 AM - 01:00 PM",
+    "01:30 PM - 04:30 PM",
+    "02:00 PM - 05:00 PM",
 ];
 
 type ExaminationsStepProps = {
@@ -179,9 +186,20 @@ export function ExaminationsStep({ invigilators, examinations, setExaminations, 
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Timings</FormLabel>
-                <FormControl>
-                  <Input placeholder="10 AM to 1 PM" {...field} />
-                </FormControl>
+                <Select onValueChange={field.onChange} value={field.value}>
+                  <FormControl>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select timings" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    {timingsList.map((time) => (
+                      <SelectItem key={time} value={time}>
+                        {time}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <FormMessage />
               </FormItem>
             )}

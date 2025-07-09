@@ -4,9 +4,11 @@ import type { Invigilator, Examination, Assignment } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import { format, parseISO } from 'date-fns';
 import { exportToExcel } from '@/lib/excel-export';
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 type AllotmentSheetProps = {
   invigilators: Invigilator[];
@@ -15,6 +17,7 @@ type AllotmentSheetProps = {
 };
 
 export function AllotmentSheet({ invigilators, examinations, assignments }: AllotmentSheetProps) {
+  const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const examDates = useMemo(() => {
     const dates = new Set<string>();
@@ -90,14 +93,50 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
     exportToExcel(exportData, 'Duty Allotment', 'duty-allotment-sheet');
   }
 
+  const handleDownloadPdf = () => {
+    const tableEl = tableContainerRef.current;
+    const buttonsEl = document.getElementById('allotment-actions');
+    if (tableEl && buttonsEl) {
+      buttonsEl.style.display = 'none'; // Hide buttons
+      html2canvas(tableEl, { scale: 2, useCORS: true }).then((canvas) => {
+        const imgData = canvas.toDataURL('image/png');
+        const pdf = new jsPDF('l', 'mm', 'a3');
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+
+        let imgWidth = pdfWidth - 20;
+        let imgHeight = imgWidth / ratio;
+
+        if (imgHeight > pdfHeight - 20) {
+            imgHeight = pdfHeight - 20;
+            imgWidth = imgHeight * ratio;
+        }
+
+        const x = (pdfWidth - imgWidth) / 2;
+        const y = (pdfHeight - imgHeight) / 2;
+
+        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+        pdf.save('duty-allotment-sheet.pdf');
+      }).finally(() => {
+        buttonsEl.style.display = 'flex'; // Show buttons again
+      });
+    }
+  };
+
   return (
     <div className="space-y-4">
-      <div className="flex justify-end">
+      <div id="allotment-actions" className="flex justify-end gap-2">
         <Button onClick={handleExport}>
           <Download className="mr-2" /> Download as Excel
         </Button>
+        <Button onClick={handleDownloadPdf} variant="outline">
+          <Download className="mr-2" /> Download as PDF
+        </Button>
       </div>
-      <div className="rounded-md border overflow-x-auto">
+      <div ref={tableContainerRef} className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>

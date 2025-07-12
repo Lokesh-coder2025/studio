@@ -176,7 +176,7 @@ export function AllotmentSheet({ invigilators, assignments, setAssignments }: Al
               <TableHead className="align-middle">Invigilator’s Name</TableHead>
               <TableHead className="align-middle">Designation</TableHead>
               {uniqueExams.map(exam => (
-                 <TableHead key={getExamKey(exam)} className="text-center whitespace-nowrap">
+                 <TableHead key={getExamKey(exam)} className="text-center w-[120px]">
                     <div>{format(parseISO(exam.date), 'dd-MMM')}</div>
                     <div className="font-normal">{exam.subject}</div>
                     <div className="text-xs font-light">{exam.time}</div>

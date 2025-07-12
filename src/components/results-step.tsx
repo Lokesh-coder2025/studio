@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Invigilator, Examination, Assignment } from '@/types';
@@ -5,16 +6,17 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { AllotmentSheet } from '@/components/allotment-sheet';
 import { InvigilatorDutySummary } from '@/components/invigilator-duty-summary';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, ArrowLeft } from 'lucide-react';
 
 type ResultsStepProps = {
   invigilators: Invigilator[];
   examinations: Examination[];
   assignments: Assignment[];
   resetApp: () => void;
+  prevStep: () => void;
 };
 
-export function ResultsStep({ invigilators, examinations, assignments, resetApp }: ResultsStepProps) {
+export function ResultsStep({ invigilators, examinations, assignments, resetApp, prevStep }: ResultsStepProps) {
   return (
     <div className="space-y-6">
       <Tabs defaultValue="allotment-sheet">
@@ -29,7 +31,10 @@ export function ResultsStep({ invigilators, examinations, assignments, resetApp 
             <InvigilatorDutySummary invigilators={invigilators} assignments={assignments} />
         </TabsContent>
       </Tabs>
-      <div className="flex justify-start pt-4">
+      <div className="flex justify-between items-center pt-4">
+        <Button variant="outline" onClick={prevStep}>
+          <ArrowLeft className="mr-2" /> Back
+        </Button>
         <Button variant="outline" onClick={resetApp}>
           <RefreshCcw className="mr-2" /> Start Over
         </Button>

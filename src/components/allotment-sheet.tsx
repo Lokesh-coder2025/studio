@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
 import { useMemo, useRef } from 'react';
 import { format, parseISO } from 'date-fns';
-import { exportToExcel } from '@/lib/excel-export';
+import { exportToExcelWithFormulas } from '@/lib/excel-export';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { cn } from '@/lib/utils';
@@ -94,35 +94,28 @@ export function AllotmentSheet({ invigilators, assignments, setAssignments }: Al
   };
 
   const handleExport = () => {
-    const exportData = dutyData.map((inv, index) => {
-      const row: {[key: string]: any} = {
-        'Sl No': index + 1,
-        'Invigilator’s Name': inv.name,
-        'Designation': inv.designation,
-      };
+    const headers = [
+      'Sl No',
+      'Invigilator’s Name',
+      'Designation',
+      ...uniqueExams.map(exam => `${format(parseISO(exam.date), "dd-MMM")}\n${exam.subject}`),
+      'Total'
+    ];
+
+    const dataRows = dutyData.map((inv, index) => {
+      const row: (string | number)[] = [
+        index + 1,
+        inv.name,
+        inv.designation,
+      ];
       uniqueExams.forEach(exam => {
-        const header = `${format(parseISO(exam.date), "dd-MMM")}\n${exam.subject}`;
         const examKey = getExamKey(exam);
-        row[header] = inv.duties[examKey] ? '1' : '';
+        row.push(inv.duties[examKey] || 0);
       });
-      row['Total'] = inv.totalDuties;
       return row;
     });
-
-    const totalRow: { [key: string]: any } = {
-        'Sl No': '',
-        'Invigilator’s Name': '',
-        'Designation': 'Total',
-    };
-    uniqueExams.forEach(exam => {
-        const header = `${format(parseISO(exam.date), "dd-MMM")}\n${exam.subject}`;
-        const examKey = getExamKey(exam);
-        totalRow[header] = columnTotals[examKey];
-    });
-    totalRow['Total'] = grandTotal;
-    exportData.push(totalRow);
-
-    exportToExcel(exportData, 'Duty Allotment', 'duty-allotment-sheet');
+    
+    exportToExcelWithFormulas(headers, dataRows, 'Duty Allotment', 'duty-allotment-sheet');
   }
 
   const handleDownloadPdf = () => {

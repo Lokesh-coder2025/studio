@@ -30,6 +30,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, re
         <TabsContent value="allotment-sheet" className="mt-4">
             <AllotmentSheet 
               invigilators={invigilators} 
+              examinations={examinations}
               assignments={assignments} 
               setAssignments={setAssignments}
             />

@@ -1,6 +1,7 @@
 
 'use client';
 
+import { useState } from 'react';
 import type { Invigilator, Examination, Assignment } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -11,12 +12,14 @@ import { RefreshCcw, ArrowLeft } from 'lucide-react';
 type ResultsStepProps = {
   invigilators: Invigilator[];
   examinations: Examination[];
-  assignments: Assignment[];
+  initialAssignments: Assignment[];
   resetApp: () => void;
   prevStep: () => void;
 };
 
-export function ResultsStep({ invigilators, examinations, assignments, resetApp, prevStep }: ResultsStepProps) {
+export function ResultsStep({ invigilators, examinations, initialAssignments, resetApp, prevStep }: ResultsStepProps) {
+  const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
+
   return (
     <div className="space-y-6">
       <Tabs defaultValue="allotment-sheet">
@@ -25,10 +28,17 @@ export function ResultsStep({ invigilators, examinations, assignments, resetApp,
           <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
         </TabsList>
         <TabsContent value="allotment-sheet" className="mt-4">
-            <AllotmentSheet invigilators={invigilators} examinations={examinations} assignments={assignments} />
+            <AllotmentSheet 
+              invigilators={invigilators} 
+              assignments={assignments} 
+              setAssignments={setAssignments}
+            />
         </TabsContent>
         <TabsContent value="individual-dashboard" className="mt-4">
-            <InvigilatorDutySummary invigilators={invigilators} assignments={assignments} />
+            <InvigilatorDutySummary 
+              invigilators={invigilators} 
+              assignments={assignments} 
+            />
         </TabsContent>
       </Tabs>
       <div className="flex justify-between items-center pt-4">

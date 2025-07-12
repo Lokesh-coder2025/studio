@@ -53,7 +53,7 @@ export default function Home() {
           />
         );
       case 3:
-        return <ResultsStep invigilators={invigilators} examinations={examinations} assignments={assignments} resetApp={resetApp} prevStep={prevStep} />;
+        return <ResultsStep invigilators={invigilators} examinations={examinations} initialAssignments={assignments} resetApp={resetApp} prevStep={prevStep} />;
       default:
         return <InvigilatorsStep invigilators={invigilators} setInvigilators={setInvigilators} nextStep={nextStep} />;
     }

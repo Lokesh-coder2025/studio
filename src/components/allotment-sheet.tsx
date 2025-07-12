@@ -1,7 +1,8 @@
 
 'use client';
 
-import type { Invigilator, Examination, Assignment } from '@/types';
+import type { Dispatch, SetStateAction } from 'react';
+import type { Invigilator, Assignment } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Download } from 'lucide-react';
@@ -10,26 +11,27 @@ import { format, parseISO } from 'date-fns';
 import { exportToExcel } from '@/lib/excel-export';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { cn } from '@/lib/utils';
 
 type AllotmentSheetProps = {
   invigilators: Invigilator[];
-  examinations: Examination[];
   assignments: Assignment[];
+  setAssignments: Dispatch<SetStateAction<Assignment[]>>;
 };
 
-export function AllotmentSheet({ invigilators, examinations, assignments }: AllotmentSheetProps) {
+export function AllotmentSheet({ invigilators, assignments, setAssignments }: AllotmentSheetProps) {
   const tableContainerRef = useRef<HTMLDivElement>(null);
 
   const uniqueExams = useMemo(() => {
-    // Sort assignments to ensure a consistent order
     return [...assignments].sort((a,b) => {
         const dateA = new Date(a.date).getTime();
         const dateB = new Date(b.date).getTime();
         if (dateA !== dateB) return dateA - dateB;
-        // If dates are the same, you might want to sort by time if available
         return a.time.localeCompare(b.time);
     });
   }, [assignments]);
+
+  const getExamKey = (exam: Assignment) => `${exam.date}|${exam.subject}|${exam.time}`;
 
   const dutyData = useMemo(() => {
     return invigilators.map(inv => {
@@ -37,7 +39,7 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
       const dutiesByExam: { [key: string]: number } = {};
       
       uniqueExams.forEach(exam => {
-        const examKey = `${exam.date}-${exam.subject}`;
+        const examKey = getExamKey(exam);
         if (exam.invigilators.includes(inv.name)) {
           dutiesByExam[examKey] = 1;
           totalDuties++;
@@ -59,7 +61,7 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
     let grand = 0;
     
     uniqueExams.forEach(exam => {
-      const examKey = `${exam.date}-${exam.subject}`;
+      const examKey = getExamKey(exam);
       const examTotal = dutyData.reduce((sum, inv) => sum + (inv.duties[examKey] || 0), 0);
       totals[examKey] = examTotal;
     });
@@ -68,6 +70,28 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
     
     return { columnTotals: totals, grandTotal: grand };
   }, [dutyData, uniqueExams]);
+
+  const handleToggleDuty = (invigilatorName: string, examToUpdate: Assignment) => {
+    setAssignments(prevAssignments => {
+      return prevAssignments.map(assignment => {
+        if (
+          assignment.date === examToUpdate.date &&
+          assignment.subject === examToUpdate.subject &&
+          assignment.time === examToUpdate.time
+        ) {
+          const isAssigned = assignment.invigilators.includes(invigilatorName);
+          let newInvigilators;
+          if (isAssigned) {
+            newInvigilators = assignment.invigilators.filter(name => name !== invigilatorName);
+          } else {
+            newInvigilators = [...assignment.invigilators, invigilatorName];
+          }
+          return { ...assignment, invigilators: newInvigilators };
+        }
+        return assignment;
+      });
+    });
+  };
 
   const handleExport = () => {
     const exportData = dutyData.map((inv, index) => {
@@ -78,14 +102,13 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
       };
       uniqueExams.forEach(exam => {
         const header = `${format(parseISO(exam.date), "dd-MMM")}\n${exam.subject}`;
-        const examKey = `${exam.date}-${exam.subject}`;
+        const examKey = getExamKey(exam);
         row[header] = inv.duties[examKey] ? '1' : '';
       });
       row['Total'] = inv.totalDuties;
       return row;
     });
 
-    // Add the total row for export
     const totalRow: { [key: string]: any } = {
         'Sl No': '',
         'Invigilator’s Name': '',
@@ -93,7 +116,7 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
     };
     uniqueExams.forEach(exam => {
         const header = `${format(parseISO(exam.date), "dd-MMM")}\n${exam.subject}`;
-        const examKey = `${exam.date}-${exam.subject}`;
+        const examKey = getExamKey(exam);
         totalRow[header] = columnTotals[examKey];
     });
     totalRow['Total'] = grandTotal;
@@ -153,9 +176,10 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
               <TableHead className="align-middle">Invigilator’s Name</TableHead>
               <TableHead className="align-middle">Designation</TableHead>
               {uniqueExams.map(exam => (
-                 <TableHead key={`${exam.date}-${exam.subject}`} className="text-center whitespace-nowrap">
+                 <TableHead key={getExamKey(exam)} className="text-center whitespace-nowrap">
                     <div>{format(parseISO(exam.date), 'dd-MMM')}</div>
                     <div className="font-normal">{exam.subject}</div>
+                    <div className="text-xs font-light">{exam.time}</div>
                  </TableHead>
               ))}
               <TableHead className="text-center align-middle">Total</TableHead>
@@ -169,10 +193,22 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
                   <TableCell className="font-medium whitespace-nowrap">{row.name}</TableCell>
                   <TableCell className="whitespace-nowrap">{row.designation}</TableCell>
                   {uniqueExams.map(exam => {
-                    const examKey = `${exam.date}-${exam.subject}`;
+                    const examKey = getExamKey(exam);
+                    const isAssigned = row.duties[examKey] === 1;
                     return (
-                        <TableCell key={`${row.id}-${examKey}`} className="text-center">
-                            {row.duties[examKey] ? '1' : ''}
+                        <TableCell 
+                          key={`${row.id}-${examKey}`} 
+                          className="text-center p-0"
+                        >
+                          <button
+                            onClick={() => handleToggleDuty(row.name, exam)}
+                            className={cn(
+                              "w-full h-full p-4 flex items-center justify-center cursor-pointer transition-colors",
+                              isAssigned ? "bg-primary/20 hover:bg-primary/30" : "hover:bg-muted"
+                            )}
+                          >
+                            {isAssigned ? '1' : <span className="text-muted-foreground opacity-20">0</span>}
+                          </button>
                         </TableCell>
                     )
                   })}
@@ -192,7 +228,7 @@ export function AllotmentSheet({ invigilators, examinations, assignments }: Allo
                 <TableRow className="bg-muted/50 font-medium hover:bg-muted/50">
                 <TableCell colSpan={3} className="text-right font-bold">Total Duties</TableCell>
                 {uniqueExams.map(exam => {
-                    const examKey = `${exam.date}-${exam.subject}`;
+                    const examKey = getExamKey(exam);
                     return (
                         <TableCell key={`total-${examKey}`} className="text-center font-bold">
                             {columnTotals[examKey]}

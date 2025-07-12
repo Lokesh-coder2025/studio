@@ -98,7 +98,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
     const newExams: Examination[] = [];
 
     const processSession = (session: z.infer<typeof sessionSchema>) => {
-      if (session.subject && session.roomsAllotted) {
+      if (session.subject && session.subject !== 'none' && session.roomsAllotted) {
         const startTime = `${session.startHour}:${session.startMinute} ${session.startPeriod}`;
         const endTime = `${session.endHour}:${session.endMinute} ${session.endPeriod}`;
         
@@ -329,7 +329,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">None</SelectItem>
+                              <SelectItem value="none">None</SelectItem>
                               {subjects.map((subject) => (
                                 <SelectItem key={`s1-${subject}`} value={subject}>
                                   {subject}
@@ -384,7 +384,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                               </SelectTrigger>
                             </FormControl>
                             <SelectContent>
-                              <SelectItem value="">None</SelectItem>
+                              <SelectItem value="none">None</SelectItem>
                               {subjects.map((subject) => (
                                 <SelectItem key={`s2-${subject}`} value={subject}>
                                   {subject}

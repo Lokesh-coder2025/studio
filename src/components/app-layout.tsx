@@ -1,3 +1,4 @@
+
 'use client';
 
 import {
@@ -25,6 +26,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarHeader>
            <div className="p-2 text-center">
             <h1 className="text-2xl font-bold text-primary font-headline">DutyFlow</h1>
+            <p className="text-xs text-primary">Developed by Lokesh D</p>
            </div>
         </SidebarHeader>
         <SidebarContent>

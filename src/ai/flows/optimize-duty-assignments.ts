@@ -1,3 +1,4 @@
+
 'use server';
 
 /**
@@ -94,8 +95,8 @@ You must generate a duty schedule that adheres to the following rules, in this e
 **Rule 3: Equal Distribution (Primary Goal)**
 - Distribute duties so that most invigilators have the base number of duties calculated in Step 1.
 
-**Rule 4: Assign Excess Duties (Strict Order)**
-- Assign the excess duties one by one to invigilators starting from the **VERY END** of the provided invigilator list and moving upwards. For example, if there are 3 excess duties and 10 invigilators, invigilator #10 gets an extra duty, invigilator #9 gets an extra duty, and invigilator #8 gets an extra duty. The order of the invigilator list provided below is crucial for this rule.
+**Rule 4: Assign Excess Duties Hierarchically (Strict Order)**
+- Assign the excess duties one by one to invigilators starting from the **VERY END** of the provided invigilator list and moving upwards. For example, if there are 3 excess duties and 10 invigilators, invigilator #10 gets an extra duty, invigilator #9 gets an extra duty, and invigilator #8 gets an extra duty. This means the lecturers at the top of the list will have fewer duties than the lecturers at the bottom. The order of the invigilator list provided below is crucial for this rule.
 
 **Rule 5: Avoid Subject Conflicts (Soft Constraint / Preference)**
 - As a preference, AVOID assigning an invigilator to an exam for a subject they teach. You can infer their subject from their 'designation' (e.g., a "Lecturer in English" teaches "English").

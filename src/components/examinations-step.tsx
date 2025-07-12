@@ -2,7 +2,7 @@
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
@@ -20,17 +20,26 @@ import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft, Plus, Trash2 
 import { useToast } from '@/hooks/use-toast';
 import { optimizeDutyAssignments } from '@/ai/flows/optimize-duty-assignments';
 
+const sessionSchema = z.object({
+    subject: z.string(),
+    startHour: z.string(),
+    startMinute: z.string(),
+    startPeriod: z.enum(['AM', 'PM']),
+    endHour: z.string(),
+    endMinute: z.string(),
+    endPeriod: z.enum(['AM', 'PM']),
+    roomsAllotted: z.string(),
+  }).partial({ subject: true, roomsAllotted: true });
+
 const formSchema = z.object({
   date: z.date({ required_error: 'Date is required.' }),
-  subject: z.string().min(1, 'Subject is required'),
-  startHour: z.string({required_error: "Hour is required."}),
-  startMinute: z.string({required_error: "Minute is required."}),
-  startPeriod: z.enum(['AM', 'PM']),
-  endHour: z.string({required_error: "Hour is required."}),
-  endMinute: z.string({required_error: "Minute is required."}),
-  endPeriod: z.enum(['AM', 'PM']),
-  roomsAllotted: z.string({ required_error: 'Number of rooms is required.' }),
+  session1: sessionSchema,
+  session2: sessionSchema,
+}).refine(data => data.session1.subject || data.session2.subject, {
+  message: "At least one session's subject must be filled out.",
+  path: ["session1.subject"], // you can pick any path for the error message
 });
+
 
 const subjects = [
   "English", "Kannada", "Hindi", "Sanskrit", "Physics", "Chemistry",
@@ -62,37 +71,71 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      subject: '',
-      startHour: '09',
-      startMinute: '00',
-      startPeriod: 'AM',
-      endHour: '12',
-      endMinute: '00',
-      endPeriod: 'PM',
-      roomsAllotted: '1',
+      session1: {
+        subject: '',
+        startHour: '09',
+        startMinute: '00',
+        startPeriod: 'AM',
+        endHour: '12',
+        endMinute: '00',
+        endPeriod: 'PM',
+        roomsAllotted: '1',
+      },
+      session2: {
+        subject: '',
+        startHour: '02',
+        startMinute: '00',
+        startPeriod: 'PM',
+        endHour: '05',
+        endMinute: '00',
+        endPeriod: 'PM',
+        roomsAllotted: '1',
+      },
     },
   });
   
   function onSubmit(values: z.infer<typeof formSchema>) {
-    const startTime = `${values.startHour}:${values.startMinute} ${values.startPeriod}`;
-    const endTime = `${values.endHour}:${values.endMinute} ${values.endPeriod}`;
-    
-    const newExamination: Examination = {
-      id: new Date().getTime().toString(),
-      date: values.date.toISOString(),
-      subject: values.subject,
-      day: format(values.date, 'EEE'),
-      startTime,
-      endTime,
-      roomsAllotted: parseInt(values.roomsAllotted, 10),
-    };
+    const newExams: Examination[] = [];
 
-    setExaminations((prev) => [...prev, newExamination].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
-    form.reset({
-      ...values,
-      date: undefined,
-      subject: '',
-    });
+    const processSession = (session: z.infer<typeof sessionSchema>) => {
+      if (session.subject && session.roomsAllotted) {
+        const startTime = `${session.startHour}:${session.startMinute} ${session.startPeriod}`;
+        const endTime = `${session.endHour}:${session.endMinute} ${session.endPeriod}`;
+        
+        return {
+          id: `${new Date().getTime()}-${session.subject}`,
+          date: values.date.toISOString(),
+          subject: session.subject,
+          day: format(values.date, 'EEE'),
+          startTime,
+          endTime,
+          roomsAllotted: parseInt(session.roomsAllotted, 10),
+        };
+      }
+      return null;
+    }
+
+    const exam1 = processSession(values.session1);
+    if (exam1) newExams.push(exam1);
+
+    const exam2 = processSession(values.session2);
+    if (exam2) newExams.push(exam2);
+
+    if (newExams.length > 0) {
+        setExaminations((prev) => [...prev, ...newExams].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+        form.reset({
+            ...values,
+            date: undefined,
+            session1: {...values.session1, subject: ''},
+            session2: {...values.session2, subject: ''},
+        });
+    } else {
+        toast({
+            title: "No subject selected",
+            description: "Please select a subject for at least one session.",
+            variant: "destructive"
+        })
+    }
   }
 
   function deleteExamination(id: string) {
@@ -162,6 +205,64 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
     }
   };
 
+  const renderTimeFields = (sessionName: 'session1' | 'session2', label: string) => (
+    <FormItem>
+        <FormLabel>{label}</FormLabel>
+        <div className="flex gap-2">
+            <Controller control={form.control} name={`${sessionName}.startHour`} render={({ field }) => (
+                <FormItem className="flex-1">
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
+                        <SelectContent>{hours.map(h => <SelectItem key={`start-h-${sessionName}-${h}`} value={h}>{h}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+            <Controller control={form.control} name={`${sessionName}.startMinute`} render={({ field }) => (
+                <FormItem className="flex-1">
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                        <SelectContent>{minutes.map(m => <SelectItem key={`start-m-${sessionName}-${m}`} value={m}>{m}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+            <Controller control={form.control} name={`${sessionName}.startPeriod`} render={({ field }) => (
+                <FormItem>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                        <SelectContent>{periods.map(p => <SelectItem key={`start-p-${sessionName}-${p}`} value={p}>{p}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+        </div>
+        <div className="flex gap-2">
+            <Controller control={form.control} name={`${sessionName}.endHour`} render={({ field }) => (
+                <FormItem className="flex-1">
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
+                        <SelectContent>{hours.map(h => <SelectItem key={`end-h-${sessionName}-${h}`} value={h}>{h}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+            <Controller control={form.control} name={`${sessionName}.endMinute`} render={({ field }) => (
+                <FormItem className="flex-1">
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                        <SelectContent>{minutes.map(m => <SelectItem key={`end-m-${sessionName}-${m}`} value={m}>{m}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+            <Controller control={form.control} name={`${sessionName}.endPeriod`} render={({ field }) => (
+                <FormItem>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                        <SelectContent>{periods.map(p => <SelectItem key={`end-p-${sessionName}-${p}`} value={p}>{p}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+        </div>
+    </FormItem>
+  )
+
   return (
     <div className="space-y-8">
       <div className="flex justify-end">
@@ -178,153 +279,154 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
       </div>
 
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <FormField
-              control={form.control}
-              name="date"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Date</FormLabel>
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <FormControl>
-                        <Button
-                          variant={"outline"}
-                          className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
-                        >
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {field.value ? format(field.value, "PPP") : <span>Select a date</span>}
-                        </Button>
-                      </FormControl>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={field.value}
-                        onSelect={field.onChange}
-                        initialFocus
-                      />
-                    </PopoverContent>
-                  </Popover>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="subject"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Subject</FormLabel>
-                  <Select onValueChange={field.onChange} value={field.value}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 border p-4 rounded-md">
+          <FormField
+            control={form.control}
+            name="date"
+            render={({ field }) => (
+              <FormItem className='max-w-xs'>
+                <FormLabel>Date for Sessions</FormLabel>
+                <Popover>
+                  <PopoverTrigger asChild>
                     <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a subject" />
-                      </SelectTrigger>
+                      <Button
+                        variant={"outline"}
+                        className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {field.value ? format(field.value, "PPP") : <span>Select a date</span>}
+                      </Button>
                     </FormControl>
-                    <SelectContent>
-                      {subjects.map((subject) => (
-                        <SelectItem key={subject} value={subject}>
-                          {subject}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="roomsAllotted"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>No of Rooms</FormLabel>
-                  <Select onValueChange={field.onChange} defaultValue={field.value}>
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select rooms" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      {roomNumbers.map((num) => (
-                        <SelectItem key={num} value={num}>
-                          {num}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <Calendar
+                      mode="single"
+                      selected={field.value}
+                      onSelect={field.onChange}
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <FormItem>
-              <FormLabel>Start Time</FormLabel>
-              <div className="flex gap-2">
-                <FormField control={form.control} name="startHour" render={({ field }) => (
-                    <FormItem className="flex-1">
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
-                            <SelectContent>{hours.map(h => <SelectItem key={`start-h-${h}`} value={h}>{h}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </FormItem>
-                )} />
-                <FormField control={form.control} name="startMinute" render={({ field }) => (
-                    <FormItem className="flex-1">
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                            <SelectContent>{minutes.map(m => <SelectItem key={`start-m-${m}`} value={m}>{m}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </FormItem>
-                )} />
-                <FormField control={form.control} name="startPeriod" render={({ field }) => (
-                    <FormItem>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                            <SelectContent>{periods.map(p => <SelectItem key={`start-p-${p}`} value={p}>{p}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </FormItem>
-                )} />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+              {/* Session 1 */}
+              <div className='space-y-4 p-4 border rounded-md'>
+                  <h3 className="font-semibold text-lg text-primary">Session 1 (e.g. Morning)</h3>
+                   <FormField
+                      control={form.control}
+                      name="session1.subject"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Subject</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a subject" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="">None</SelectItem>
+                              {subjects.map((subject) => (
+                                <SelectItem key={`s1-${subject}`} value={subject}>
+                                  {subject}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {renderTimeFields('session1', 'Time')}
+                    <FormField
+                      control={form.control}
+                      name="session1.roomsAllotted"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>No of Rooms</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select rooms" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {roomNumbers.map((num) => (
+                                <SelectItem key={`s1-room-${num}`} value={num}>
+                                  {num}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
               </div>
-            </FormItem>
-             <FormItem>
-              <FormLabel>End Time</FormLabel>
-              <div className="flex gap-2">
-                <FormField control={form.control} name="endHour" render={({ field }) => (
-                    <FormItem className="flex-1">
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                            <SelectContent>{hours.map(h => <SelectItem key={`end-h-${h}`} value={h}>{h}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </FormItem>
-                )} />
-                <FormField control={form.control} name="endMinute" render={({ field }) => (
-                    <FormItem className="flex-1">
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                            <SelectContent>{minutes.map(m => <SelectItem key={`end-m-${m}`} value={m}>{m}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </FormItem>
-                )} />
-                <FormField control={form.control} name="endPeriod" render={({ field }) => (
-                    <FormItem>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                            <SelectContent>{periods.map(p => <SelectItem key={`end-p-${p}`} value={p}>{p}</SelectItem>)}</SelectContent>
-                        </Select>
-                    </FormItem>
-                )} />
+
+              {/* Session 2 */}
+              <div className='space-y-4 p-4 border rounded-md'>
+                  <h3 className="font-semibold text-lg text-primary">Session 2 (e.g. Afternoon)</h3>
+                  <FormField
+                      control={form.control}
+                      name="session2.subject"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Subject</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select a subject" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="">None</SelectItem>
+                              {subjects.map((subject) => (
+                                <SelectItem key={`s2-${subject}`} value={subject}>
+                                  {subject}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    {renderTimeFields('session2', 'Time')}
+                     <FormField
+                      control={form.control}
+                      name="session2.roomsAllotted"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>No of Rooms</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select rooms" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {roomNumbers.map((num) => (
+                                <SelectItem key={`s2-room-${num}`} value={num}>
+                                  {num}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
               </div>
-            </FormItem>
           </div>
 
           <div className='flex justify-end'>
             <Button type="submit">
-              <Plus className="mr-2" /> Add Examination
+              <Plus className="mr-2" /> Add Examination(s) for Date
             </Button>
           </div>
         </form>
@@ -338,8 +440,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
               <TableHead>Date</TableHead>
               <TableHead>Day</TableHead>
               <TableHead>Subject</TableHead>
-              <TableHead>Start Time</TableHead>
-              <TableHead>End Time</TableHead>
+              <TableHead>Timings</TableHead>
               <TableHead>No of Rooms</TableHead>
               <TableHead className="text-right w-[100px]">Actions</TableHead>
             </TableRow>
@@ -352,8 +453,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                   <TableCell>{format(parseISO(exam.date), "dd-MMM-yyyy")}</TableCell>
                   <TableCell>{exam.day}</TableCell>
                   <TableCell className="font-medium">{exam.subject}</TableCell>
-                  <TableCell>{exam.startTime}</TableCell>
-                  <TableCell>{exam.endTime}</TableCell>
+                  <TableCell>{exam.startTime} - {exam.endTime}</TableCell>
                   <TableCell className="text-center">{exam.roomsAllotted}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => deleteExamination(exam.id)}>
@@ -365,7 +465,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={8} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   No examinations added yet.
                 </TableCell>
               </TableRow>

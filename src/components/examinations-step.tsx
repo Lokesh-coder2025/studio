@@ -35,9 +35,15 @@ const formSchema = z.object({
   date: z.date({ required_error: 'Date is required.' }),
   session1: sessionSchema,
   session2: sessionSchema,
-}).refine(data => data.session1.subject || data.session2.subject, {
+}).refine(data => {
+    // This allows the form to be valid if at least one subject is selected,
+    // and that subject is not the placeholder 'none' value.
+    const s1Subject = data.session1.subject && data.session1.subject !== 'none';
+    const s2Subject = data.session2.subject && data.session2.subject !== 'none';
+    return s1Subject || s2Subject;
+}, {
   message: "At least one session's subject must be filled out.",
-  path: ["session1.subject"], // you can pick any path for the error message
+  path: ["session1.subject"],
 });
 
 
@@ -72,7 +78,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
     resolver: zodResolver(formSchema),
     defaultValues: {
       session1: {
-        subject: '',
+        subject: 'none',
         startHour: '09',
         startMinute: '00',
         startPeriod: 'AM',
@@ -82,7 +88,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
         roomsAllotted: '1',
       },
       session2: {
-        subject: '',
+        subject: 'none',
         startHour: '02',
         startMinute: '00',
         startPeriod: 'PM',
@@ -126,8 +132,8 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
         form.reset({
             ...values,
             date: undefined,
-            session1: {...values.session1, subject: ''},
-            session2: {...values.session2, subject: ''},
+            session1: {...form.getValues('session1'), subject: 'none'},
+            session2: {...form.getValues('session2'), subject: 'none'},
         });
     } else {
         toast({
@@ -163,8 +169,16 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
         invigilatorsNeeded: exam.roomsAllotted,
       }));
 
+      // For the AI, we only need name, designation, and any pre-existing duties.
+      // We will create a simplified version of the invigilator list.
+      const invigilatorsForAI = invigilators.map(({ name, designation }) => ({ 
+        name, 
+        designation, 
+        duties: [] // Assuming no pre-existing duties from this UI for now
+      }));
+
       const aiInput = {
-        invigilators: invigilators.map(({ name, designation }) => ({ name, designation, duties: [] })),
+        invigilators: invigilatorsForAI,
         examinations: formattedExams,
       };
 

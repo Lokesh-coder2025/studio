@@ -109,7 +109,7 @@ export default function Home() {
     <div className="p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-8">
-            <h1 className="text-4xl font-bold font-headline">New Allotment</h1>
+            <h1 className="text-4xl font-bold font-headline text-primary">New Allotment</h1>
             <p className="text-muted-foreground mt-2">Automated Invigilation Duty Allotment System</p>
         </header>
 

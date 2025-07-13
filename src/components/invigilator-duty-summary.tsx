@@ -63,8 +63,8 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
         const canvasHeight = canvas.height;
         const ratio = canvasWidth / canvasHeight;
 
-        const leftMargin = 20; // 2cm
-        const rightMargin = 20; // 2cm
+        const leftMargin = 30; // 3cm
+        const rightMargin = 30; // 3cm
         const topMargin = 20; // 2cm
 
         let imgWidth = pdfWidth - leftMargin - rightMargin;

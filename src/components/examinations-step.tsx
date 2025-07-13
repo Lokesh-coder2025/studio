@@ -324,7 +324,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                       selected={field.value}
                       onSelect={(date) => {
                         field.onChange(date);
-                        // No need to close: setIsCalendarOpen(false);
+                        setIsCalendarOpen(false);
                       }}
                       initialFocus
                     />

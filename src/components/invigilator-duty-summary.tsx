@@ -111,7 +111,11 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
             {`
               .pdf-render {
                 font-family: "Avenir", sans-serif !important;
-                font-size: 16px !important;
+                font-size: 20px !important;
+              }
+              .pdf-render .table {
+                table-layout: fixed;
+                width: 100%;
               }
               .pdf-render .text-xl {
                 font-size: 1.5rem !important; 
@@ -136,7 +140,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
             </CardHeader>
             <CardContent className="px-6 pb-6">
               <div className="rounded-md border">
-                <Table>
+                <Table className="table">
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-center font-bold">Sl.No</TableHead>

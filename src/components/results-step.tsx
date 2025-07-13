@@ -26,7 +26,7 @@ type ResultsStepProps = {
   setAllotmentId: Dispatch<SetStateAction<string | null>>;
 };
 
-export function ResultsStep({ invigilators, examinations, initialAssignments, resetApp, prevStep, examTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
+export function ResultsStep({ invigilators, examinations, initialAssignments, prevStep, examTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
   const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
   const { toast } = useToast();
   const allotmentSheetRef = useRef<HTMLDivElement>(null);
@@ -42,8 +42,10 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, re
     }
 
     const currentId = allotmentId || new Date().toISOString();
-    setAllotmentId(currentId);
-
+    if (!allotmentId) {
+      setAllotmentId(currentId);
+    }
+    
     const savedAllotment: SavedAllotment = {
       id: currentId,
       examTitle: examTitle || `Examination from ${format(parseISO(examinations[0].date), 'd-MMM-yy')}`,
@@ -63,6 +65,16 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, re
     }
     
     localStorage.setItem('savedAllotments', JSON.stringify(savedAllotments));
+    
+    const history = JSON.parse(localStorage.getItem('dutyHistory') || '[]');
+    const historyIndex = history.findIndex((item: SavedAllotment) => item.id === currentId);
+     if (historyIndex > -1) {
+      history[historyIndex] = savedAllotment;
+    } else {
+      history.unshift(savedAllotment);
+    }
+    localStorage.setItem('dutyHistory', JSON.stringify(history));
+
 
     toast({
       title: "Allotment Saved",

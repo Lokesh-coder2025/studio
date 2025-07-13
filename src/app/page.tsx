@@ -2,13 +2,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import type { Invigilator, Examination, Assignment } from '@/types';
+import type { Invigilator, Examination, Assignment, SavedAllotment } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InvigilatorsStep } from '@/components/invigilators-step';
 import { ExaminationsStep } from '@/components/examinations-step';
 import { ResultsStep } from '@/components/results-step';
 import { Workflow, BookUser, FileSpreadsheet } from 'lucide-react';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 
 const STEPS = [
   { step: 1, title: "Invigilators' Details", description: "Add all available invigilators.", icon: BookUser },
@@ -26,6 +26,17 @@ export default function Home() {
   const [allotmentId, setAllotmentId] = useState<string | null>(null);
   
   const searchParams = useSearchParams();
+  const router = useRouter();
+
+  const resetApp = () => {
+    setCurrentStep(1);
+    setInvigilators([]);
+    setExaminations([]);
+    setAssignments([]);
+    setExamTitle('');
+    setAllotmentId(null);
+    router.push('/');
+  };
 
   useEffect(() => {
     const loadId = searchParams.get('load');
@@ -40,27 +51,22 @@ export default function Home() {
         setAllotmentId(allotmentToLoad.id);
         setCurrentStep(3);
       }
+    } else {
+        // This ensures that navigating to '/' without a query param resets the state
+        if (currentStep !== 1 || invigilators.length > 0 || examinations.length > 0) {
+            resetApp();
+        }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
   const nextStep = () => setCurrentStep((prev) => prev + 1);
   const prevStep = () => {
     if (searchParams.get('load')) {
-        window.location.href = '/saved-allotments';
+        router.push('/saved-allotments');
     } else {
         setCurrentStep((prev) => prev - 1);
     }
-  };
-
-  const resetApp = () => {
-    setCurrentStep(1);
-    setInvigilators([]);
-    setExaminations([]);
-    setAssignments([]);
-    setExamTitle('');
-    setAllotmentId(null);
-    // Clear the query param
-    window.history.replaceState({}, '', '/');
   };
 
   const renderStep = () => {

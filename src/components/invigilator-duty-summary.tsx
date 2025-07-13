@@ -119,10 +119,10 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                 <TableHeader>
                   <TableRow>
                     <TableHead className="w-[70px] text-center">Sl.No</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Day</TableHead>
+                    <TableHead className="w-[120px]">Date</TableHead>
+                    <TableHead className="w-[80px]">Day</TableHead>
                     <TableHead>Subject</TableHead>
-                    <TableHead>Timings</TableHead>
+                    <TableHead className="w-[180px]">Timings</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>

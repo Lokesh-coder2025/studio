@@ -114,7 +114,7 @@ export default function Home() {
         </header>
 
         <div className="w-full mb-8">
-            <ol className="flex items-center w-full relative left-[2cm]">
+            <ol className="flex items-center w-full relative left-[3cm]">
                 {STEPS.map((item, index) => (
                     <li key={item.step} className={`flex w-full items-center ${index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-1 after:border-b after:border-border after:border-2 after:inline-block" : ""} ${currentStep > item.step ? 'after:border-primary' : ''}`}>
                         <span className={`flex items-center justify-center w-10 h-10 rounded-full lg:h-12 lg:w-12 shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>

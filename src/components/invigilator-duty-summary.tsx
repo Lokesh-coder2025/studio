@@ -56,7 +56,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
 
       html2canvas(input, { scale: 4, useCORS: true }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
+        const pdf = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         
@@ -101,7 +101,6 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
             {`
               .pdf-render {
                 font-family: "Arial", sans-serif !important;
-                font-size: 50px !important;
               }
               .pdf-render .table {
                 table-layout: fixed;

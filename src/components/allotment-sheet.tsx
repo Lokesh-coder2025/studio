@@ -60,9 +60,8 @@ export function AllotmentSheet({ invigilators, examinations, assignments, setAss
   const examDetailsMap = useMemo(() => {
     const map = new Map<string, Examination>();
     examinations.forEach(exam => {
-      // The assignments from the AI have a different time format, so we use that as the key
       const examKey = getExamKey({
-        date: parseISO(exam.date).toISOString().split('T')[0], // The AI uses YYYY-MM-DD
+        date: format(parseISO(exam.date), 'yyyy-MM-dd'),
         subject: exam.subject,
         time: `${exam.startTime} - ${exam.endTime}`
       });
@@ -88,7 +87,7 @@ export function AllotmentSheet({ invigilators, examinations, assignments, setAss
     });
 
     allottedGrand = dutyData.reduce((sum, inv) => sum + inv.totalDuties, 0);
-    requiredGrand = Array.from(examDetailsMap.values()).reduce((sum, exam) => sum + (exam.roomsAllotted || 0), 0);
+    requiredGrand = Object.values(required).reduce((sum, rooms) => sum + rooms, 0);
 
     return { columnTotals: allotted, grandTotal: allottedGrand, requiredTotals: required, requiredGrandTotal: requiredGrand };
   }, [dutyData, uniqueExams, examDetailsMap]);

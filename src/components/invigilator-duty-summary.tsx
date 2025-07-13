@@ -48,7 +48,6 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
   const handleDownloadPdf = () => {
     const input = summaryCardRef.current;
     if (input && selectedInvigilator) {
-      // Temporarily apply PDF-specific styles
       input.classList.add('pdf-render');
       const button = input.querySelector('#download-pdf-btn');
       if (button) {
@@ -64,10 +63,10 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
         const canvasHeight = canvas.height;
         const ratio = canvasWidth / canvasHeight;
 
-        let imgWidth = pdfWidth - 20; // 10mm margin on each side
+        let imgWidth = pdfWidth - 20; 
         let imgHeight = imgWidth / ratio;
 
-        if (imgHeight > pdfHeight - 20) { // 2cm margin top and bottom in total
+        if (imgHeight > pdfHeight - 20) { 
           imgHeight = pdfHeight - 20;
           imgWidth = imgHeight * ratio;
         }
@@ -78,7 +77,6 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
         pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
         pdf.save(`${selectedInvigilator.name}-duty-summary.pdf`);
       }).finally(() => {
-        // Clean up styles after rendering
         input.classList.remove('pdf-render');
         if (button) {
           (button as HTMLElement).style.display = 'flex';
@@ -108,11 +106,14 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
           <style>
             {`
               .pdf-render {
-                font-family: "Arial", sans-serif !important;
+                font-family: "Avenir", sans-serif !important;
                 font-size: 16px !important;
               }
               .pdf-render .text-xl {
-                font-size: 1.5rem !important; /* Adjust title size if needed */
+                font-size: 1.5rem !important; 
+              }
+              .pdf-render th {
+                font-weight: bold !important;
               }
             `}
           </style>
@@ -138,7 +139,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                       <TableHead>Date</TableHead>
                       <TableHead>Day</TableHead>
                       <TableHead>Subject</TableHead>
-                      <TableHead>Timings</TableHead>
+                      <TableHead className="text-center">Timings</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
@@ -156,7 +157,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                           <TableCell>{format(parseISO(duty.date), 'dd.MM.yyyy')}</TableCell>
                           <TableCell>{duty.day}</TableCell>
                           <TableCell>{duty.subject}</TableCell>
-                          <TableCell>{duty.time}</TableCell>
+                          <TableCell className="text-center">{duty.time}</TableCell>
                         </TableRow>
                       ))
                     ) : (

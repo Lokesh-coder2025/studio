@@ -50,7 +50,7 @@ export default function HistoryPage() {
         <header className="mb-8 text-center">
           <div>
             <h1 className="text-4xl font-bold text-primary font-headline">History</h1>
-            <p className="text-muted-foreground mt-2">Previously generated duty allotments.</p>
+            <p className="text-muted-foreground mt-2">Previously generated duty allotments</p>
           </div>
         </header>
 

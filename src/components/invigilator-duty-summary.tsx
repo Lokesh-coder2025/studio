@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useState, useMemo, useRef } from 'react';
@@ -10,11 +11,18 @@ import { Search, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
+import { cn } from '@/lib/utils';
 
 type InvigilatorDutySummaryProps = {
   invigilators: Invigilator[];
   assignments: Assignment[];
 };
+
+const serialNumberColors = [
+  "bg-blue-100 text-blue-800", "bg-green-100 text-green-800", "bg-yellow-100 text-yellow-800",
+  "bg-purple-100 text-purple-800", "bg-pink-100 text-pink-800", "bg-indigo-100 text-indigo-800",
+  "bg-red-100 text-red-800", "bg-cyan-100 text-cyan-800", "bg-orange-100 text-orange-800"
+];
 
 export function InvigilatorDutySummary({ invigilators, assignments }: InvigilatorDutySummaryProps) {
   const [selectedInvigilatorId, setSelectedInvigilatorId] = useState<string | null>(null);
@@ -40,26 +48,37 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
   const handleDownloadPdf = () => {
     const input = summaryCardRef.current;
     if (input && selectedInvigilator) {
-      const button = input.querySelector('button');
+      const button = input.querySelector('#download-pdf-btn');
       if (button) {
-        button.style.display = 'none';
+        (button as HTMLElement).style.display = 'none';
       }
 
-      html2canvas(input, { scale: 2 }).then((canvas) => {
-        if (button) {
-          button.style.display = '';
-        }
+      html2canvas(input, { scale: 2, useCORS: true }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
         const ratio = canvasWidth / canvasHeight;
-        const imgWidth = pdfWidth - 20;
-        const imgHeight = imgWidth / ratio;
-        
-        pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+
+        let imgWidth = pdfWidth - 20; // 10mm margin on each side
+        let imgHeight = imgWidth / ratio;
+
+        if (imgHeight > pdfHeight - 20) {
+          imgHeight = pdfHeight - 20;
+          imgWidth = imgHeight * ratio;
+        }
+
+        const x = (pdfWidth - imgWidth) / 2;
+        const y = (pdfHeight - imgHeight) / 2;
+
+        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
         pdf.save(`${selectedInvigilator.name}-duty-summary.pdf`);
+      }).finally(() => {
+        if (button) {
+          (button as HTMLElement).style.display = '';
+        }
       });
     }
   };
@@ -81,28 +100,29 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
       </div>
 
       {selectedInvigilator ? (
-        <Card ref={summaryCardRef}>
-          <CardHeader>
-            <div className="flex justify-between items-center">
-              <CardTitle>Invigilator's Duty Summary</CardTitle>
-              <Button onClick={handleDownloadPdf} variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" />
-                Download PDF
-              </Button>
-            </div>
+        <Card ref={summaryCardRef} className="overflow-hidden">
+          <CardHeader className="p-0">
+              <div className="bg-primary text-primary-foreground text-center p-4">
+                  <CardTitle className="text-xl">Invigilator's Duty Summary</CardTitle>
+              </div>
+              <div className="p-6 pb-2 flex justify-between items-center">
+                <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
+                    <p><span className="font-semibold">Name:</span> {selectedInvigilator.name}</p>
+                    <p><span className="font-semibold">Designation:</span> {selectedInvigilator.designation}</p>
+                    <p><span className="font-semibold">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</p>
+                </div>
+                <Button id="download-pdf-btn" onClick={handleDownloadPdf} variant="outline" size="sm">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF
+                </Button>
+              </div>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
-                <p><span className="font-semibold">Name:</span> {selectedInvigilator.name}</p>
-                <p><span className="font-semibold">Designation:</span> {selectedInvigilator.designation}</p>
-                <p><span className="font-semibold">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</p>
-            </div>
-            
+          <CardContent className="px-6 pb-6">
             <div className="rounded-md border">
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead className="w-[50px]">Sl.No</TableHead>
+                    <TableHead className="w-[70px] text-center">Sl.No</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Day</TableHead>
                     <TableHead>Subject</TableHead>
@@ -113,7 +133,14 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                   {invigilatorDuties.length > 0 ? (
                     invigilatorDuties.map((duty, index) => (
                       <TableRow key={`${duty.date}-${duty.subject}`}>
-                        <TableCell>{index + 1}</TableCell>
+                        <TableCell className="text-center">
+                          <div className={cn(
+                              "mx-auto flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
+                              serialNumberColors[index % serialNumberColors.length]
+                          )}>
+                            {index + 1}
+                          </div>
+                        </TableCell>
                         <TableCell>{format(parseISO(duty.date), 'dd.MM.yyyy')}</TableCell>
                         <TableCell>{duty.day}</TableCell>
                         <TableCell>{duty.subject}</TableCell>

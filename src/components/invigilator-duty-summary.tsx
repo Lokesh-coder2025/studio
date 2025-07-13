@@ -63,16 +63,20 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
         const canvasHeight = canvas.height;
         const ratio = canvasWidth / canvasHeight;
 
-        let imgWidth = pdfWidth - 20; 
+        const leftMargin = 20; // 2cm
+        const rightMargin = 20; // 2cm
+        const topMargin = 20; // 2cm
+
+        let imgWidth = pdfWidth - leftMargin - rightMargin;
         let imgHeight = imgWidth / ratio;
 
-        if (imgHeight > pdfHeight - 20) { 
-          imgHeight = pdfHeight - 20;
+        if (imgHeight > pdfHeight - topMargin) {
+          imgHeight = pdfHeight - topMargin;
           imgWidth = imgHeight * ratio;
         }
 
-        const x = (pdfWidth - imgWidth) / 2;
-        const y = 20; // 2cm margin from the top
+        const x = leftMargin;
+        const y = topMargin;
 
         pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
         pdf.save(`${selectedInvigilator.name}-duty-summary.pdf`);
@@ -135,11 +139,11 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="text-center">Sl.No</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead>Day</TableHead>
-                      <TableHead>Subject</TableHead>
-                      <TableHead className="text-center">Timings</TableHead>
+                      <TableHead className="text-center font-bold">Sl.No</TableHead>
+                      <TableHead className="font-bold">Date</TableHead>
+                      <TableHead className="font-bold">Day</TableHead>
+                      <TableHead className="font-bold">Subject</TableHead>
+                      <TableHead className="text-center font-bold">Timings</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>

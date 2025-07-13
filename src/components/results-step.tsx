@@ -160,8 +160,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     <div className="space-y-6">
       <Tabs defaultValue="allotment-sheet">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
-          <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
+          <TabsTrigger value="allotment-sheet" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md">Duty Allotment Sheet</TabsTrigger>
+          <TabsTrigger value="individual-dashboard" className="data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md">Individual Dashboard</TabsTrigger>
         </TabsList>
         <TabsContent value="allotment-sheet" className="mt-4">
             <AllotmentSheet 

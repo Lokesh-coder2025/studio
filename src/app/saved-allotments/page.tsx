@@ -50,10 +50,10 @@ export default function SavedAllotmentsPage() {
   return (
     <div className="p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto">
-        <header className="mb-8">
+        <header className="mb-8 text-center">
           <div>
             <h1 className="text-4xl font-bold text-primary font-headline">Saved Allotments</h1>
-            <p className="text-muted-foreground mt-2">Load a previously saved allotment to continue editing.</p>
+            <p className="text-muted-foreground mt-2">Load a previously saved allotment to continue editing</p>
           </div>
         </header>
 

@@ -48,6 +48,8 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
   const handleDownloadPdf = () => {
     const input = summaryCardRef.current;
     if (input && selectedInvigilator) {
+      // Temporarily apply PDF-specific styles
+      input.classList.add('pdf-render');
       const button = input.querySelector('#download-pdf-btn');
       if (button) {
         (button as HTMLElement).style.display = 'none';
@@ -65,17 +67,19 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
         let imgWidth = pdfWidth - 20; // 10mm margin on each side
         let imgHeight = imgWidth / ratio;
 
-        if (imgHeight > pdfHeight - 20) {
-          imgHeight = pdfHeight - 20;
+        if (imgHeight > pdfHeight - 40) { // 20mm margin top and bottom
+          imgHeight = pdfHeight - 40;
           imgWidth = imgHeight * ratio;
         }
 
         const x = (pdfWidth - imgWidth) / 2;
-        const y = (pdfHeight - imgHeight) / 2;
+        const y = 20; // 2cm margin from the top
 
         pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
         pdf.save(`${selectedInvigilator.name}-duty-summary.pdf`);
       }).finally(() => {
+        // Clean up styles after rendering
+        input.classList.remove('pdf-render');
         if (button) {
           (button as HTMLElement).style.display = 'flex';
         }
@@ -100,67 +104,80 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
       </div>
 
       {selectedInvigilator ? (
-        <Card ref={summaryCardRef} className="overflow-hidden">
-          <CardHeader className="p-0">
-              <div className="bg-primary text-primary-foreground text-center p-4">
-                  <CardTitle className="text-xl">Invigilator's Duty Summary</CardTitle>
-              </div>
-              <div className="p-6 pb-4 space-y-4">
-                <div className="flex justify-between items-center text-sm w-full">
-                    <p className="flex-1 text-left"><span className="font-semibold">Name:</span> {selectedInvigilator.name}</p>
-                    <p className="flex-1 text-center"><span className="font-semibold">Designation:</span> {selectedInvigilator.designation}</p>
-                    <p className="flex-1 text-right"><span className="font-semibold">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</p>
+        <>
+          <style>
+            {`
+              .pdf-render {
+                font-family: Avenir, sans-serif !important;
+                font-size: 14px !important;
+              }
+              .pdf-render .text-xl {
+                font-size: 1.5rem !important; /* Adjust title size if needed */
+              }
+            `}
+          </style>
+          <Card ref={summaryCardRef} className="overflow-hidden">
+            <CardHeader className="p-0">
+                <div className="bg-primary text-primary-foreground text-center p-4">
+                    <CardTitle className="text-xl">Invigilator's Duty Summary</CardTitle>
                 </div>
-              </div>
-          </CardHeader>
-          <CardContent className="px-6 pb-6">
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="text-center">Sl.No</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Day</TableHead>
-                    <TableHead>Subject</TableHead>
-                    <TableHead>Timings</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {invigilatorDuties.length > 0 ? (
-                    invigilatorDuties.map((duty, index) => (
-                      <TableRow key={`${duty.date}-${duty.subject}`}>
-                        <TableCell className="text-center">
-                          <div className={cn(
-                              "mx-auto flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
-                              serialNumberColors[index % serialNumberColors.length]
-                          )}>
-                            {index + 1}
-                          </div>
-                        </TableCell>
-                        <TableCell>{format(parseISO(duty.date), 'dd.MM.yyyy')}</TableCell>
-                        <TableCell>{duty.day}</TableCell>
-                        <TableCell>{duty.subject}</TableCell>
-                        <TableCell>{duty.time}</TableCell>
-                      </TableRow>
-                    ))
-                  ) : (
+                <div className="p-6 pb-4 space-y-4">
+                  <div className="flex justify-between items-center text-sm w-full">
+                      <p className="flex-1 text-left"><span className="font-semibold">Name:</span> {selectedInvigilator.name}</p>
+                      <p className="flex-1 text-center"><span className="font-semibold">Designation:</span> {selectedInvigilator.designation}</p>
+                      <p className="flex-1 text-right"><span className="font-semibold">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</p>
+                  </div>
+                </div>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <div className="rounded-md border">
+                <Table>
+                  <TableHeader>
                     <TableRow>
-                      <TableCell colSpan={5} className="h-24 text-center">
-                        No duties assigned to this invigilator.
-                      </TableCell>
+                      <TableHead className="text-center">Sl.No</TableHead>
+                      <TableHead>Date</TableHead>
+                      <TableHead>Day</TableHead>
+                      <TableHead>Subject</TableHead>
+                      <TableHead>Timings</TableHead>
                     </TableRow>
-                  )}
-                </TableBody>
-              </Table>
-            </div>
-          </CardContent>
-          <CardFooter className="flex justify-end">
-             <Button id="download-pdf-btn" onClick={handleDownloadPdf} variant="outline" size="sm">
-                <Download className="mr-2 h-4 w-4" />
-                Download PDF
-              </Button>
-          </CardFooter>
-        </Card>
+                  </TableHeader>
+                  <TableBody>
+                    {invigilatorDuties.length > 0 ? (
+                      invigilatorDuties.map((duty, index) => (
+                        <TableRow key={`${duty.date}-${duty.subject}`}>
+                          <TableCell className="text-center">
+                            <div className={cn(
+                                "mx-auto flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
+                                serialNumberColors[index % serialNumberColors.length]
+                            )}>
+                              {index + 1}
+                            </div>
+                          </TableCell>
+                          <TableCell>{format(parseISO(duty.date), 'dd.MM.yyyy')}</TableCell>
+                          <TableCell>{duty.day}</TableCell>
+                          <TableCell>{duty.subject}</TableCell>
+                          <TableCell>{duty.time}</TableCell>
+                        </TableRow>
+                      ))
+                    ) : (
+                      <TableRow>
+                        <TableCell colSpan={5} className="h-24 text-center">
+                          No duties assigned to this invigilator.
+                        </TableCell>
+                      </TableRow>
+                    )}
+                  </TableBody>
+                </Table>
+              </div>
+            </CardContent>
+            <CardFooter className="flex justify-end">
+               <Button id="download-pdf-btn" onClick={handleDownloadPdf} variant="outline" size="sm">
+                  <Download className="mr-2 h-4 w-4" />
+                  Download PDF
+                </Button>
+            </CardFooter>
+          </Card>
+        </>
       ) : (
          <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">
             <p className="text-muted-foreground">Select an invigilator to view their duty summary.</p>

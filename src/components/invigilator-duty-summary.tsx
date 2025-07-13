@@ -108,8 +108,8 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
           <style>
             {`
               .pdf-render {
-                font-family: "Century Gothic", sans-serif !important;
-                font-size: 14px !important;
+                font-family: "Arial", sans-serif !important;
+                font-size: 16px !important;
               }
               .pdf-render .text-xl {
                 font-size: 1.5rem !important; /* Adjust title size if needed */
@@ -170,7 +170,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                 </Table>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end">
+            <CardFooter className="flex justify-end p-6">
                <Button id="download-pdf-btn" onClick={handleDownloadPdf} variant="outline" size="sm">
                   <Download className="mr-2 h-4 w-4" />
                   Download PDF

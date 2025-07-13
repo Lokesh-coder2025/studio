@@ -67,8 +67,8 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
         let imgWidth = pdfWidth - 20; // 10mm margin on each side
         let imgHeight = imgWidth / ratio;
 
-        if (imgHeight > pdfHeight - 40) { // 20mm margin top and bottom
-          imgHeight = pdfHeight - 40;
+        if (imgHeight > pdfHeight - 20) { // 2cm margin top and bottom in total
+          imgHeight = pdfHeight - 20;
           imgWidth = imgHeight * ratio;
         }
 
@@ -108,7 +108,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
           <style>
             {`
               .pdf-render {
-                font-family: Avenir, sans-serif !important;
+                font-family: "Century Gothic", sans-serif !important;
                 font-size: 14px !important;
               }
               .pdf-render .text-xl {
@@ -118,7 +118,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
           </style>
           <Card ref={summaryCardRef} className="overflow-hidden">
             <CardHeader className="p-0">
-                <div className="bg-primary text-primary-foreground text-center p-4">
+                <div className="bg-primary text-primary-foreground flex items-center justify-center p-4 min-h-[80px]">
                     <CardTitle className="text-xl">Invigilator's Duty Summary</CardTitle>
                 </div>
                 <div className="p-6 pb-4 space-y-4">

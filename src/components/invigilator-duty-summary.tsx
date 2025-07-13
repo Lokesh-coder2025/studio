@@ -40,7 +40,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
       .map(a => ({
         ...a,
         date: a.date,
-        day: format(parseISO(a.date), 'EEE'),
+        day: format(parseISO(a.date), 'EEEE'),
       }))
       .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [selectedInvigilator, assignments]);
@@ -111,7 +111,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
             {`
               .pdf-render {
                 font-family: "Avenir", sans-serif !important;
-                font-size: 20px !important;
+                font-size: 24px !important;
               }
               .pdf-render .table {
                 table-layout: fixed;
@@ -144,7 +144,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                   <TableHeader>
                     <TableRow>
                       <TableHead className="text-center font-bold">Sl.No</TableHead>
-                      <TableHead className="font-bold">Date</TableHead>
+                      <TableHead className="text-center font-bold">Date</TableHead>
                       <TableHead className="font-bold">Day</TableHead>
                       <TableHead className="font-bold">Subject</TableHead>
                       <TableHead className="text-center font-bold">Timings</TableHead>
@@ -162,7 +162,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                               {index + 1}
                             </div>
                           </TableCell>
-                          <TableCell>{format(parseISO(duty.date), 'dd.MM.yyyy')}</TableCell>
+                          <TableCell className="text-center">{format(parseISO(duty.date), 'dd.MM.yyyy')}</TableCell>
                           <TableCell>{duty.day}</TableCell>
                           <TableCell>{duty.subject}</TableCell>
                           <TableCell className="text-center">{duty.time}</TableCell>

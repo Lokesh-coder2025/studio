@@ -113,8 +113,8 @@ export default function Home() {
             <p className="text-muted-foreground mt-2">Automated Invigilation Duty Allotment System</p>
         </header>
 
-        <div className="w-full max-w-4xl mx-auto mb-8">
-            <ol className="flex items-center w-auto mx-auto">
+        <div className="w-full flex justify-center mb-8">
+            <ol className="flex items-center w-auto">
                 {STEPS.map((item, index) => (
                     <li key={item.step} className={`flex w-full items-center ${index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-1 after:border-b after:border-border after:border-2 after:inline-block" : ""} ${currentStep > item.step ? 'after:border-primary' : ''}`}>
                         <span className={`flex items-center justify-center w-10 h-10 rounded-full lg:h-12 lg:w-12 shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>

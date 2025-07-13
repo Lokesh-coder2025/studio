@@ -2,6 +2,7 @@
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -75,6 +76,7 @@ type ExaminationsStepProps = {
 
 export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examinations, setExaminations, setAssignments, setAllotmentId, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
   const { toast } = useToast();
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -304,7 +306,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
             render={({ field }) => (
               <FormItem className='max-w-xs'>
                 <FormLabel>Date for Sessions</FormLabel>
-                <Popover>
+                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
@@ -316,11 +318,14 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
                     <Calendar
                       mode="single"
                       selected={field.value}
-                      onSelect={field.onChange}
+                      onSelect={(date) => {
+                        field.onChange(date);
+                        // No need to close: setIsCalendarOpen(false);
+                      }}
                       initialFocus
                     />
                   </PopoverContent>

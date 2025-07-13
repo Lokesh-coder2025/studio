@@ -1,13 +1,14 @@
 
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { Invigilator, Examination, Assignment } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InvigilatorsStep } from '@/components/invigilators-step';
 import { ExaminationsStep } from '@/components/examinations-step';
 import { ResultsStep } from '@/components/results-step';
 import { Workflow, BookUser, FileSpreadsheet } from 'lucide-react';
+import { useSearchParams } from 'next/navigation';
 
 const STEPS = [
   { step: 1, title: "Invigilators' Details", description: "Add all available invigilators.", icon: BookUser },
@@ -22,15 +23,44 @@ export default function Home() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [examTitle, setExamTitle] = useState('');
+  const [allotmentId, setAllotmentId] = useState<string | null>(null);
+  
+  const searchParams = useSearchParams();
+
+  useEffect(() => {
+    const loadId = searchParams.get('load');
+    if (loadId) {
+      const savedAllotments = JSON.parse(localStorage.getItem('savedAllotments') || '[]');
+      const allotmentToLoad = savedAllotments.find((item: any) => item.id === loadId);
+      if (allotmentToLoad) {
+        setInvigilators(allotmentToLoad.invigilators);
+        setExaminations(allotmentToLoad.examinations);
+        setAssignments(allotmentToLoad.assignments);
+        setExamTitle(allotmentToLoad.examTitle);
+        setAllotmentId(allotmentToLoad.id);
+        setCurrentStep(3);
+      }
+    }
+  }, [searchParams]);
 
   const nextStep = () => setCurrentStep((prev) => prev + 1);
-  const prevStep = () => setCurrentStep((prev) => prev - 1);
+  const prevStep = () => {
+    if (searchParams.get('load')) {
+        window.location.href = '/saved-allotments';
+    } else {
+        setCurrentStep((prev) => prev - 1);
+    }
+  };
+
   const resetApp = () => {
     setCurrentStep(1);
     setInvigilators([]);
     setExaminations([]);
     setAssignments([]);
     setExamTitle('');
+    setAllotmentId(null);
+    // Clear the query param
+    window.history.replaceState({}, '', '/');
   };
 
   const renderStep = () => {
@@ -46,6 +76,7 @@ export default function Home() {
             examinations={examinations}
             setExaminations={setExaminations}
             setAssignments={setAssignments}
+            setAllotmentId={setAllotmentId}
             nextStep={nextStep}
             prevStep={prevStep}
             isGenerating={isGenerating}
@@ -53,7 +84,16 @@ export default function Home() {
           />
         );
       case 3:
-        return <ResultsStep invigilators={invigilators} examinations={examinations} initialAssignments={assignments} resetApp={resetApp} prevStep={prevStep} />;
+        return <ResultsStep 
+                    invigilators={invigilators} 
+                    examinations={examinations} 
+                    initialAssignments={assignments} 
+                    resetApp={resetApp} 
+                    prevStep={prevStep} 
+                    examTitle={examTitle}
+                    allotmentId={allotmentId}
+                    setAllotmentId={setAllotmentId}
+                />;
       default:
         return <InvigilatorsStep invigilators={invigilators} setInvigilators={setInvigilators} nextStep={nextStep} />;
     }

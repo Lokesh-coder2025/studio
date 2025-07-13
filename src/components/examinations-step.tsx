@@ -66,13 +66,14 @@ type ExaminationsStepProps = {
   examinations: Examination[];
   setExaminations: Dispatch<SetStateAction<Examination[]>>;
   setAssignments: Dispatch<SetStateAction<Assignment[]>>;
+  setAllotmentId: Dispatch<SetStateAction<string | null>>;
   nextStep: () => void;
   prevStep: () => void;
   isGenerating: boolean;
   setIsGenerating: Dispatch<SetStateAction<boolean>>;
 };
 
-export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examinations, setExaminations, setAssignments, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
+export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examinations, setExaminations, setAssignments, setAllotmentId, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -185,10 +186,13 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
       const result = await optimizeDutyAssignments(aiInput);
       setAssignments(result);
       
+      const newAllotmentId = new Date().toISOString();
+      setAllotmentId(newAllotmentId);
+      
       if (result.length > 0) {
         const firstExamDate = examinations[0].date;
         const savedAllotment: SavedAllotment = {
-          id: new Date().toISOString(),
+          id: newAllotmentId,
           examTitle: examTitle || `Examination from ${format(parseISO(firstExamDate), 'd-MMM-yy')}`,
           firstExamDate: firstExamDate,
           invigilators,

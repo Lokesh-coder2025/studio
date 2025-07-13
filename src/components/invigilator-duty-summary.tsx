@@ -65,8 +65,14 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
         
         const ratio = canvasWidth / canvasHeight;
         
-        const imgWidth = pdfWidth;
-        const imgHeight = imgWidth / ratio;
+        let imgWidth = pdfWidth;
+        let imgHeight = imgWidth / ratio;
+
+        if (imgHeight > pdfHeight) {
+            imgHeight = pdfHeight;
+            imgWidth = imgHeight * ratio;
+        }
+
 
         pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
         pdf.save(`${selectedInvigilator.name}-duty-summary.pdf`);
@@ -101,7 +107,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
             {`
               .pdf-render {
                 font-family: "Century Gothic", sans-serif !important;
-                font-size: 150px !important;
+                font-size: 262.5px !important;
               }
               .pdf-render .table {
                 table-layout: fixed;

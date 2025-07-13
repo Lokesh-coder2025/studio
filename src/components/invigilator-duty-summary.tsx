@@ -101,6 +101,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
             {`
               .pdf-render {
                 font-family: "Arial", sans-serif !important;
+                font-size: 50px !important;
               }
               .pdf-render .table {
                 table-layout: fixed;

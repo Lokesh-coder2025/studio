@@ -54,31 +54,21 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
         (button as HTMLElement).style.display = 'none';
       }
 
-      html2canvas(input, { scale: 2, useCORS: true }).then((canvas) => {
+      html2canvas(input, { scale: 4, useCORS: true }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
+        
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
+        
         const ratio = canvasWidth / canvasHeight;
+        
+        const imgWidth = pdfWidth;
+        const imgHeight = imgWidth / ratio;
 
-        const leftMargin = 30; // 3cm
-        const rightMargin = 30; // 3cm
-        const topMargin = 20; // 2cm
-
-        let imgWidth = pdfWidth - leftMargin - rightMargin;
-        let imgHeight = imgWidth / ratio;
-
-        if (imgHeight > pdfHeight - topMargin) {
-          imgHeight = pdfHeight - topMargin;
-          imgWidth = imgHeight * ratio;
-        }
-
-        const x = leftMargin;
-        const y = topMargin;
-
-        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
         pdf.save(`${selectedInvigilator.name}-duty-summary.pdf`);
       }).finally(() => {
         input.classList.remove('pdf-render');
@@ -110,15 +100,11 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
           <style>
             {`
               .pdf-render {
-                font-family: "Avenir", sans-serif !important;
-                font-size: 30px !important;
+                font-family: "Arial", sans-serif !important;
               }
               .pdf-render .table {
                 table-layout: fixed;
                 width: 100%;
-              }
-              .pdf-render .text-xl {
-                font-size: 1.5rem !important; 
               }
               .pdf-render th {
                 font-weight: bold !important;

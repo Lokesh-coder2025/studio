@@ -4,13 +4,8 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { Invigilator, Examination, Assignment } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Download } from 'lucide-react';
-import { useMemo, useRef } from 'react';
+import { useMemo, forwardRef } from 'react';
 import { format, parseISO } from 'date-fns';
-import { exportToExcelWithFormulas } from '@/lib/excel-export';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
 import { cn } from '@/lib/utils';
 
 type AllotmentSheetProps = {
@@ -20,169 +15,101 @@ type AllotmentSheetProps = {
   setAssignments: Dispatch<SetStateAction<Assignment[]>>;
 };
 
-export function AllotmentSheet({ invigilators, examinations, assignments, setAssignments }: AllotmentSheetProps) {
-  const tableContainerRef = useRef<HTMLDivElement>(null);
-
-  const uniqueExams = useMemo(() => {
-    return [...assignments].sort((a,b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-        if (dateA !== dateB) return dateA - dateB;
-        return a.time.localeCompare(b.time);
-    });
-  }, [assignments]);
-
-  const getExamKey = (exam: {date: string, subject: string, time: string}) => `${exam.date}|${exam.subject}|${exam.time}`;
-
-  const dutyData = useMemo(() => {
-    return invigilators.map(inv => {
-      let totalDuties = 0;
-      const dutiesByExam: { [key: string]: number } = {};
-      
-      uniqueExams.forEach(exam => {
-        const examKey = getExamKey(exam);
-        if (exam.invigilators.includes(inv.name)) {
-          dutiesByExam[examKey] = 1;
-          totalDuties++;
-        } else {
-          dutiesByExam[examKey] = 0;
-        }
+export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
+  ({ invigilators, examinations, assignments, setAssignments }, ref) => {
+    const uniqueExams = useMemo(() => {
+      return [...assignments].sort((a,b) => {
+          const dateA = new Date(a.date).getTime();
+          const dateB = new Date(b.date).getTime();
+          if (dateA !== dateB) return dateA - dateB;
+          return a.time.localeCompare(b.time);
       });
+    }, [assignments]);
 
-      return {
-        ...inv,
-        duties: dutiesByExam,
-        totalDuties,
-      };
-    });
-  }, [invigilators, uniqueExams]);
-  
-  const examDetailsMap = useMemo(() => {
-    const map = new Map<string, Examination>();
-    examinations.forEach(exam => {
-      const examKey = getExamKey({
-        date: format(parseISO(exam.date), 'yyyy-MM-dd'),
-        subject: exam.subject,
-        time: `${exam.startTime} - ${exam.endTime}`
-      });
-      map.set(examKey, exam);
-    });
-    return map;
-  }, [examinations]);
+    const getExamKey = (exam: {date: string, subject: string, time: string}) => `${exam.date}|${exam.subject}|${exam.time}`;
 
-  const { columnTotals, grandTotal, requiredTotals, requiredGrandTotal } = useMemo(() => {
-    const allotted: { [key: string]: number } = {};
-    let allottedGrand = 0;
-    
-    const required: { [key: string]: number } = {};
-    let requiredGrand = 0;
-    
-    uniqueExams.forEach(exam => {
-      const examKey = getExamKey(exam);
-      const examTotal = dutyData.reduce((sum, inv) => sum + (inv.duties[examKey] || 0), 0);
-      allotted[examKey] = examTotal;
-      
-      const details = examDetailsMap.get(examKey);
-      required[examKey] = details?.roomsAllotted || 0;
-    });
-
-    allottedGrand = dutyData.reduce((sum, inv) => sum + inv.totalDuties, 0);
-    requiredGrand = Object.values(required).reduce((sum, rooms) => sum + rooms, 0);
-
-    return { columnTotals: allotted, grandTotal: allottedGrand, requiredTotals: required, requiredGrandTotal: requiredGrand };
-  }, [dutyData, uniqueExams, examDetailsMap]);
-
-  const handleToggleDuty = (invigilatorName: string, examToUpdate: Assignment) => {
-    setAssignments(prevAssignments => {
-      return prevAssignments.map(assignment => {
-        if (
-          assignment.date === examToUpdate.date &&
-          assignment.subject === examToUpdate.subject &&
-          assignment.time === examToUpdate.time
-        ) {
-          const isAssigned = assignment.invigilators.includes(invigilatorName);
-          let newInvigilators;
-          if (isAssigned) {
-            newInvigilators = assignment.invigilators.filter(name => name !== invigilatorName);
+    const dutyData = useMemo(() => {
+      return invigilators.map(inv => {
+        let totalDuties = 0;
+        const dutiesByExam: { [key: string]: number } = {};
+        
+        uniqueExams.forEach(exam => {
+          const examKey = getExamKey(exam);
+          if (exam.invigilators.includes(inv.name)) {
+            dutiesByExam[examKey] = 1;
+            totalDuties++;
           } else {
-            newInvigilators = [...assignment.invigilators, invigilatorName];
+            dutiesByExam[examKey] = 0;
           }
-          return { ...assignment, invigilators: newInvigilators };
-        }
-        return assignment;
+        });
+
+        return {
+          ...inv,
+          duties: dutiesByExam,
+          totalDuties,
+        };
       });
-    });
-  };
+    }, [invigilators, uniqueExams]);
+    
+    const examDetailsMap = useMemo(() => {
+      const map = new Map<string, Examination>();
+      examinations.forEach(exam => {
+        const examKey = getExamKey({
+          date: format(parseISO(exam.date), 'yyyy-MM-dd'),
+          subject: exam.subject,
+          time: `${exam.startTime} - ${exam.endTime}`
+        });
+        map.set(examKey, exam);
+      });
+      return map;
+    }, [examinations]);
 
-  const handleExport = () => {
-    const headers = [
-      'Sl No',
-      'Invigilator’s Name',
-      'Designation',
-      ...uniqueExams.map(exam => `${format(parseISO(exam.date), "dd-MMM")}\n${exam.subject}`),
-      'Total'
-    ];
-
-    const dataRows = dutyData.map((inv, index) => {
-      const row: (string | number)[] = [
-        index + 1,
-        inv.name,
-        inv.designation,
-      ];
+    const { columnTotals, grandTotal, requiredTotals, requiredGrandTotal } = useMemo(() => {
+      const allotted: { [key: string]: number } = {};
+      let allottedGrand = 0;
+      
+      const required: { [key: string]: number } = {};
+      let requiredGrand = 0;
+      
       uniqueExams.forEach(exam => {
         const examKey = getExamKey(exam);
-        row.push(inv.duties[examKey] || 0);
+        const examTotal = dutyData.reduce((sum, inv) => sum + (inv.duties[examKey] || 0), 0);
+        allotted[examKey] = examTotal;
+        
+        const details = examDetailsMap.get(examKey);
+        required[examKey] = details?.roomsAllotted || 0;
       });
-      return row;
-    });
-    
-    exportToExcelWithFormulas(headers, dataRows, 'Duty Allotment', 'duty-allotment-sheet');
-  }
 
-  const handleDownloadPdf = () => {
-    const tableEl = tableContainerRef.current;
-    const buttonsEl = document.getElementById('allotment-actions');
-    if (tableEl && buttonsEl) {
-      buttonsEl.style.display = 'none'; // Hide buttons
-      html2canvas(tableEl, { scale: 2, useCORS: true }).then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l', 'mm', 'a3');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasWidth / canvasHeight;
+      allottedGrand = dutyData.reduce((sum, inv) => sum + inv.totalDuties, 0);
+      requiredGrand = Object.values(required).reduce((sum, rooms) => sum + rooms, 0);
 
-        let imgWidth = pdfWidth - 20;
-        let imgHeight = imgWidth / ratio;
+      return { columnTotals: allotted, grandTotal: allottedGrand, requiredTotals: required, requiredGrandTotal: requiredGrand };
+    }, [dutyData, uniqueExams, examDetailsMap]);
 
-        if (imgHeight > pdfHeight - 20) {
-            imgHeight = pdfHeight - 20;
-            imgWidth = imgHeight * ratio;
-        }
-
-        const x = (pdfWidth - imgWidth) / 2;
-        const y = (pdfHeight - imgHeight) / 2;
-
-        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-        pdf.save('duty-allotment-sheet.pdf');
-      }).finally(() => {
-        buttonsEl.style.display = 'flex'; // Show buttons again
+    const handleToggleDuty = (invigilatorName: string, examToUpdate: Assignment) => {
+      setAssignments(prevAssignments => {
+        return prevAssignments.map(assignment => {
+          if (
+            assignment.date === examToUpdate.date &&
+            assignment.subject === examToUpdate.subject &&
+            assignment.time === examToUpdate.time
+          ) {
+            const isAssigned = assignment.invigilators.includes(invigilatorName);
+            let newInvigilators;
+            if (isAssigned) {
+              newInvigilators = assignment.invigilators.filter(name => name !== invigilatorName);
+            } else {
+              newInvigilators = [...assignment.invigilators, invigilatorName];
+            }
+            return { ...assignment, invigilators: newInvigilators };
+          }
+          return assignment;
+        });
       });
-    }
-  };
+    };
 
-  return (
-    <div className="space-y-4">
-      <div id="allotment-actions" className="flex justify-end gap-2">
-        <Button onClick={handleExport}>
-          <Download className="mr-2" /> Download as Excel
-        </Button>
-        <Button onClick={handleDownloadPdf} variant="outline">
-          <Download className="mr-2" /> Download as PDF
-        </Button>
-      </div>
-      <div ref={tableContainerRef} className="rounded-md border overflow-x-auto">
+    return (
+      <div ref={ref} className="rounded-md border overflow-x-auto">
         <Table>
           <TableHeader>
             <TableRow>
@@ -274,6 +201,8 @@ export function AllotmentSheet({ invigilators, examinations, assignments, setAss
           )}
         </Table>
       </div>
-    </div>
-  );
-}
+    );
+  }
+);
+
+AllotmentSheet.displayName = 'AllotmentSheet';

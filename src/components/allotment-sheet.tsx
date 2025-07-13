@@ -60,6 +60,7 @@ export function AllotmentSheet({ invigilators, examinations, assignments, setAss
   const examDetailsMap = useMemo(() => {
     const map = new Map<string, Examination>();
     examinations.forEach(exam => {
+      // Standardize the key creation to match how uniqueExams are created
       const examKey = getExamKey({
         date: exam.date,
         subject: exam.subject,
@@ -82,13 +83,7 @@ export function AllotmentSheet({ invigilators, examinations, assignments, setAss
       const examTotal = dutyData.reduce((sum, inv) => sum + (inv.duties[examKey] || 0), 0);
       allotted[examKey] = examTotal;
       
-      const originalExamKey = getExamKey({
-        date: format(parseISO(exam.date), 'yyyy-MM-dd\'T\'HH:mm:ss.SSS\'Z\''),
-        subject: exam.subject,
-        time: exam.time,
-      });
-
-      const details = examDetailsMap.get(originalExamKey);
+      const details = examDetailsMap.get(examKey);
       required[examKey] = details?.roomsAllotted || 0;
     });
 
@@ -246,7 +241,7 @@ export function AllotmentSheet({ invigilators, examinations, assignments, setAss
           {dutyData.length > 0 && (
             <TableFooter>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableCell colSpan={3} className="text-right font-bold">Total Duties Required</TableCell>
+                    <TableCell colSpan={3} className="text-right font-bold">No of Rooms </TableCell>
                     {uniqueExams.map(exam => {
                         const examKey = getExamKey(exam);
                         return (

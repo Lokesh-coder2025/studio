@@ -16,16 +16,30 @@ import {
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { FileSpreadsheet, History, Save } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
+
+  const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    if (pathname === '/') {
+      // If we are on the homepage, we might need to trigger a reset
+      // by navigating with a unique query param to force reload of state in useEffect
+      const randomQuery = `reset=${new Date().getTime()}`;
+      router.push(`/?${randomQuery}`);
+    } else {
+      router.push('/');
+    }
+  };
 
   return (
     <SidebarProvider>
       <Sidebar>
         <SidebarHeader>
            <div className="p-2 text-center">
-            <h1 className="text-2xl font-bold text-primary font-headline">DutyFlow</h1>
+            <h1 className="text-3xl leading-[2.5rem] font-bold text-primary font-headline">DutyFlow</h1>
             <p className="text-xs text-primary">Developed by Lokesh D</p>
            </div>
         </SidebarHeader>
@@ -33,7 +47,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <SidebarMenu>
             <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname === '/'} tooltip="New Allotment">
-                <Link href="/">
+                <Link href="/" onClick={handleNewAllotmentClick}>
                   <FileSpreadsheet />
                   <span>New Allotment</span>
                 </Link>

@@ -4,7 +4,7 @@
 import { useState, useMemo, useRef } from 'react';
 import type { Invigilator, Assignment } from '@/types';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
 import { Search, Download } from 'lucide-react';
@@ -77,7 +77,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
         pdf.save(`${selectedInvigilator.name}-duty-summary.pdf`);
       }).finally(() => {
         if (button) {
-          (button as HTMLElement).style.display = '';
+          (button as HTMLElement).style.display = 'flex';
         }
       });
     }
@@ -110,12 +110,6 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                     <p className="flex-1 text-left"><span className="font-semibold">Name:</span> {selectedInvigilator.name}</p>
                     <p className="flex-1 text-center"><span className="font-semibold">Designation:</span> {selectedInvigilator.designation}</p>
                     <p className="flex-1 text-right"><span className="font-semibold">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</p>
-                </div>
-                <div className="flex justify-end">
-                    <Button id="download-pdf-btn" onClick={handleDownloadPdf} variant="outline" size="sm">
-                      <Download className="mr-2 h-4 w-4" />
-                      Download PDF
-                    </Button>
                 </div>
               </div>
           </CardHeader>
@@ -160,6 +154,12 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
               </Table>
             </div>
           </CardContent>
+          <CardFooter className="flex justify-end">
+             <Button id="download-pdf-btn" onClick={handleDownloadPdf} variant="outline" size="sm">
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+              </Button>
+          </CardFooter>
         </Card>
       ) : (
          <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">

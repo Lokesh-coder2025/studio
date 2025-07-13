@@ -105,16 +105,18 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
               <div className="bg-primary text-primary-foreground text-center p-4">
                   <CardTitle className="text-xl">Invigilator's Duty Summary</CardTitle>
               </div>
-              <div className="p-6 pb-2 flex justify-between items-center">
-                <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm">
-                    <p><span className="font-semibold">Name:</span> {selectedInvigilator.name}</p>
-                    <p><span className="font-semibold">Designation:</span> {selectedInvigilator.designation}</p>
-                    <p><span className="font-semibold">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</p>
+              <div className="p-6 pb-4 space-y-4">
+                <div className="flex justify-between items-center text-sm w-full">
+                    <p className="flex-1 text-left"><span className="font-semibold">Name:</span> {selectedInvigilator.name}</p>
+                    <p className="flex-1 text-center"><span className="font-semibold">Designation:</span> {selectedInvigilator.designation}</p>
+                    <p className="flex-1 text-right"><span className="font-semibold">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</p>
                 </div>
-                <Button id="download-pdf-btn" onClick={handleDownloadPdf} variant="outline" size="sm">
-                  <Download className="mr-2 h-4 w-4" />
-                  Download PDF
-                </Button>
+                <div className="flex justify-end">
+                    <Button id="download-pdf-btn" onClick={handleDownloadPdf} variant="outline" size="sm">
+                      <Download className="mr-2 h-4 w-4" />
+                      Download PDF
+                    </Button>
+                </div>
               </div>
           </CardHeader>
           <CardContent className="px-6 pb-6">

@@ -54,18 +54,18 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </SidebarMenuButton>
             </SidebarMenuItem>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild isActive={pathname === '/history'} tooltip="History">
-                <Link href="/history">
-                  <History />
-                  <span>History</span>
-                </Link>
-              </SidebarMenuButton>
-            </SidebarMenuItem>
-            <SidebarMenuItem>
               <SidebarMenuButton asChild isActive={pathname === '/saved-allotments'} tooltip="Saved Allotments">
                 <Link href="/saved-allotments">
                   <Save />
                   <span>Saved Allotments</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+            <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/history'} tooltip="History">
+                <Link href="/history">
+                  <History />
+                  <span>History</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

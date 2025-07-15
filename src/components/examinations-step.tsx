@@ -18,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { Invigilator, Examination, Assignment, SavedAllotment } from '@/types';
-import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft, Plus, Trash2, Upload } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft, Trash2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { optimizeDutyAssignments } from '@/ai/flows/optimize-duty-assignments';
 
@@ -74,6 +74,64 @@ type ExaminationsStepProps = {
   isGenerating: boolean;
   setIsGenerating: Dispatch<SetStateAction<boolean>>;
 };
+
+const renderTimeFields = (form: any, sessionName: 'session1' | 'session2', label: string) => (
+    <FormItem>
+        <FormLabel>{label}</FormLabel>
+        <div className="flex gap-2">
+            <Controller control={form.control} name={`${sessionName}.startHour`} render={({ field }) => (
+                <FormItem className="flex-1">
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
+                        <SelectContent>{hours.map(h => <SelectItem key={`start-h-${sessionName}-${h}`} value={h}>{h}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+            <Controller control={form.control} name={`${sessionName}.startMinute`} render={({ field }) => (
+                <FormItem className="flex-1">
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                        <SelectContent>{minutes.map(m => <SelectItem key={`start-m-${sessionName}-${m}`} value={m}>{m}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+            <Controller control={form.control} name={`${sessionName}.startPeriod`} render={({ field }) => (
+                <FormItem>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                        <SelectContent>{periods.map(p => <SelectItem key={`start-p-${sessionName}-${p}`} value={p}>{p}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+        </div>
+        <div className="flex gap-2">
+            <Controller control={form.control} name={`${sessionName}.endHour`} render={({ field }) => (
+                <FormItem className="flex-1">
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
+                        <SelectContent>{hours.map(h => <SelectItem key={`end-h-${sessionName}-${h}`} value={h}>{h}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+            <Controller control={form.control} name={`${sessionName}.endMinute`} render={({ field }) => (
+                <FormItem className="flex-1">
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                        <SelectContent>{minutes.map(m => <SelectItem key={`end-m-${sessionName}-${m}`} value={m}>{m}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+            <Controller control={form.control} name={`${sessionName}.endPeriod`} render={({ field }) => (
+                <FormItem>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
+                        <SelectContent>{periods.map(p => <SelectItem key={`end-p-${sessionName}-${p}`} value={p}>{p}</SelectItem>)}</SelectContent>
+                    </Select>
+                </FormItem>
+            )} />
+        </div>
+    </FormItem>
+  );
 
 export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examinations, setExaminations, setAssignments, setAllotmentId, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
   const { toast } = useToast();
@@ -283,64 +341,6 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
     }
   };
 
-  const renderTimeFields = (sessionName: 'session1' | 'session2', label: string) => (
-    <FormItem>
-        <FormLabel>{label}</FormLabel>
-        <div className="flex gap-2">
-            <Controller control={form.control} name={`${sessionName}.startHour`} render={({ field }) => (
-                <FormItem className="flex-1">
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
-                        <SelectContent>{hours.map(h => <SelectItem key={`start-h-${sessionName}-${h}`} value={h}>{h}</SelectItem>)}</SelectContent>
-                    </Select>
-                </FormItem>
-            )} />
-            <Controller control={form.control} name={`${sessionName}.startMinute`} render={({ field }) => (
-                <FormItem className="flex-1">
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                        <SelectContent>{minutes.map(m => <SelectItem key={`start-m-${sessionName}-${m}`} value={m}>{m}</SelectItem>)}</SelectContent>
-                    </Select>
-                </FormItem>
-            )} />
-            <Controller control={form.control} name={`${sessionName}.startPeriod`} render={({ field }) => (
-                <FormItem>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                        <SelectContent>{periods.map(p => <SelectItem key={`start-p-${sessionName}-${p}`} value={p}>{p}</SelectItem>)}</SelectContent>
-                    </Select>
-                </FormItem>
-            )} />
-        </div>
-        <div className="flex gap-2">
-            <Controller control={form.control} name={`${sessionName}.endHour`} render={({ field }) => (
-                <FormItem className="flex-1">
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue/></SelectTrigger></FormControl>
-                        <SelectContent>{hours.map(h => <SelectItem key={`end-h-${sessionName}-${h}`} value={h}>{h}</SelectItem>)}</SelectContent>
-                    </Select>
-                </FormItem>
-            )} />
-            <Controller control={form.control} name={`${sessionName}.endMinute`} render={({ field }) => (
-                <FormItem className="flex-1">
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                        <SelectContent>{minutes.map(m => <SelectItem key={`end-m-${sessionName}-${m}`} value={m}>{m}</SelectItem>)}</SelectContent>
-                    </Select>
-                </FormItem>
-            )} />
-            <Controller control={form.control} name={`${sessionName}.endPeriod`} render={({ field }) => (
-                <FormItem>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl><SelectTrigger><SelectValue /></SelectTrigger></FormControl>
-                        <SelectContent>{periods.map(p => <SelectItem key={`end-p-${sessionName}-${p}`} value={p}>{p}</SelectItem>)}</SelectContent>
-                    </Select>
-                </FormItem>
-            )} />
-        </div>
-    </FormItem>
-  )
-
   return (
     <div className="space-y-8">
       <div className="flex justify-end">
@@ -422,7 +422,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                         </FormItem>
                       )}
                     />
-                    {renderTimeFields('session1', 'Time')}
+                    {renderTimeFields(form, 'session1', 'Time')}
                     <FormField
                       control={form.control}
                       name="session1.roomsAllotted"
@@ -477,7 +477,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                         </FormItem>
                       )}
                     />
-                    {renderTimeFields('session2', 'Time')}
+                    {renderTimeFields(form, 'session2', 'Time')}
                      <FormField
                       control={form.control}
                       name="session2.roomsAllotted"
@@ -507,7 +507,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
           
           <div className="flex justify-end flex-wrap items-center gap-4">
             <Button type="submit">
-              <Plus className="mr-2" /> Add Examination(s)
+               Add Examination(s)
             </Button>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">or</span>
@@ -563,7 +563,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
               <TableRow>
                 <TableCell colSpan={7} className="h-24 text-center">
                   No examinations added yet.
-                </TabelCell>
+                </TableCell>
               </TableRow>
             )}
           </TableBody>

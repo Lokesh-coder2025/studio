@@ -7,6 +7,7 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { format, parseISO } from 'date-fns';
+import * as XLSX from 'xlsx';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -17,7 +18,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
 import type { Invigilator, Examination, Assignment, SavedAllotment } from '@/types';
-import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft, Plus, Trash2 } from 'lucide-react';
+import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft, Plus, Trash2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { optimizeDutyAssignments } from '@/ai/flows/optimize-duty-assignments';
 
@@ -151,6 +152,63 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
     setExaminations((prev) => prev.filter((exam) => exam.id !== id));
   }
   
+  const handleExamFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      try {
+        const data = event.target?.result;
+        if (!data) throw new Error('File could not be read.');
+
+        const workbook = XLSX.read(data, { type: 'binary' });
+        const sheetName = workbook.SheetNames[0];
+        const worksheet = workbook.Sheets[sheetName];
+        const json = XLSX.utils.sheet_to_json<any>(worksheet);
+
+        const newExams = json
+          .map((row, index) => {
+            const date = row.Date ? new Date((row.Date - (25567 + 2)) * 86400 * 1000) : null;
+            if (!date || !row.Subject || !row['Start Time'] || !row['End Time'] || !row['No of Rooms']) {
+              return null;
+            }
+            return {
+              id: `${new Date().getTime()}-${index}`,
+              date: date.toISOString(),
+              day: format(date, 'EEE'),
+              subject: String(row.Subject),
+              startTime: String(row['Start Time']),
+              endTime: String(row['End Time']),
+              roomsAllotted: Number(row['No of Rooms']),
+            };
+          })
+          .filter((exam): exam is Examination => exam !== null);
+
+        if (newExams.length > 0) {
+          setExaminations(prev => [...prev, ...newExams].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+          toast({
+            title: 'Import Successful',
+            description: `${newExams.length} examinations added.`,
+            className: 'bg-accent text-accent-foreground',
+          });
+        } else {
+          toast({
+            title: 'No examinations found',
+            description: "Ensure columns for 'Date', 'Subject', 'Start Time', 'End Time', and 'No of Rooms' exist and are correctly formatted.",
+            variant: 'destructive',
+          });
+        }
+      } catch (error) {
+        console.error("Error parsing exam Excel:", error);
+        toast({ title: 'Import Failed', description: 'Could not parse the file.', variant: 'destructive' });
+      } finally {
+        if (e.target) e.target.value = '';
+      }
+    };
+    reader.readAsBinaryString(file);
+  };
+
   const handleGenerate = async () => {
     setIsGenerating(true);
     if (examinations.length === 0) {
@@ -446,11 +504,26 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
                     />
               </div>
           </div>
-
-          <div className='flex justify-end'>
+          
+          <div className="flex justify-end flex-wrap items-center gap-4">
             <Button type="submit">
-              <Plus className="mr-2" /> +Add Examination(s)
+              <Plus className="mr-2" /> Add Examination(s)
             </Button>
+            <div className="flex items-center gap-2">
+              <span className="text-sm text-muted-foreground">or</span>
+              <Input
+                id="excel-exam-upload"
+                type="file"
+                className="hidden"
+                accept=".xlsx, .xls"
+                onChange={handleExamFileUpload}
+              />
+              <Button asChild variant="outline">
+                <label htmlFor="excel-exam-upload" className="cursor-pointer">
+                  <Upload className="mr-2" /> Import from Excel
+                </label>
+              </Button>
+            </div>
           </div>
         </form>
       </Form>
@@ -490,7 +563,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
               <TableRow>
                 <TableCell colSpan={7} className="h-24 text-center">
                   No examinations added yet.
-                </TableCell>
+                </TabelCell>
               </TableRow>
             )}
           </TableBody>

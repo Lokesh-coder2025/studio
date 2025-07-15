@@ -7,11 +7,23 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
-import { Search, Download } from 'lucide-react';
+import { Search, Download, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import { cn } from '@/lib/utils';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useToast } from '@/hooks/use-toast';
+import { sendEmail } from '@/ai/flows/send-email-flow';
 
 type InvigilatorDutySummaryProps = {
   invigilators: Invigilator[];
@@ -26,7 +38,10 @@ const serialNumberColors = [
 
 export function InvigilatorDutySummary({ invigilators, assignments }: InvigilatorDutySummaryProps) {
   const [selectedInvigilatorId, setSelectedInvigilatorId] = useState<string | null>(null);
+  const [isEmailConfirmationOpen, setIsEmailConfirmationOpen] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const summaryCardRef = useRef<HTMLDivElement>(null);
+  const { toast } = useToast();
 
   const selectedInvigilator = useMemo(() => {
     return invigilators.find(inv => inv.id === selectedInvigilatorId) || null;
@@ -45,43 +60,99 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
       .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
   }, [selectedInvigilator, assignments]);
 
-  const handleDownloadPdf = () => {
+  const generatePdfBlob = async (): Promise<string | null> => {
     const input = summaryCardRef.current;
-    if (input && selectedInvigilator) {
-      input.classList.add('pdf-render');
-      const button = input.querySelector('#download-pdf-btn');
-      if (button) {
-        (button as HTMLElement).style.display = 'none';
-      }
+    if (!input) return null;
 
-      html2canvas(input, { scale: 4, useCORS: true }).then((canvas) => {
+    let pdfButton, emailButton;
+    input.classList.add('pdf-render');
+    
+    pdfButton = input.querySelector('#download-pdf-btn');
+    if (pdfButton) (pdfButton as HTMLElement).style.display = 'none';
+    
+    emailButton = input.querySelector('#send-email-btn');
+    if (emailButton) (emailButton as HTMLElement).style.display = 'none';
+
+    try {
+        const canvas = await html2canvas(input, { scale: 4, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l', 'mm', 'a4'); // 'l' for landscape
+        const pdf = new jsPDF('l', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
-        
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
-        
         const ratio = canvasWidth / canvasHeight;
         
         let imgWidth = pdfWidth;
         let imgHeight = imgWidth / ratio;
-
         if (imgHeight > pdfHeight) {
             imgHeight = pdfHeight;
             imgWidth = imgHeight * ratio;
         }
 
-
         pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
-        pdf.save(`${selectedInvigilator.name}-duty-summary.pdf`);
-      }).finally(() => {
+        return pdf.output('datauristring').split(',')[1];
+    } finally {
         input.classList.remove('pdf-render');
-        if (button) {
-          (button as HTMLElement).style.display = 'flex';
-        }
+        if (pdfButton) (pdfButton as HTMLElement).style.display = 'flex';
+        if (emailButton) (emailButton as HTMLElement).style.display = 'flex';
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    const pdfBase64 = await generatePdfBlob();
+    if (pdfBase64 && selectedInvigilator) {
+      const link = document.createElement('a');
+      link.href = `data:application/pdf;base64,${pdfBase64}`;
+      link.download = `${selectedInvigilator.name}-duty-summary.pdf`;
+      link.click();
+    }
+  };
+  
+  const handleSendEmail = async () => {
+    if (!selectedInvigilator) return;
+    setIsSendingEmail(true);
+
+    try {
+      const pdfBase64 = await generatePdfBlob();
+      if (!pdfBase64) {
+        throw new Error('Failed to generate PDF for emailing.');
+      }
+      
+      const emailBody = `
+        <p>Dear ${selectedInvigilator.name},</p>
+        <p>Please find your invigilation duty summary attached to this email.</p>
+        <p>Thank you,</p>
+        <p>DutyFlow</p>
+      `;
+
+      const result = await sendEmail({
+        to: selectedInvigilator.email,
+        subject: 'Your Invigilation Duty Summary',
+        htmlBody: emailBody,
+        pdfBase64,
+        pdfFileName: `${selectedInvigilator.name}-duty-summary.pdf`,
       });
+
+      if (result.success) {
+        toast({
+          title: 'Email Sent!',
+          description: `An email has been sent to ${selectedInvigilator.email}. Preview: ${result.message.split(' ').pop()}`,
+          className: 'bg-accent text-accent-foreground',
+        });
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+      toast({
+        title: 'Email Failed',
+        description: `Could not send email. ${errorMessage}`,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSendingEmail(false);
     }
   };
 
@@ -177,13 +248,43 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                 </Table>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-end p-6">
+            <CardFooter className="flex justify-between items-center p-6">
+               <Button id="send-email-btn" onClick={() => setIsEmailConfirmationOpen(true)} variant="outline" size="sm" disabled={isSendingEmail}>
+                  {isSendingEmail ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="mr-2 h-4 w-4" /> Send Email
+                    </>
+                  )}
+               </Button>
                <Button id="download-pdf-btn" onClick={handleDownloadPdf} variant="outline" size="sm">
                   <Download className="mr-2 h-4 w-4" />
                   Download PDF
                 </Button>
             </CardFooter>
           </Card>
+           <AlertDialog open={isEmailConfirmationOpen} onOpenChange={setIsEmailConfirmationOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirm Email</AlertDialogTitle>
+                <AlertDialogDescription>
+                  Are you sure you want to send the duty summary to {selectedInvigilator.name} at {selectedInvigilator.email}?
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => {
+                  setIsEmailConfirmationOpen(false);
+                  handleSendEmail();
+                }}>
+                  Send
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </>
       ) : (
          <div className="flex items-center justify-center h-64 border-2 border-dashed rounded-lg">

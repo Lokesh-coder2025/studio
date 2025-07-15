@@ -449,7 +449,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
 
           <div className='flex justify-end'>
             <Button type="submit">
-              <Plus className="mr-2" /> Add Examination(s) for Date
+              <Plus className="mr-2" /> Add Examination
             </Button>
           </div>
         </form>

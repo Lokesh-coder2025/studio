@@ -2,6 +2,8 @@ export interface Invigilator {
   id: string;
   name: string;
   designation: string;
+  mobileNo: string;
+  email: string;
 }
 
 export interface Examination {

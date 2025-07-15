@@ -15,7 +15,9 @@ import { useToast } from '@/hooks/use-toast';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
+  mobileNo: z.string().regex(/^\d{10}$/, { message: 'Mobile number must be 10 digits.' }),
   designation: z.string().min(3, { message: 'Designation must be at least 3 characters.' }),
+  email: z.string().email({ message: 'Please enter a valid email address.' }),
 });
 
 type InvigilatorsStepProps = {
@@ -28,7 +30,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
   const { toast } = useToast();
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: '', designation: '' },
+    defaultValues: { name: '', mobileNo: '', designation: '', email: '' },
   });
 
   function onSubmit(values: z.infer<typeof formSchema>) {
@@ -66,8 +68,10 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
           .map((row, index) => {
             const nameKey = Object.keys(row).find((k) => k.toLowerCase().includes('name'));
             const designationKey = Object.keys(row).find((k) => k.toLowerCase().includes('designation'));
+            const mobileKey = Object.keys(row).find((k) => k.toLowerCase().includes('mobile'));
+            const emailKey = Object.keys(row).find((k) => k.toLowerCase().includes('mail'));
 
-            if (!nameKey || !designationKey || !row[nameKey] || !row[designationKey]) {
+            if (!nameKey || !designationKey || !mobileKey || !emailKey || !row[nameKey] || !row[designationKey] || !row[mobileKey] || !row[emailKey]) {
               return null;
             }
 
@@ -75,6 +79,8 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
               id: `${new Date().getTime()}-${index}`,
               name: String(row[nameKey]),
               designation: String(row[designationKey]),
+              mobileNo: String(row[mobileKey]),
+              email: String(row[emailKey]),
             };
           })
           .filter((inv): inv is Invigilator => inv !== null);
@@ -82,7 +88,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
         if (newInvigilators.length === 0) {
             toast({
                 title: 'No valid invigilators found',
-                description: "Ensure the Excel file has columns for 'Invigilator's Name' and 'Designation'.",
+                description: "Ensure the Excel file has columns for 'Name', 'Designation', 'Mobile No', and 'E-Mail ID'.",
                 variant: 'destructive',
             });
             return;
@@ -130,7 +136,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
     <div className="space-y-8">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
             <FormField
               control={form.control}
               name="name"
@@ -157,8 +163,34 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                 </FormItem>
               )}
             />
+            <FormField
+              control={form.control}
+              name="mobileNo"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mobile No</FormLabel>
+                  <FormControl>
+                    <Input type="tel" placeholder="e.g. 9876543210" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+             <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>E-Mail ID</FormLabel>
+                  <FormControl>
+                    <Input type="email" placeholder="e.g. lokesh@example.com" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
           </div>
-          <div className="flex flex-wrap items-center gap-4">
+          <div className="flex flex-wrap items-center gap-4 pt-2">
             <Button type="submit">
               <UserPlus className="mr-2" /> Add Invigilator
             </Button>
@@ -188,6 +220,8 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
               <TableHead className="w-[50px]">Sl. No</TableHead>
               <TableHead>Invigilator's Name</TableHead>
               <TableHead>Designation</TableHead>
+              <TableHead>Mobile No</TableHead>
+              <TableHead>E-Mail ID</TableHead>
               <TableHead className="text-right w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -198,6 +232,8 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                   <TableCell>{index + 1}</TableCell>
                   <TableCell className="font-medium">{invigilator.name}</TableCell>
                   <TableCell>{invigilator.designation}</TableCell>
+                  <TableCell>{invigilator.mobileNo}</TableCell>
+                  <TableCell>{invigilator.email}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => deleteInvigilator(invigilator.id)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -208,7 +244,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={4} className="h-24 text-center">
+                <TableCell colSpan={6} className="h-24 text-center">
                   No invigilators added yet.
                 </TableCell>
               </TableRow>

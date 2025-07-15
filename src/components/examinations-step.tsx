@@ -131,7 +131,7 @@ const renderTimeFields = (form: any, sessionName: 'session1' | 'session2', label
             )} />
         </div>
     </FormItem>
-  );
+);
 
 export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examinations, setExaminations, setAssignments, setAllotmentId, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
   const { toast } = useToast();
@@ -507,7 +507,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
           
           <div className="flex justify-end flex-wrap items-center gap-4">
             <Button type="submit">
-               Add Examination(s)
+               +Add Examination(s)
             </Button>
             <div className="flex items-center gap-2">
               <span className="text-sm text-muted-foreground">or</span>

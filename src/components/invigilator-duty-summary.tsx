@@ -74,23 +74,27 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
     if (emailButton) (emailButton as HTMLElement).style.display = 'none';
 
     try {
-        const canvas = await html2canvas(input, { scale: 4, useCORS: true });
+        const canvas = await html2canvas(input, { scale: 2, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l', 'mm', 'a4');
+        const pdf = new jsPDF('p', 'mm', 'a4'); // Changed 'l' to 'p' for portrait
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
         const ratio = canvasWidth / canvasHeight;
         
-        let imgWidth = pdfWidth;
+        let imgWidth = pdfWidth - 20; // Add some margin
         let imgHeight = imgWidth / ratio;
-        if (imgHeight > pdfHeight) {
-            imgHeight = pdfHeight;
+        
+        if (imgHeight > pdfHeight - 20) {
+            imgHeight = pdfHeight - 20;
             imgWidth = imgHeight * ratio;
         }
 
-        pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+        const x = (pdfWidth - imgWidth) / 2;
+        const y = 10; // Top margin
+
+        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
         return pdf.output('datauristring').split(',')[1];
     } finally {
         input.classList.remove('pdf-render');
@@ -178,7 +182,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
             {`
               .pdf-render {
                 font-family: "Century Gothic", sans-serif !important;
-                font-size: 262.5px !important;
+                font-size: 14px !important;
               }
               .pdf-render .table {
                 table-layout: fixed;
@@ -294,3 +298,5 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
     </div>
   );
 }
+
+    

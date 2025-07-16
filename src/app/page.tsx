@@ -23,6 +23,7 @@ export default function Home() {
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const [examTitle, setExamTitle] = useState('');
+  const [collegeName, setCollegeName] = useState('');
   const [allotmentId, setAllotmentId] = useState<string | null>(null);
   
   const searchParams = useSearchParams();
@@ -34,6 +35,7 @@ export default function Home() {
     setExaminations([]);
     setAssignments([]);
     setExamTitle('');
+    setCollegeName('');
     setAllotmentId(null);
     router.push('/');
   };
@@ -48,6 +50,7 @@ export default function Home() {
         setExaminations(allotmentToLoad.examinations);
         setAssignments(allotmentToLoad.assignments);
         setExamTitle(allotmentToLoad.examTitle);
+        setCollegeName(allotmentToLoad.collegeName || '');
         setAllotmentId(allotmentToLoad.id);
         setCurrentStep(3);
       }
@@ -76,6 +79,8 @@ export default function Home() {
       case 2:
         return (
           <ExaminationsStep
+            collegeName={collegeName}
+            setCollegeName={setCollegeName}
             examTitle={examTitle}
             setExamTitle={setExamTitle}
             invigilators={invigilators}
@@ -96,6 +101,7 @@ export default function Home() {
                     initialAssignments={assignments} 
                     resetApp={resetApp} 
                     prevStep={prevStep} 
+                    collegeName={collegeName}
                     examTitle={examTitle}
                     allotmentId={allotmentId}
                     setAllotmentId={setAllotmentId}

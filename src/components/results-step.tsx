@@ -27,12 +27,13 @@ type ResultsStepProps = {
   initialAssignments: Assignment[];
   resetApp: () => void;
   prevStep: () => void;
+  collegeName: string;
   examTitle: string;
   allotmentId: string | null;
   setAllotmentId: Dispatch<SetStateAction<string | null>>;
 };
 
-export function ResultsStep({ invigilators, examinations, initialAssignments, prevStep, examTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
+export function ResultsStep({ invigilators, examinations, initialAssignments, prevStep, collegeName, examTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
   const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
   const { toast } = useToast();
   const allotmentSheetRef = useRef<HTMLDivElement>(null);
@@ -54,6 +55,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     
     const savedAllotment: SavedAllotment = {
       id: currentId,
+      collegeName,
       examTitle: examTitle || `Examination from ${format(parseISO(examinations[0].date), 'd-MMM-yy')}`,
       firstExamDate: examinations[0].date,
       invigilators,
@@ -172,24 +174,28 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       return row;
     });
   
-    const finalTitle = examTitle || 'Duty Allotment Sheet';
+    const finalExamTitle = examTitle || 'Duty Allotment Sheet';
   
     doc.autoTable({
       head: head,
       body: body,
-      startY: 20,
+      startY: 30, // Pushed down to make space for titles
       didDrawPage: function (data) {
-        // Header
+        // College Name (H1)
         doc.setFontSize(20);
         doc.setTextColor(40);
-        doc.text(finalTitle, data.settings.margin.left, 15);
+        doc.text(collegeName || 'College Name', data.settings.margin.left, 15);
+        
+        // Exam Title (H2)
+        doc.setFontSize(16);
+        doc.text(finalExamTitle, data.settings.margin.left, 22);
       },
       styles: {
         fontSize: 9,
         cellPadding: 2,
       },
       headStyles: {
-        fillColor: [22, 163, 74], // Corresponds to a green color, adjust as needed
+        fillColor: [22, 163, 74], 
         textColor: 255,
         fontStyle: 'bold',
       },

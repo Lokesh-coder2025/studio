@@ -1,3 +1,4 @@
+
 export interface Invigilator {
   id: string;
   name: string;
@@ -25,6 +26,7 @@ export interface Assignment {
 
 export interface SavedAllotment {
   id: string;
+  collegeName: string;
   examTitle: string;
   firstExamDate: string;
   invigilators: Invigilator[];

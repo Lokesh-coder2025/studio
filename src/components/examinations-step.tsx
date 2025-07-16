@@ -62,6 +62,8 @@ const periods = ['AM', 'PM'];
 const roomNumbers = Array.from({ length: 50 }, (_, i) => (i + 1).toString());
 
 type ExaminationsStepProps = {
+  collegeName: string;
+  setCollegeName: Dispatch<SetStateAction<string>>;
   examTitle: string;
   setExamTitle: Dispatch<SetStateAction<string>>;
   invigilators: Invigilator[];
@@ -133,7 +135,7 @@ const renderTimeFields = (form: any, sessionName: 'session1' | 'session2', label
     </FormItem>
 );
 
-export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examinations, setExaminations, setAssignments, setAllotmentId, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
+export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setExamTitle, invigilators, examinations, setExaminations, setAssignments, setAllotmentId, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
   const { toast } = useToast();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
@@ -311,6 +313,7 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
         const firstExamDate = examinations[0].date;
         const savedAllotment: SavedAllotment = {
           id: newAllotmentId,
+          collegeName,
           examTitle: examTitle || `Examination from ${format(parseISO(firstExamDate), 'd-MMM-yy')}`,
           firstExamDate: firstExamDate,
           invigilators,
@@ -343,7 +346,17 @@ export function ExaminationsStep({ examTitle, setExamTitle, invigilators, examin
 
   return (
     <div className="space-y-8">
-      <div className="flex justify-end">
+      <div className="flex justify-between items-start gap-4">
+        <div className="w-full max-w-sm">
+          <Label htmlFor="college-name" className="text-sm font-medium">Name of the College</Label>
+          <Input
+            id="college-name"
+            placeholder="e.g. Anjuman Pre-University College"
+            value={collegeName}
+            onChange={(e) => setCollegeName(e.target.value)}
+            className="mt-2"
+          />
+        </div>
         <div className="w-full max-w-sm">
           <Label htmlFor="exam-title" className="text-sm font-medium">Name of the Examination</Label>
           <Input

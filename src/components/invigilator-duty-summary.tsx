@@ -201,11 +201,14 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                 <div className="p-6 pb-4 space-y-2 text-sm">
                     <div className="grid grid-cols-2 gap-x-8 gap-y-2">
                       <p><span className="font-semibold">Name:</span> {selectedInvigilator.name}</p>
-                      <p><span className="font-semibold w-20 inline-block">Mobile No:</span> {selectedInvigilator.mobileNo}</p>
+                      <p><span className="font-semibold w-28 inline-block">Mobile No:</span> {selectedInvigilator.mobileNo}</p>
+                      
                       <p><span className="font-semibold">Designation:</span> {selectedInvigilator.designation}</p>
-                      <p><span className="font-semibold w-20 inline-block">E-Mail ID:</span> {selectedInvigilator.email}</p>
+                      <p><span className="font-semibold w-28 inline-block">E-Mail ID:</span> {selectedInvigilator.email}</p>
+
+                      <span></span>
+                      <p><span className="font-semibold w-28 inline-block">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</p>
                     </div>
-                    <p className="pt-2 text-center"><span className="font-semibold">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</p>
                 </div>
             </CardHeader>
             <CardContent className="px-6 pb-6">

@@ -39,8 +39,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
       <Sidebar>
         <SidebarHeader>
            <div className="p-2 text-center">
-            <h1 className="text-3xl leading-[2.5rem] font-bold text-primary font-headline">DutyFlow</h1>
-            <p className="text-xs text-primary">Developed by Lokesh D</p>
+            <h1 className="text-4xl font-bold text-primary font-headline">DutyFlow</h1>
            </div>
         </SidebarHeader>
         <SidebarContent>

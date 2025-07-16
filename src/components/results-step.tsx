@@ -131,21 +131,31 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   const handleDownloadPdf = () => {
     const tableEl = allotmentSheetRef.current;
     if (tableEl) {
-      html2canvas(tableEl, { scale: 2, useCORS: true, scrollX: -window.scrollX, scrollY: -window.scrollY, windowWidth: tableEl.scrollWidth, windowHeight: tableEl.scrollHeight }).then((canvas) => {
+      // Use A3 landscape for wider tables
+      const pdf = new jsPDF('l', 'mm', 'a3');
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      
+      html2canvas(tableEl, { 
+        scale: 2, // Higher scale for better quality
+        useCORS: true,
+        scrollX: -window.scrollX,
+        scrollY: -window.scrollY,
+        windowWidth: tableEl.scrollWidth,
+        windowHeight: tableEl.scrollHeight
+      }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4'); // Changed from 'l' and 'a3' to 'p' and 'a4' for portrait
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
         const ratio = canvasWidth / canvasHeight;
 
-        let imgWidth = pdfWidth - 20; // with margin
+        // Calculate dimensions to fit the page width, maintaining aspect ratio
+        let imgWidth = pdfWidth - 20; // 10mm margin on each side
         let imgHeight = imgWidth / ratio;
         
-        // If image height is still too big, scale down based on height
+        // If the calculated height is greater than the page height, scale down further
         if (imgHeight > pdfHeight - 20) {
-            imgHeight = pdfHeight - 20; // with margin
+            imgHeight = pdfHeight - 20; // 10mm margin top/bottom
             imgWidth = imgHeight * ratio;
         }
 

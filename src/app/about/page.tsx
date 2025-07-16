@@ -52,29 +52,6 @@ export default function AboutPage() {
         }
     ];
 
-    const techStack = [
-        {
-            icon: Cpu,
-            title: "Next.js & React",
-            description: "For a fast, modern, and server-rendered user interface."
-        },
-        {
-            icon: Palette,
-            title: "ShadCN UI & Tailwind CSS",
-            description: "Provides a beautiful and responsive component library."
-        },
-        {
-            icon: Bot,
-            title: "Genkit AI",
-            description: "Powers the intelligent duty assignment and email features."
-        },
-        {
-            icon: Database,
-            title: "Browser LocalStorage",
-            description: "For persisting saved sessions and history directly in your browser."
-        }
-    ];
-
   return (
     <div className="p-4 sm:p-6 md:p-8">
       <div className="max-w-7xl mx-auto space-y-8">
@@ -89,12 +66,21 @@ export default function AboutPage() {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl font-headline text-accent">What it does</CardTitle>
+            <CardTitle className="text-2xl font-headline text-accent">Our Story</CardTitle>
           </CardHeader>
-          <CardContent>
-            <p className="text-foreground/90">
-              DutyFlow is a comprehensive tool designed to streamline the complex process of assigning invigilation duties for examinations. It takes lists of invigilators and exams as input and uses an AI-powered system to generate a fair and optimized duty schedule, saving you time and ensuring accuracy.
-            </p>
+          <CardContent className="prose prose-lg max-w-none text-foreground/90 space-y-4">
+              <p>
+                DutyFlow is an intelligent, AI-powered platform designed to revolutionize how educational institutions assign and manage invigilation duties. With just a few simple steps, DutyFlow transforms the complex and time-consuming process of exam duty allotment into a streamlined, fair, and highly efficient experience. Whether you're handling large-scale exam schedules or a small set of tests, DutyFlow adapts with precision. 
+              </p>
+              <p>
+                DutyFlow is the vision of Lokesh D—a seasoned educator and an aspiring web developer driven by a desire to create meaningful solutions for academic institutions. Combining his deep understanding of institutional needs with his expertise in modern web technologies, Lokesh has built DutyFlow not merely as a digital tool, but as a thoughtful solution to real, everyday challenges in examination planning and duty management.
+              </p>
+              <p>
+                Behind the scenes, DutyFlow leverages modern technology: Next.js and React for speed and responsiveness, ShadCN UI with Tailwind CSS for elegant design, and Genkit AI powered by Google’s models for intelligent duty distribution and email automation. With support for Excel and PDF exports, and session persistence via browser local storage, DutyFlow is built not only for performance but also for reliability and ease of use.
+              </p>
+               <p>
+                Whether you're an exam coordinator, principal, or educator, DutyFlow is thoughtfully designed with your needs in mind. Join the growing community of institutions transforming their exam management with ease, fairness, and intelligence.
+              </p>
           </CardContent>
         </Card>
         
@@ -109,25 +95,6 @@ export default function AboutPage() {
             ))}
           </CardContent>
         </Card>
-
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-headline text-accent">Technology Stack</CardTitle>
-             <CardDescription>Built with modern and powerful technologies.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
-            {techStack.map(tech => (
-                 <div key={tech.title} className="flex flex-col items-center text-center p-4 rounded-lg bg-background hover:bg-muted/50 transition-colors">
-                    <div className="bg-primary/10 text-primary p-3 rounded-full mb-3">
-                        <tech.icon className="h-8 w-8" />
-                    </div>
-                    <h3 className="font-semibold">{tech.title}</h3>
-                    <p className="text-muted-foreground text-sm mt-1">{tech.description}</p>
-                </div>
-            ))}
-          </CardContent>
-        </Card>
-
       </div>
     </div>
   );

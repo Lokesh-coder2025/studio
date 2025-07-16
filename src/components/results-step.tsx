@@ -2,7 +2,7 @@
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useState, useRef, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { Invigilator, Examination, Assignment, SavedAllotment } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -36,7 +36,6 @@ type ResultsStepProps = {
 export function ResultsStep({ invigilators, examinations, initialAssignments, prevStep, collegeName, examTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
   const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
   const { toast } = useToast();
-  const allotmentSheetRef = useRef<HTMLDivElement>(null);
 
   const handleSave = () => {
     if (examinations.length === 0) {
@@ -175,6 +174,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     });
   
     const finalExamTitle = examTitle || 'Duty Allotment Sheet';
+    const pageWidth = doc.internal.pageSize.getWidth();
   
     doc.autoTable({
       head: head,
@@ -184,11 +184,11 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         // College Name (H1)
         doc.setFontSize(20);
         doc.setTextColor(40);
-        doc.text(collegeName || 'College Name', data.settings.margin.left, 15);
+        doc.text(collegeName || 'College Name', pageWidth / 2, 15, { align: 'center' });
         
         // Exam Title (H2)
         doc.setFontSize(16);
-        doc.text(finalExamTitle, data.settings.margin.left, 22);
+        doc.text(finalExamTitle, pageWidth / 2, 22, { align: 'center' });
       },
       styles: {
         fontSize: 9,
@@ -218,7 +218,6 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </TabsList>
         <TabsContent value="allotment-sheet" className="mt-4">
             <AllotmentSheet 
-              ref={allotmentSheetRef}
               invigilators={invigilators} 
               examinations={examinations}
               assignments={assignments} 

@@ -76,7 +76,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
     try {
         const canvas = await html2canvas(input, { scale: 2, useCORS: true });
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4'); // Changed 'l' to 'p' for portrait
+        const pdf = new jsPDF('p', 'mm', 'a4');
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const canvasWidth = canvas.width;
@@ -198,16 +198,15 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                 <div className="bg-primary text-primary-foreground flex items-center justify-center p-4 min-h-[80px]">
                     <CardTitle className="text-xl">Invigilator's Duty Summary</CardTitle>
                 </div>
-                <div className="p-6 pb-4 space-y-2 text-sm">
-                    <div className="grid grid-cols-2 gap-x-8 gap-y-2">
-                      <p><span className="font-semibold">Name:</span> {selectedInvigilator.name}</p>
-                      <p><span className="font-semibold w-28 inline-block">Mobile No:</span> {selectedInvigilator.mobileNo}</p>
-                      
-                      <p><span className="font-semibold">Designation:</span> {selectedInvigilator.designation}</p>
-                      <p><span className="font-semibold w-28 inline-block">E-Mail ID:</span> {selectedInvigilator.email}</p>
-
-                      <span></span>
-                      <p><span className="font-semibold w-28 inline-block">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</p>
+                <div className="p-6 pb-4 space-y-4 text-sm">
+                    <div className="grid grid-cols-2 gap-x-8">
+                        <div><span className="font-semibold">Name:</span> {selectedInvigilator.name}</div>
+                        <div><span className="font-semibold">Designation:</span> {selectedInvigilator.designation}</div>
+                    </div>
+                    <div className="grid grid-cols-3 gap-x-8">
+                        <div><span className="font-semibold">Mobile No:</span> {selectedInvigilator.mobileNo}</div>
+                        <div><span className="font-semibold">E-Mail ID:</span> {selectedInvigilator.email}</div>
+                        <div><span className="font-semibold">No of Duties Allotted:</span> {invigilatorDuties.length.toString().padStart(2, '0')}</div>
                     </div>
                 </div>
             </CardHeader>

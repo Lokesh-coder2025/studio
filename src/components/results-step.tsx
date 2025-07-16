@@ -175,20 +175,35 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   
     const finalExamTitle = examTitle || 'Duty Allotment Sheet';
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
   
     doc.autoTable({
       head: head,
       body: body,
       startY: 30, // Pushed down to make space for titles
       didDrawPage: function (data) {
-        // College Name (H1)
-        doc.setFontSize(20);
-        doc.setTextColor(40);
-        doc.text(collegeName || 'College Name', pageWidth / 2, 15, { align: 'center' });
+        // Add headers only on the first page
+        if (data.pageNumber === 1) {
+          // College Name (H1)
+          doc.setFontSize(20);
+          doc.setTextColor(40);
+          doc.text(collegeName || 'College Name', pageWidth / 2, 15, { align: 'center' });
+          
+          // Exam Title (H2)
+          doc.setFontSize(16);
+          doc.text(finalExamTitle, pageWidth / 2, 22, { align: 'center' });
+        }
         
-        // Exam Title (H2)
-        doc.setFontSize(16);
-        doc.text(finalExamTitle, pageWidth / 2, 22, { align: 'center' });
+        // Add page numbers to the bottom right of every page
+        const pageCount = doc.internal.getNumberOfPages();
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(
+            `Page ${data.pageNumber} of ${pageCount}`,
+            pageWidth - 10,
+            pageHeight - 10,
+            { align: 'right' }
+        );
       },
       styles: {
         fontSize: 9,

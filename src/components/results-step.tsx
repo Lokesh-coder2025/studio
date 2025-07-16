@@ -13,7 +13,13 @@ import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { exportToExcelWithFormulas } from '@/lib/excel-export';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import 'jspdf-autotable';
+
+// Extend jsPDF with the autoTable method
+interface jsPDFWithAutoTable extends jsPDF {
+  autoTable: (options: any) => jsPDF;
+}
+
 
 type ResultsStepProps = {
   invigilators: Invigilator[];
@@ -96,12 +102,15 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
 
   const dutyDataForExport = useMemo(() => {
     return invigilators.map(inv => {
+      let totalDuties = 0;
       const dutiesByExam: { [key: string]: number } = {};
       uniqueExamsForExport.forEach(exam => {
         const examKey = getExamKeyForExport(exam);
-        dutiesByExam[examKey] = exam.invigilators.includes(inv.name) ? 1 : 0;
+        const duty = exam.invigilators.includes(inv.name) ? 1 : 0;
+        dutiesByExam[examKey] = duty;
+        if(duty > 0) totalDuties++;
       });
-      return { ...inv, duties: dutiesByExam };
+      return { ...inv, duties: dutiesByExam, totalDuties };
     });
   }, [invigilators, uniqueExamsForExport]);
 
@@ -128,64 +137,71 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     exportToExcelWithFormulas(headers, dataRows, 'Duty Allotment', 'duty-allotment-sheet');
   };
 
-  const handleDownloadPdf = async () => {
-    const tableEl = allotmentSheetRef.current;
-    if (!tableEl) return;
+  const handleDownloadPdf = () => {
+    const doc = new jsPDF({
+      orientation: 'landscape',
+    }) as jsPDFWithAutoTable;
   
-    const scrollContainer = tableEl.querySelector('.relative.w-full.overflow-auto');
-    if (!scrollContainer) return;
-  
-    // Temporarily remove overflow to render the full table
-    const originalStyle = (scrollContainer as HTMLElement).style.overflow;
-    (scrollContainer as HTMLElement).style.overflow = 'visible';
-  
-    try {
-      const canvas = await html2canvas(tableEl, {
-        scale: 2,
-        useCORS: true,
-        scrollX: 0,
-        scrollY: -window.scrollY,
-        width: tableEl.scrollWidth,
-        height: tableEl.scrollHeight,
+    const head = [
+      [
+        { content: 'Sl No', styles: { halign: 'center' } },
+        { content: 'Invigilator’s Name', styles: { halign: 'left' } },
+        { content: 'Designation', styles: { halign: 'left' } },
+        ...uniqueExamsForExport.map(exam => ({
+          content: `${format(parseISO(exam.date), 'dd-MMM-yy')}\n${exam.subject}\n${exam.time}`,
+          styles: { halign: 'center', fontSize: 8 },
+        })),
+        { content: 'Total', styles: { halign: 'center' } },
+      ],
+    ];
+
+    const body = dutyDataForExport.map((inv, index) => {
+      const row = [
+        { content: index + 1, styles: { halign: 'center' } },
+        inv.name,
+        inv.designation,
+      ];
+      uniqueExamsForExport.forEach(exam => {
+        const examKey = getExamKeyForExport(exam);
+        row.push({
+          content: inv.duties[examKey] || '0',
+          styles: { halign: 'center' },
+        });
       });
+      row.push({ content: inv.totalDuties, styles: { halign: 'center' } });
+      return row;
+    });
   
-      // Restore original style
-      (scrollContainer as HTMLElement).style.overflow = originalStyle;
+    const finalTitle = examTitle || 'Duty Allotment Sheet';
   
-      const imgData = canvas.toDataURL('image/png');
+    doc.autoTable({
+      head: head,
+      body: body,
+      startY: 20,
+      didDrawPage: function (data) {
+        // Header
+        doc.setFontSize(20);
+        doc.setTextColor(40);
+        doc.text(finalTitle, data.settings.margin.left, 15);
+      },
+      styles: {
+        fontSize: 9,
+        cellPadding: 2,
+      },
+      headStyles: {
+        fillColor: [22, 163, 74], // Corresponds to a green color, adjust as needed
+        textColor: 255,
+        fontStyle: 'bold',
+      },
+      alternateRowStyles: {
+        fillColor: [240, 240, 240],
+      },
+      theme: 'grid',
+    });
   
-      const pdf = new jsPDF('l', 'mm', 'a3');
-      const pdfWidth = pdf.internal.pageSize.getWidth();
-      const pdfHeight = pdf.internal.pageSize.getHeight();
-  
-      const canvasWidth = canvas.width;
-      const canvasHeight = canvas.height;
-      const ratio = canvasWidth / canvasHeight;
-  
-      let imgWidth = pdfWidth - 20; // 10mm margin on each side
-      let imgHeight = imgWidth / ratio;
-  
-      if (imgHeight > pdfHeight - 20) {
-        imgHeight = pdfHeight - 20;
-        imgWidth = imgHeight * ratio;
-      }
-  
-      const x = (pdfWidth - imgWidth) / 2;
-      const y = (pdfHeight - imgHeight) / 2;
-  
-      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-      pdf.save('duty-allotment-sheet.pdf');
-    } catch (error) {
-      console.error('Error generating PDF:', error);
-      toast({
-        title: "PDF Generation Failed",
-        description: "An error occurred while creating the PDF.",
-        variant: 'destructive',
-      });
-      // Ensure style is restored even on error
-      (scrollContainer as HTMLElement).style.overflow = originalStyle;
-    }
+    doc.save('duty-allotment-sheet.pdf');
   };
+
 
   return (
     <div className="space-y-6">

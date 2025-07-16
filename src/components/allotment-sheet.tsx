@@ -149,7 +149,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                             )}
                           >
                             {isAssigned ? (
-                               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary-foreground">
+                               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary font-semibold">
                                 1
                                </div>
                             ) : (

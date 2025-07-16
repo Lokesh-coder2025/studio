@@ -59,7 +59,7 @@ export default function AboutPage() {
           <div>
             <h1 className="text-4xl font-bold text-primary font-headline">About DutyFlow</h1>
             <p className="text-muted-foreground mt-2">
-              An intelligent assistant for creating fair and optimized invigilation duty schedules.
+              An intelligent assistant for creating optimized invigilation duty schedules.
             </p>
           </div>
         </header>

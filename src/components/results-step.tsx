@@ -131,22 +131,24 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   const handleDownloadPdf = () => {
     const tableEl = allotmentSheetRef.current;
     if (tableEl) {
-      html2canvas(tableEl, { scale: 2, useCORS: true }).then((canvas) => {
+      html2canvas(tableEl, { scale: 2, useCORS: true, scrollX: -window.scrollX, scrollY: -window.scrollY, windowWidth: tableEl.scrollWidth, windowHeight: tableEl.scrollHeight }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('l', 'mm', 'a3');
+        const pdf = new jsPDF('p', 'mm', 'a4'); // Changed from 'l' and 'a3' to 'p' and 'a4' for portrait
         const pdfWidth = pdf.internal.pageSize.getWidth();
         const pdfHeight = pdf.internal.pageSize.getHeight();
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
         const ratio = canvasWidth / canvasHeight;
 
-        let imgWidth = pdfWidth - 20;
+        let imgWidth = pdfWidth - 20; // with margin
         let imgHeight = imgWidth / ratio;
-
+        
+        // If image height is still too big, scale down based on height
         if (imgHeight > pdfHeight - 20) {
-            imgHeight = pdfHeight - 20;
+            imgHeight = pdfHeight - 20; // with margin
             imgWidth = imgHeight * ratio;
         }
+
         const x = (pdfWidth - imgWidth) / 2;
         const y = (pdfHeight - imgHeight) / 2;
 

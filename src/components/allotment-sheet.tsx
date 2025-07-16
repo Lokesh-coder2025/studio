@@ -144,11 +144,17 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                           <button
                             onClick={() => handleToggleDuty(row.name, exam)}
                             className={cn(
-                              "w-full h-full p-4 flex items-center justify-center cursor-pointer transition-colors",
-                              isAssigned ? "bg-primary/20 hover:bg-primary/30" : "hover:bg-muted"
+                              "w-full h-full p-2 flex items-center justify-center cursor-pointer transition-colors",
+                              !isAssigned && "hover:bg-muted"
                             )}
                           >
-                            {isAssigned ? '1' : <span className="text-muted-foreground opacity-20">0</span>}
+                            {isAssigned ? (
+                               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary-foreground">
+                                1
+                               </div>
+                            ) : (
+                               <span className="text-muted-foreground opacity-20">0</span>
+                            )}
                           </button>
                         </TableCell>
                     )

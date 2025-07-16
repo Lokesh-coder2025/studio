@@ -15,7 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { FileSpreadsheet, History, Save } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -66,6 +66,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link href="/history">
                   <History />
                   <span>History</span>
+                </Link>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+             <SidebarMenuItem>
+              <SidebarMenuButton asChild isActive={pathname === '/about'} tooltip="About DutyFlow">
+                <Link href="/about">
+                  <Info />
+                  <span>About DutyFlow</span>
                 </Link>
               </SidebarMenuButton>
             </SidebarMenuItem>

@@ -139,10 +139,10 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       html2canvas(tableEl, { 
         scale: 2, // Higher scale for better quality
         useCORS: true,
-        scrollX: -window.scrollX,
-        scrollY: -window.scrollY,
-        windowWidth: tableEl.scrollWidth,
-        windowHeight: tableEl.scrollHeight
+        scrollX: 0,
+        scrollY: 0,
+        width: tableEl.scrollWidth,
+        height: tableEl.scrollHeight,
       }).then((canvas) => {
         const imgData = canvas.toDataURL('image/png');
         const canvasWidth = canvas.width;

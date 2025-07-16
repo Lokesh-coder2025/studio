@@ -104,7 +104,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
         
         toast({
           title: 'Import Successful',
-          description: `${addedCount} invigilators added. ${skippedCount > 0 ? `${skippedCount} duplicates skipped.` : ''}`,
+          description: `${addedCount} invigilators added. ${skippedCount > 0 ? `${skippedCount} skipped.` : ''}`,
           className: 'bg-accent text-accent-foreground',
         });
       } catch (error) {
@@ -203,7 +203,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                 accept=".xlsx, .xls"
                 onChange={handleFileUpload}
               />
-              <Button asChild variant="outline">
+              <Button asChild>
                 <label htmlFor="excel-upload" className="cursor-pointer">
                   <Upload className="mr-2" /> Import from Excel
                 </label>

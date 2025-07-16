@@ -128,43 +128,62 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     exportToExcelWithFormulas(headers, dataRows, 'Duty Allotment', 'duty-allotment-sheet');
   };
 
-  const handleDownloadPdf = () => {
+  const handleDownloadPdf = async () => {
     const tableEl = allotmentSheetRef.current;
-    if (tableEl) {
-      // Use A3 landscape for wider tables
+    if (!tableEl) return;
+  
+    const scrollContainer = tableEl.querySelector('.relative.w-full.overflow-auto');
+    if (!scrollContainer) return;
+  
+    // Temporarily remove overflow to render the full table
+    const originalStyle = (scrollContainer as HTMLElement).style.overflow;
+    (scrollContainer as HTMLElement).style.overflow = 'visible';
+  
+    try {
+      const canvas = await html2canvas(tableEl, {
+        scale: 2,
+        useCORS: true,
+        scrollX: 0,
+        scrollY: -window.scrollY,
+        width: tableEl.scrollWidth,
+        height: tableEl.scrollHeight,
+      });
+  
+      // Restore original style
+      (scrollContainer as HTMLElement).style.overflow = originalStyle;
+  
+      const imgData = canvas.toDataURL('image/png');
+  
       const pdf = new jsPDF('l', 'mm', 'a3');
       const pdfWidth = pdf.internal.pageSize.getWidth();
       const pdfHeight = pdf.internal.pageSize.getHeight();
-      
-      html2canvas(tableEl, { 
-        scale: 2, // Higher scale for better quality
-        useCORS: true,
-        scrollX: 0,
-        scrollY: 0,
-        width: tableEl.scrollWidth,
-        height: tableEl.scrollHeight,
-      }).then((canvas) => {
-        const imgData = canvas.toDataURL('image/png');
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasWidth / canvasHeight;
-
-        // Calculate dimensions to fit the page width, maintaining aspect ratio
-        let imgWidth = pdfWidth - 20; // 10mm margin on each side
-        let imgHeight = imgWidth / ratio;
-        
-        // If the calculated height is greater than the page height, scale down further
-        if (imgHeight > pdfHeight - 20) {
-            imgHeight = pdfHeight - 20; // 10mm margin top/bottom
-            imgWidth = imgHeight * ratio;
-        }
-
-        const x = (pdfWidth - imgWidth) / 2;
-        const y = (pdfHeight - imgHeight) / 2;
-
-        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-        pdf.save('duty-allotment-sheet.pdf');
+  
+      const canvasWidth = canvas.width;
+      const canvasHeight = canvas.height;
+      const ratio = canvasWidth / canvasHeight;
+  
+      let imgWidth = pdfWidth - 20; // 10mm margin on each side
+      let imgHeight = imgWidth / ratio;
+  
+      if (imgHeight > pdfHeight - 20) {
+        imgHeight = pdfHeight - 20;
+        imgWidth = imgHeight * ratio;
+      }
+  
+      const x = (pdfWidth - imgWidth) / 2;
+      const y = (pdfHeight - imgHeight) / 2;
+  
+      pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
+      pdf.save('duty-allotment-sheet.pdf');
+    } catch (error) {
+      console.error('Error generating PDF:', error);
+      toast({
+        title: "PDF Generation Failed",
+        description: "An error occurred while creating the PDF.",
+        variant: 'destructive',
       });
+      // Ensure style is restored even on error
+      (scrollContainer as HTMLElement).style.overflow = originalStyle;
     }
   };
 

@@ -7,6 +7,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { useMemo, forwardRef } from 'react';
 import { format, parseISO } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area';
+
 
 type AllotmentSheetProps = {
   invigilators: Invigilator[];
@@ -109,103 +111,106 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
     };
 
     return (
-      <div ref={ref} className="rounded-md border overflow-x-auto">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px] align-middle">Sl.No</TableHead>
-              <TableHead className="align-middle">Invigilator’s Name</TableHead>
-              <TableHead className="align-middle">Designation</TableHead>
-              {uniqueExams.map(exam => (
-                 <TableHead key={getExamKey(exam)} className="text-center w-[120px]">
-                    <div>{format(parseISO(exam.date), 'dd-MMM')}</div>
-                    <div className="font-normal">{exam.subject}</div>
-                    <div className="text-xs font-light">{exam.time}</div>
-                 </TableHead>
-              ))}
-              <TableHead className="text-center align-middle">Total</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {dutyData.length > 0 ? (
-              dutyData.map((row, index) => (
-                <TableRow key={row.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell className="font-medium whitespace-nowrap">{row.name}</TableCell>
-                  <TableCell className="whitespace-nowrap">{row.designation}</TableCell>
-                  {uniqueExams.map(exam => {
-                    const examKey = getExamKey(exam);
-                    const isAssigned = row.duties[examKey] === 1;
-                    return (
-                        <TableCell 
-                          key={`${row.id}-${examKey}`} 
-                          className="text-center p-0"
-                        >
-                          <button
-                            onClick={() => handleToggleDuty(row.name, exam)}
-                            className={cn(
-                              "w-full h-full p-2 flex items-center justify-center cursor-pointer transition-colors",
-                              !isAssigned && "hover:bg-muted"
-                            )}
-                          >
-                            {isAssigned ? (
-                               <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary font-semibold">
-                                1
-                               </div>
-                            ) : (
-                               <span className="text-muted-foreground opacity-20">0</span>
-                            )}
-                          </button>
-                        </TableCell>
-                    )
-                  })}
-                  <TableCell className="font-bold text-center">{row.totalDuties}</TableCell>
-                </TableRow>
-              ))
-            ) : (
+      <div ref={ref} className="rounded-md border">
+        <ScrollArea>
+          <Table>
+            <TableHeader>
               <TableRow>
-                <TableCell colSpan={uniqueExams.length + 4} className="h-24 text-center">
-                  No duty data available.
-                </TableCell>
+                <TableHead className="w-[50px] align-middle">Sl.No</TableHead>
+                <TableHead className="align-middle">Invigilator’s Name</TableHead>
+                <TableHead className="align-middle">Designation</TableHead>
+                {uniqueExams.map(exam => (
+                  <TableHead key={getExamKey(exam)} className="text-center w-[120px]">
+                      <div>{format(parseISO(exam.date), 'dd-MMM')}</div>
+                      <div className="font-normal">{exam.subject}</div>
+                      <div className="text-xs font-light">{exam.time}</div>
+                  </TableHead>
+                ))}
+                <TableHead className="text-center align-middle">Total</TableHead>
               </TableRow>
-            )}
-          </TableBody>
-          {dutyData.length > 0 && (
-            <TableFooter>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableCell colSpan={3} className="text-right font-bold">No of Rooms </TableCell>
+            </TableHeader>
+            <TableBody>
+              {dutyData.length > 0 ? (
+                dutyData.map((row, index) => (
+                  <TableRow key={row.id}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell className="font-medium whitespace-nowrap">{row.name}</TableCell>
+                    <TableCell className="whitespace-nowrap">{row.designation}</TableCell>
                     {uniqueExams.map(exam => {
-                        const examKey = getExamKey(exam);
-                        return (
-                            <TableCell key={`required-${examKey}`} className="text-center font-bold">
-                                {requiredTotals[examKey]}
-                            </TableCell>
-                        )
+                      const examKey = getExamKey(exam);
+                      const isAssigned = row.duties[examKey] === 1;
+                      return (
+                          <TableCell 
+                            key={`${row.id}-${examKey}`} 
+                            className="text-center p-0"
+                          >
+                            <button
+                              onClick={() => handleToggleDuty(row.name, exam)}
+                              className={cn(
+                                "w-full h-full p-2 flex items-center justify-center cursor-pointer transition-colors",
+                                !isAssigned && "hover:bg-muted"
+                              )}
+                            >
+                              {isAssigned ? (
+                                <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary font-semibold">
+                                  1
+                                </div>
+                              ) : (
+                                <span className="text-muted-foreground opacity-20">0</span>
+                              )}
+                            </button>
+                          </TableCell>
+                      )
                     })}
-                    <TableCell className="text-center font-bold">{requiredGrandTotal}</TableCell>
+                    <TableCell className="font-bold text-center">{row.totalDuties}</TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={uniqueExams.length + 4} className="h-24 text-center">
+                    No duty data available.
+                  </TableCell>
                 </TableRow>
-                <TableRow className="bg-muted/50 font-medium hover:bg-muted/50">
-                <TableCell colSpan={3} className="text-right font-bold">Total Duties Allotted</TableCell>
-                {uniqueExams.map(exam => {
-                    const examKey = getExamKey(exam);
-                    const isMismatch = columnTotals[examKey] !== requiredTotals[examKey];
-                    return (
-                        <TableCell 
-                            key={`total-${examKey}`} 
-                            className={cn(
-                                "text-center font-bold",
-                                isMismatch && "text-destructive"
-                            )}
-                        >
-                            {columnTotals[examKey]}
-                        </TableCell>
-                    )
-                })}
-                <TableCell className={cn("text-center font-bold", grandTotal !== requiredGrandTotal && "text-destructive")}>{grandTotal}</TableCell>
-                </TableRow>
-            </TableFooter>
-          )}
-        </Table>
+              )}
+            </TableBody>
+            {dutyData.length > 0 && (
+              <TableFooter>
+                  <TableRow className="bg-muted/50 hover:bg-muted/50">
+                      <TableCell colSpan={3} className="text-right font-bold">No of Rooms </TableCell>
+                      {uniqueExams.map(exam => {
+                          const examKey = getExamKey(exam);
+                          return (
+                              <TableCell key={`required-${examKey}`} className="text-center font-bold">
+                                  {requiredTotals[examKey]}
+                              </TableCell>
+                          )
+                      })}
+                      <TableCell className="text-center font-bold">{requiredGrandTotal}</TableCell>
+                  </TableRow>
+                  <TableRow className="bg-muted/50 font-medium hover:bg-muted/50">
+                  <TableCell colSpan={3} className="text-right font-bold">Total Duties Allotted</TableCell>
+                  {uniqueExams.map(exam => {
+                      const examKey = getExamKey(exam);
+                      const isMismatch = columnTotals[examKey] !== requiredTotals[examKey];
+                      return (
+                          <TableCell 
+                              key={`total-${examKey}`} 
+                              className={cn(
+                                  "text-center font-bold",
+                                  isMismatch && "text-destructive"
+                              )}
+                          >
+                              {columnTotals[examKey]}
+                          </TableCell>
+                      )
+                  })}
+                  <TableCell className={cn("text-center font-bold", grandTotal !== requiredGrandTotal && "text-destructive")}>{grandTotal}</TableCell>
+                  </TableRow>
+              </TableFooter>
+            )}
+          </Table>
+          <ScrollBar orientation="horizontal" />
+        </ScrollArea>
       </div>
     );
   }

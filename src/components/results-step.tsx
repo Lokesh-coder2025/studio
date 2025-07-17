@@ -262,14 +262,14 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </TabsContent>
       </Tabs>
       <div className="flex justify-between items-center pt-4 border-t mt-4">
-        <Button variant="outline" onClick={prevStep}>
+        <Button onClick={prevStep}>
           <ArrowLeft /> Back
         </Button>
         <div className="flex gap-2">
-           <Button variant="outline" onClick={handleSave}>
+           <Button onClick={handleSave}>
               <Save /> Save Allotment
             </Button>
-           <Button onClick={handleDownloadPdf} variant="outline">
+           <Button onClick={handleDownloadPdf}>
               <Download /> Download as PDF
             </Button>
             <Button onClick={handleExportExcel}>

@@ -381,7 +381,6 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                   <PopoverTrigger asChild>
                     <FormControl>
                       <Button
-                        variant={"outline"}
                         className={cn("w-full justify-start text-left font-normal", !field.value && "text-muted-foreground")}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
@@ -531,7 +530,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                 accept=".xlsx, .xls"
                 onChange={handleExamFileUpload}
               />
-              <Button asChild>
+              <Button>
                 <label htmlFor="excel-exam-upload" className="cursor-pointer">
                   <Upload className="mr-2" /> Import from Excel
                 </label>
@@ -584,7 +583,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
       </div>
 
       <div className="flex justify-between">
-        <Button type="button" variant="outline" onClick={prevStep} disabled={isGenerating}>
+        <Button type="button" onClick={prevStep} disabled={isGenerating}>
           <ArrowLeft className="mr-2" /> Back to Invigilators
         </Button>
         <Button onClick={handleGenerate} disabled={isGenerating || examinations.length === 0}>

@@ -63,7 +63,7 @@ export default function AboutPage() {
 
         <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle className="text-2xl font-headline text-accent">Our Story</CardTitle>
+            <CardTitle className="text-2xl font-headline text-accent">The What. The Who. & The How of DutyFlow. </CardTitle>
           </CardHeader>
           <CardContent className="prose prose-lg max-w-none text-foreground/90 space-y-4">
               <p>

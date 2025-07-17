@@ -40,6 +40,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <SidebarHeader>
            <div className="p-2 text-center">
             <h1 className="text-4xl font-bold text-primary font-headline">DutyFlow</h1>
+            <p className="text-sm text-muted-foreground mt-1">Your Smart Exam Partner</p>
            </div>
         </SidebarHeader>
         <SidebarContent>

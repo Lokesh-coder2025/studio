@@ -1,3 +1,4 @@
+
 "use client"
 
 import * as React from "react"
@@ -32,7 +33,7 @@ type SidebarContext = {
   setOpen: (open: boolean) => void
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
-  isMobile: boolean
+  isMobile: boolean | undefined
   toggleSidebar: () => void
 }
 
@@ -176,6 +177,12 @@ const Sidebar = React.forwardRef<
     ref
   ) => {
     const { isMobile, state, openMobile, setOpenMobile } = useSidebar()
+    
+    // Add a loading state to prevent hydration mismatch
+    const [isClient, setIsClient] = React.useState(false)
+    React.useEffect(() => {
+        setIsClient(true)
+    }, [])
 
     if (collapsible === "none") {
       return (
@@ -190,6 +197,11 @@ const Sidebar = React.forwardRef<
           {children}
         </div>
       )
+    }
+
+    if (!isClient) {
+        // Render a placeholder or nothing on the server and initial client render
+        return null; 
     }
 
     if (isMobile) {
@@ -583,7 +595,7 @@ const SidebarMenuButton = React.forwardRef<
         <TooltipContent
           side="right"
           align="center"
-          hidden={state !== "collapsed" || isMobile}
+          hidden={state !== "collapsed" || isMobile === true}
           {...tooltip}
         />
       </Tooltip>

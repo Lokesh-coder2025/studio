@@ -2,7 +2,7 @@
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef } from 'react';
 import type { Invigilator, Examination, Assignment, SavedAllotment } from '@/types';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
@@ -35,6 +35,7 @@ type ResultsStepProps = {
 
 export function ResultsStep({ invigilators, examinations, initialAssignments, prevStep, collegeName, examTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
   const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
+  const allotmentSheetRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const handleSave = () => {
@@ -152,12 +153,12 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           content: `${format(parseISO(exam.date), 'dd-MMM-yy')}\n${exam.subject}\n${exam.time}`,
           styles: { halign: 'center', fontSize: 8 },
         })),
-        { content: 'Total', styles: { halign: 'center' } },
+        { content: 'Total', styles: { halign: 'center', fontStyle: 'bold' } },
       ],
     ];
 
     const body = dutyDataForExport.map((inv, index) => {
-      const row = [
+      const row: any[] = [
         { content: index + 1, styles: { halign: 'center' } },
         inv.name,
         inv.designation,
@@ -169,7 +170,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           styles: { halign: 'center' },
         });
       });
-      row.push({ content: inv.totalDuties, styles: { halign: 'center' } });
+      row.push({ content: inv.totalDuties, styles: { halign: 'center', fontStyle: 'bold' } });
       return row;
     });
   
@@ -246,6 +247,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </TabsList>
         <TabsContent value="allotment-sheet" className="mt-4">
             <AllotmentSheet 
+              ref={allotmentSheetRef}
               invigilators={invigilators} 
               examinations={examinations}
               assignments={assignments} 

@@ -53,7 +53,7 @@ export default function AboutPage() {
     ];
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
+    <div className="p-4 sm:p-6 md:p-8 font-sans-alt">
       <div className="max-w-7xl mx-auto space-y-8">
         <header className="text-center">
           <div>

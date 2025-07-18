@@ -140,7 +140,9 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
+    mode: 'onTouched',
     defaultValues: {
+      date: undefined,
       session1: {
         subject: 'none',
         startHour: '09',
@@ -194,11 +196,17 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
     if (newExams.length > 0) {
         setExaminations((prev) => [...prev, ...newExams].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
         form.reset({
-            ...values,
             date: undefined,
-            session1: {...form.getValues('session1'), subject: 'none'},
-            session2: {...form.getValues('session2'), subject: 'none'},
+            session1: {
+                ...(form.getValues('session1')),
+                subject: 'none',
+            },
+            session2: {
+                ...(form.getValues('session2')),
+                subject: 'none',
+            }
         });
+        form.clearErrors();
     } else {
         toast({
             title: "No subject selected",

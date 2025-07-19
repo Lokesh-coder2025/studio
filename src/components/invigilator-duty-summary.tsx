@@ -9,9 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { format, parseISO } from 'date-fns';
 import { Search, Download, Send, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
-import { cn } from '@/lib/utils';
+import { generateInvigilatorPdf } from '@/lib/pdf-generation';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,17 +28,10 @@ type InvigilatorDutySummaryProps = {
   assignments: Assignment[];
 };
 
-const serialNumberColors = [
-  "bg-blue-100 text-blue-800", "bg-green-100 text-green-800", "bg-yellow-100 text-yellow-800",
-  "bg-purple-100 text-purple-800", "bg-pink-100 text-pink-800", "bg-indigo-100 text-indigo-800",
-  "bg-red-100 text-red-800", "bg-cyan-100 text-cyan-800", "bg-orange-100 text-orange-800"
-];
-
 export function InvigilatorDutySummary({ invigilators, assignments }: InvigilatorDutySummaryProps) {
   const [selectedInvigilatorId, setSelectedInvigilatorId] = useState<string | null>(null);
   const [isEmailConfirmationOpen, setIsEmailConfirmationOpen] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
-  const summaryCardRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
   const selectedInvigilator = useMemo(() => {
@@ -61,50 +52,8 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
   }, [selectedInvigilator, assignments]);
 
   const generatePdfBlob = async (): Promise<string | null> => {
-    const input = summaryCardRef.current;
-    if (!input) return null;
-
-    let pdfButton, emailButton, signature;
-    input.classList.add('pdf-render');
-    
-    pdfButton = input.querySelector('#download-pdf-btn');
-    if (pdfButton) (pdfButton as HTMLElement).style.display = 'none';
-    
-    emailButton = input.querySelector('#send-email-btn');
-    if (emailButton) (emailButton as HTMLElement).style.display = 'none';
-
-    signature = input.querySelector('#pdf-signature');
-    if (signature) (signature as HTMLElement).style.visibility = 'visible';
-
-    try {
-        const canvas = await html2canvas(input, { scale: 2, useCORS: true });
-        const imgData = canvas.toDataURL('image/png');
-        const pdf = new jsPDF('p', 'mm', 'a4');
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const ratio = canvasWidth / canvasHeight;
-        
-        let imgWidth = pdfWidth - 20; // Add some margin
-        let imgHeight = imgWidth / ratio;
-        
-        if (imgHeight > pdfHeight - 20) {
-            imgHeight = pdfHeight - 20;
-            imgWidth = imgHeight * ratio;
-        }
-
-        const x = (pdfWidth - imgWidth) / 2;
-        const y = 10; // Top margin
-
-        pdf.addImage(imgData, 'PNG', x, y, imgWidth, imgHeight);
-        return pdf.output('datauristring').split(',')[1];
-    } finally {
-        input.classList.remove('pdf-render');
-        if (pdfButton) (pdfButton as HTMLElement).style.display = 'flex';
-        if (emailButton) (emailButton as HTMLElement).style.display = 'flex';
-        if (signature) (signature as HTMLElement).style.visibility = 'hidden';
-    }
+     if (!selectedInvigilator) return null;
+     return await generateInvigilatorPdf(selectedInvigilator, invigilatorDuties);
   };
 
   const handleDownloadPdf = async () => {
@@ -182,22 +131,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
 
       {selectedInvigilator ? (
         <>
-          <style>
-            {`
-              .pdf-render {
-                font-family: "Century Gothic", sans-serif !important;
-                font-size: 14px !important;
-              }
-              .pdf-render .table {
-                table-layout: fixed;
-                width: 100%;
-              }
-              .pdf-render th {
-                font-weight: bold !important;
-              }
-            `}
-          </style>
-          <Card ref={summaryCardRef} className="overflow-hidden">
+          <Card className="overflow-hidden">
             <CardHeader className="p-0">
                 <div className="bg-primary text-primary-foreground flex items-center justify-center p-4 min-h-[80px]">
                     <CardTitle className="text-xl">Invigilator's Duty Summary</CardTitle>
@@ -232,10 +166,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                       invigilatorDuties.map((duty, index) => (
                         <TableRow key={`${duty.date}-${duty.subject}`}>
                           <TableCell className="text-center">
-                            <div className={cn(
-                                "mx-auto flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold",
-                                serialNumberColors[index % serialNumberColors.length]
-                            )}>
+                            <div className="mx-auto flex h-6 w-6 items-center justify-center rounded-full text-xs font-bold bg-primary/20 text-primary">
                               {index + 1}
                             </div>
                           </TableCell>
@@ -257,9 +188,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
               </div>
             </CardContent>
             <CardFooter className="flex justify-between items-center p-6">
-                <div>
-                   <p id="pdf-signature" className="text-xs text-muted-foreground invisible">Generated by DutyFlow</p>
-                </div>
+                <div></div>
                 <div className="flex gap-2">
                    <Button id="send-email-btn" onClick={() => setIsEmailConfirmationOpen(true)} size="sm" disabled={isSendingEmail}>
                       {isSendingEmail ? (

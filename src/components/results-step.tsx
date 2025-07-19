@@ -8,12 +8,24 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { AllotmentSheet } from '@/components/allotment-sheet';
 import { InvigilatorDutySummary } from '@/components/invigilator-duty-summary';
-import { ArrowLeft, Save, Download } from 'lucide-react';
+import { ArrowLeft, Save, Download, Send, Loader2 } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { exportToExcelWithFormulas } from '@/lib/excel-export';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { generateInvigilatorPdf } from '@/lib/pdf-generation';
+import { sendBulkEmails } from '@/ai/flows/send-bulk-emails-flow';
 
 // Extend jsPDF with the autoTable method
 interface jsPDFWithAutoTable extends jsPDF {
@@ -35,6 +47,8 @@ type ResultsStepProps = {
 
 export function ResultsStep({ invigilators, examinations, initialAssignments, prevStep, collegeName, examTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
   const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
+  const [isSendingAll, setIsSendingAll] = useState(false);
+  const [isEmailAllConfirmOpen, setIsEmailAllConfirmOpen] = useState(false);
   const allotmentSheetRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -237,6 +251,76 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     doc.save('duty-allotment-sheet.pdf');
   };
 
+  const handleEmailAll = async () => {
+    setIsSendingAll(true);
+    toast({ title: "Preparing emails...", description: "Generating PDFs for all invigilators. This may take a moment." });
+
+    try {
+      const invigilatorsWithDuties = invigilators.filter(inv => 
+        assignments.some(a => a.invigilators.includes(inv.name))
+      );
+
+      if (invigilatorsWithDuties.length === 0) {
+        toast({ title: "No one to email", description: "No invigilators have duties assigned.", variant: "destructive" });
+        return;
+      }
+
+      const emailPayloads = await Promise.all(invigilatorsWithDuties.map(async (inv) => {
+        const duties = assignments
+          .filter(a => a.invigilators.includes(inv.name))
+          .map(a => ({
+            ...a,
+            day: format(parseISO(a.date), 'EEEE'),
+          }))
+          .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        
+        const pdfBase64 = await generateInvigilatorPdf(inv, duties);
+
+        if (!pdfBase64) {
+          console.error(`Failed to generate PDF for ${inv.name}`);
+          return null;
+        }
+
+        return {
+          to: inv.email,
+          subject: 'Your Invigilation Duty Summary',
+          htmlBody: `<p>Dear ${inv.name},</p><p>Please find your invigilation duty summary attached.</p><p>Thank you,<br/>DutyFlow</p>`,
+          pdfBase64,
+          pdfFileName: `${inv.name}-duty-summary.pdf`,
+        };
+      }));
+
+      const validPayloads = emailPayloads.filter(p => p !== null);
+      if (validPayloads.length === 0) {
+        throw new Error("Could not generate any PDFs to send.");
+      }
+
+      toast({ title: "Sending emails...", description: `Sending emails to ${validPayloads.length} invigilators.` });
+      
+      const result = await sendBulkEmails(validPayloads as any[]);
+
+      if (result.failedEmails > 0) {
+        toast({
+          title: "Partial Success",
+          description: `Sent ${result.successfulEmails} emails. ${result.failedEmails} failed.`,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "All Emails Sent!",
+          description: `Successfully sent duty summaries to ${result.successfulEmails} invigilators.`,
+          className: "bg-accent text-accent-foreground"
+        });
+      }
+
+    } catch (error) {
+      console.error("Bulk email error:", error);
+      toast({ title: "Bulk Email Failed", description: error instanceof Error ? error.message : "An unknown error occurred.", variant: "destructive" });
+    } finally {
+      setIsSendingAll(false);
+    }
+  };
+
 
   return (
     <div className="space-y-6">
@@ -262,21 +346,51 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </TabsContent>
       </Tabs>
       <div className="flex justify-between items-center pt-4 border-t mt-4">
-        <Button onClick={prevStep}>
+        <Button variant="outline" onClick={prevStep} disabled={isSendingAll}>
           <ArrowLeft /> Back
         </Button>
-        <div className="flex gap-2">
-           <Button onClick={handleSave}>
+        <div className="flex flex-wrap gap-2 justify-end">
+           <Button onClick={handleSave} disabled={isSendingAll}>
               <Save /> Save Allotment
             </Button>
-           <Button onClick={handleDownloadPdf}>
+           <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAll}>
+              {isSendingAll ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                </>
+              ) : (
+                <>
+                  <Send /> Email All Summaries
+                </>
+              )}
+            </Button>
+           <Button onClick={handleDownloadPdf} disabled={isSendingAll}>
               <Download /> Download as PDF
             </Button>
-            <Button onClick={handleExportExcel}>
+            <Button onClick={handleExportExcel} disabled={isSendingAll}>
               <Download /> Download as Excel
             </Button>
         </div>
       </div>
+      <AlertDialog open={isEmailAllConfirmOpen} onOpenChange={setIsEmailAllConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Bulk Email</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will generate a PDF summary and send an email to every invigilator who has at least one duty assigned. Do you want to proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              setIsEmailAllConfirmOpen(false);
+              handleEmailAll();
+            }}>
+              Yes, Email All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

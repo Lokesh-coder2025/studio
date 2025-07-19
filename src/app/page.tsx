@@ -9,6 +9,7 @@ import { ExaminationsStep } from '@/components/examinations-step';
 import { ResultsStep } from '@/components/results-step';
 import { Workflow, BookUser, FileSpreadsheet } from 'lucide-react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import { cn } from '@/lib/utils';
 
 const STEPS = [
   { step: 1, title: "Invigilators' Details", description: "Add all available invigilators.", icon: BookUser },
@@ -131,7 +132,10 @@ export default function Home() {
             </ol>
         </div>
 
-        <Card className="max-w-6xl mx-auto shadow-lg">
+        <Card className={cn(
+            "mx-auto shadow-lg",
+            currentStep === 3 ? 'w-full' : 'max-w-6xl'
+          )}>
           <CardHeader>
             <CardTitle className="text-2xl font-headline">{STEPS[currentStep - 1].title}</CardTitle>
             <CardDescription>{STEPS[currentStep - 1].description}</CardDescription>

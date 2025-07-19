@@ -100,7 +100,7 @@ export default function HistoryPage() {
 
         <Dialog open={!!selectedAllotment} onOpenChange={(isOpen) => !isOpen && setSelectedAllotment(null)}>
           {selectedAllotment && (
-            <DialogContent className="max-w-7xl w-full h-[90vh] flex flex-col">
+            <DialogContent className="max-w-[95vw] w-full h-[90vh] flex flex-col">
               <DialogHeader>
                 <DialogTitle>{selectedAllotment.examTitle}</DialogTitle>
                 <DialogDescription>Duty Allotment Sheet</DialogDescription>

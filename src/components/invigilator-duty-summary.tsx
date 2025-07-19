@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format, parseISO } from 'date-fns';
-import { Search, Download, Send, Loader2 } from 'lucide-react';
+import { Search, Download, Send, Loader2, MessageSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { generateInvigilatorPdf } from '@/lib/pdf-generation';
 import {
@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { sendEmail } from '@/ai/flows/send-email-flow';
+import { sendSms } from '@/ai/flows/send-sms-flow';
 
 type InvigilatorDutySummaryProps = {
   invigilators: Invigilator[];
@@ -31,7 +32,9 @@ type InvigilatorDutySummaryProps = {
 export function InvigilatorDutySummary({ invigilators, assignments }: InvigilatorDutySummaryProps) {
   const [selectedInvigilatorId, setSelectedInvigilatorId] = useState<string | null>(null);
   const [isEmailConfirmationOpen, setIsEmailConfirmationOpen] = useState(false);
+  const [isSmsConfirmationOpen, setIsSmsConfirmationOpen] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const [isSendingSms, setIsSendingSms] = useState(false);
   const { toast } = useToast();
 
   const selectedInvigilator = useMemo(() => {
@@ -113,6 +116,47 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
     }
   };
 
+  const handleSendSms = async () => {
+    if (!selectedInvigilator) return;
+    setIsSendingSms(true);
+
+    try {
+      const smsBody = `Dear ${selectedInvigilator.name}, your invigilation duty summary has been sent to your email. Thank you. - DutyFlow`;
+      
+      // Twilio requires E.164 format, which might need a country code.
+      // Assuming Indian numbers for this example, prepending +91.
+      // A more robust solution would involve better phone number validation/formatting.
+      const formattedMobileNo = selectedInvigilator.mobileNo.startsWith('+') 
+        ? selectedInvigilator.mobileNo
+        : `+91${selectedInvigilator.mobileNo}`;
+
+      const result = await sendSms({
+        to: formattedMobileNo,
+        body: smsBody,
+      });
+
+      if (result.success) {
+        toast({
+          title: 'SMS Sent!',
+          description: `An SMS notification has been sent to ${formattedMobileNo}.`,
+          className: 'bg-accent text-accent-foreground',
+        });
+      } else {
+        throw new Error(result.message);
+      }
+    } catch (error) {
+      console.error(error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+      toast({
+        title: 'SMS Failed',
+        description: `Could not send SMS. ${errorMessage}`,
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSendingSms(false);
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="max-w-md">
@@ -190,6 +234,17 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
             <CardFooter className="flex justify-between items-center p-6">
                 <div></div>
                 <div className="flex gap-2">
+                   <Button id="send-sms-btn" onClick={() => setIsSmsConfirmationOpen(true)} size="sm" variant="outline" disabled={isSendingSms}>
+                      {isSendingSms ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                        </>
+                      ) : (
+                        <>
+                          <MessageSquare className="mr-2 h-4 w-4" /> Send SMS
+                        </>
+                      )}
+                   </Button>
                    <Button id="send-email-btn" onClick={() => setIsEmailConfirmationOpen(true)} size="sm" disabled={isSendingEmail}>
                       {isSendingEmail ? (
                         <>
@@ -223,6 +278,25 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
                   handleSendEmail();
                 }}>
                   Send
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          <AlertDialog open={isSmsConfirmationOpen} onOpenChange={setIsSmsConfirmationOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Confirm SMS Notification</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will send an SMS to {selectedInvigilator.name} at {selectedInvigilator.mobileNo} to notify them that their duty summary has been emailed.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction onClick={() => {
+                  setIsSmsConfirmationOpen(false);
+                  handleSendSms();
+                }}>
+                  Send SMS
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

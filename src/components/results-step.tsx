@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { AllotmentSheet } from '@/components/allotment-sheet';
 import { InvigilatorDutySummary } from '@/components/invigilator-duty-summary';
-import { ArrowLeft, Save, Download, Send, Loader2 } from 'lucide-react';
+import { ArrowLeft, Save, Download, Send, Loader2, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { exportToExcelWithFormulas } from '@/lib/excel-export';
@@ -26,6 +26,8 @@ import {
 } from '@/components/ui/alert-dialog';
 import { generateInvigilatorPdf } from '@/lib/pdf-generation';
 import { sendBulkEmails } from '@/ai/flows/send-bulk-emails-flow';
+import { sendBulkSms } from '@/ai/flows/send-bulk-sms-flow';
+
 
 // Extend jsPDF with the autoTable method
 interface jsPDFWithAutoTable extends jsPDF {
@@ -47,8 +49,10 @@ type ResultsStepProps = {
 
 export function ResultsStep({ invigilators, examinations, initialAssignments, prevStep, collegeName, examTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
   const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
-  const [isSendingAll, setIsSendingAll] = useState(false);
+  const [isSendingAllEmails, setIsSendingAllEmails] = useState(false);
+  const [isSendingAllSms, setIsSendingAllSms] = useState(false);
   const [isEmailAllConfirmOpen, setIsEmailAllConfirmOpen] = useState(false);
+  const [isSmsAllConfirmOpen, setIsSmsAllConfirmOpen] = useState(false);
   const allotmentSheetRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -249,7 +253,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   };
 
   const handleEmailAll = async () => {
-    setIsSendingAll(true);
+    setIsSendingAllEmails(true);
     toast({ title: "Preparing emails...", description: "Generating PDFs for all invigilators. This may take a moment." });
 
     try {
@@ -314,7 +318,58 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       console.error("Bulk email error:", error);
       toast({ title: "Bulk Email Failed", description: error instanceof Error ? error.message : "An unknown error occurred.", variant: "destructive" });
     } finally {
-      setIsSendingAll(false);
+      setIsSendingAllEmails(false);
+    }
+  };
+
+  const handleSmsAll = async () => {
+    setIsSendingAllSms(true);
+    toast({ title: "Preparing SMS messages...", description: "This may take a moment." });
+
+    try {
+      const invigilatorsWithDuties = invigilators.filter(inv => 
+        assignments.some(a => a.invigilators.includes(inv.name))
+      );
+
+      if (invigilatorsWithDuties.length === 0) {
+        toast({ title: "No one to message", description: "No invigilators have duties assigned.", variant: "destructive" });
+        return;
+      }
+
+      const smsPayloads = invigilatorsWithDuties.map(inv => {
+        const formattedMobileNo = inv.mobileNo.startsWith('+') 
+          ? inv.mobileNo
+          : `+91${inv.mobileNo}`;
+        
+        return {
+          to: formattedMobileNo,
+          body: `Dear ${inv.name}, your invigilation duty summary has been sent to your email. Thank you. - DutyFlow`
+        };
+      });
+
+      toast({ title: "Sending SMS...", description: `Sending notifications to ${smsPayloads.length} invigilators.` });
+
+      const result = await sendBulkSms(smsPayloads);
+      
+      if (result.failedSms > 0) {
+        toast({
+          title: "Partial SMS Success",
+          description: `Sent ${result.successfulSms} messages. ${result.failedSms} failed.`,
+          variant: "destructive"
+        });
+      } else {
+        toast({
+          title: "All SMS Sent!",
+          description: `Successfully sent notifications to ${result.successfulSms} invigilators.`,
+          className: "bg-accent text-accent-foreground"
+        });
+      }
+
+    } catch (error) {
+      console.error("Bulk SMS error:", error);
+      toast({ title: "Bulk SMS Failed", description: error instanceof Error ? error.message : "An unknown error occurred.", variant: "destructive" });
+    } finally {
+      setIsSendingAllSms(false);
     }
   };
 
@@ -343,15 +398,26 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </TabsContent>
       </Tabs>
       <div className="flex justify-between items-center pt-4 border-t mt-4">
-        <Button variant="outline" onClick={prevStep} disabled={isSendingAll}>
+        <Button variant="outline" onClick={prevStep} disabled={isSendingAllEmails || isSendingAllSms}>
           <ArrowLeft /> Back
         </Button>
         <div className="flex flex-wrap gap-2 justify-end">
-           <Button onClick={handleSave} disabled={isSendingAll}>
+           <Button onClick={handleSave} disabled={isSendingAllEmails || isSendingAllSms}>
               <Save /> Save Allotment
             </Button>
-           <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAll}>
-              {isSendingAll ? (
+           <Button onClick={() => setIsSmsAllConfirmOpen(true)} disabled={isSendingAllEmails || isSendingAllSms} variant="outline">
+              {isSendingAllSms ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
+                </>
+              ) : (
+                <>
+                  <MessageSquare /> SMS All Notifications
+                </>
+              )}
+            </Button>
+           <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAllEmails || isSendingAllSms}>
+              {isSendingAllEmails ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
                 </>
@@ -361,10 +427,10 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 </>
               )}
             </Button>
-           <Button variant="outline" onClick={handleDownloadPdf} disabled={isSendingAll}>
+           <Button variant="outline" onClick={handleDownloadPdf} disabled={isSendingAllEmails || isSendingAllSms}>
               <Download /> Download as PDF
             </Button>
-            <Button onClick={handleExportExcel} disabled={isSendingAll}>
+            <Button onClick={handleExportExcel} disabled={isSendingAllEmails || isSendingAllSms}>
               <Download /> Download as Excel
             </Button>
         </div>
@@ -384,6 +450,25 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
               handleEmailAll();
             }}>
               Yes, Email All
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+      <AlertDialog open={isSmsAllConfirmOpen} onOpenChange={setIsSmsAllConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Bulk SMS</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will send an SMS notification to every invigilator with assigned duties. Standard messaging rates may apply. Do you want to proceed?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={() => {
+              setIsSmsAllConfirmOpen(false);
+              handleSmsAll();
+            }}>
+              Yes, SMS All
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

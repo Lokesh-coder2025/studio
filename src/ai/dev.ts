@@ -5,3 +5,5 @@ import '@/ai/flows/generate-exam-descriptions.ts';
 import '@/ai/flows/optimize-duty-assignments.ts';
 import '@/ai/flows/send-email-flow.ts';
 import '@/ai/flows/send-bulk-emails-flow.ts';
+import '@/ai/flows/send-sms-flow.ts';
+import '@/ai/flows/send-bulk-sms-flow.ts';

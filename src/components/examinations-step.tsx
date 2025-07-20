@@ -539,9 +539,9 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                 accept=".xlsx, .xls"
                 onChange={handleExamFileUpload}
               />
-              <Button>
-                <label htmlFor="excel-exam-upload" className="cursor-pointer">
-                  <Upload className="mr-2" /> Import from Excel
+              <Button asChild>
+                <label htmlFor="excel-exam-upload" className="cursor-pointer flex items-center gap-2">
+                  <Upload /> Import from Excel
                 </label>
               </Button>
             </div>

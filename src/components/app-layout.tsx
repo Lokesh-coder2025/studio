@@ -36,7 +36,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <NavigationHeader>
               <div className="flex items-center gap-4">
                 <div className="text-left">
-                  <h1 className="text-4xl font-bold text-primary font-headline">DutyFlow</h1>
+                  <h1 className="text-6xl font-bold text-primary font-headline">DutyFlow</h1>
                   <p className="text-xs text-muted-foreground hidden sm:block">Your Smart Exam Partner</p>
                 </div>
               </div>

@@ -359,7 +359,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
           <Label htmlFor="college-name" className="text-sm font-medium">Name of the College</Label>
           <Input
             id="college-name"
-            placeholder="e.g. Anjuman Pre-University College"
+            placeholder="e.g. Seshadripuram Independent Pre-University College"
             value={collegeName}
             onChange={(e) => setCollegeName(e.target.value)}
             className="mt-2"

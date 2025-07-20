@@ -115,15 +115,15 @@ export default function Home() {
   return (
     <>
       <div className="sticky top-[64px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
-        <div className="p-2 sm:p-3 md:p-4">
-            <ol className="flex items-center w-full max-w-4xl mx-auto">
+        <div className="p-2 sm:p-3 flex justify-center">
+            <ol className="flex items-center w-full max-w-2xl">
                 {STEPS.map((item, index) => (
-                    <li key={item.step} className={`flex w-full items-center ${index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-0.5 after:border-b after:border-border after:border-1 after:inline-block" : ""} ${currentStep > item.step ? 'after:border-primary' : ''}`}>
+                    <li key={item.step} className={`flex w-full items-center ${index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-[2px] after:border-b after:border-border after:border-1 after:inline-block" : ""} ${currentStep > item.step ? 'after:border-primary' : ''}`}>
                         <div className="flex flex-col items-center">
-                            <span className={`flex items-center justify-center w-6 h-6 rounded-full lg:h-8 lg:w-8 shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                                <item.icon className="w-3 h-3 lg:w-4 lg:h-4" />
+                            <span className={`flex items-center justify-center w-6 h-6 rounded-full shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                                <item.icon className="w-3 h-3" />
                             </span>
-                            <p className={`mt-1 text-xs font-medium whitespace-nowrap ${currentStep >= item.step ? 'text-primary' : 'text-muted-foreground'}`}>{item.title}</p>
+                            <p className={`mt-1 text-[10px] font-medium whitespace-nowrap ${currentStep >= item.step ? 'text-primary' : 'text-muted-foreground'}`}>{item.title}</p>
                         </div>
                     </li>
                 ))}

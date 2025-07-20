@@ -99,7 +99,7 @@ const Navigation = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "sticky top-0 z-50 bg-background/95 shadow-sm backdrop-blur-sm",
+          "sticky top-0 z-50",
           className
         )}
         {...props}
@@ -145,7 +145,7 @@ const NavigationInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        "flex-1 flex flex-col pt-[112px]",
+        "flex-1 flex flex-col pt-[128px]",
         className
       )}
       {...props}
@@ -162,7 +162,7 @@ const NavigationHeader = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex items-center h-16 w-full px-4 sm:px-6 md:px-8 border-b", className)}
+      className={cn("flex items-center h-20 w-full px-4 sm:px-6 md:px-8 border-b", className)}
       {...props}
     />
   )

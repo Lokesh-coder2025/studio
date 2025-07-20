@@ -196,7 +196,7 @@ const NavigationMenu = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("flex items-center gap-2 -mb-px", className)}
+    className={cn("items-center gap-2 -mb-px", className)}
     {...props}
   />
 ))

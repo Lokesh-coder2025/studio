@@ -123,7 +123,7 @@ export default function Home() {
                             <span className={`flex items-center justify-center w-10 h-10 rounded-full lg:h-12 lg:w-12 shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                                 <item.icon className="w-5 h-5 lg:w-6 lg:h-6" />
                             </span>
-                            <p className={`mt-2 text-sm font-medium ${currentStep >= item.step ? 'text-primary' : 'text-muted-foreground'}`}>{item.title}</p>
+                            <p className={`mt-2 text-sm font-medium whitespace-nowrap ${currentStep >= item.step ? 'text-primary' : 'text-muted-foreground'}`}>{item.title}</p>
                         </div>
                     </li>
                 ))}

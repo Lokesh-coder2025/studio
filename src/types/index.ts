@@ -15,6 +15,7 @@ export interface Examination {
   startTime: string;
   endTime: string;
   roomsAllotted: number;
+  relieversRequired: number;
 }
 
 export interface Assignment {

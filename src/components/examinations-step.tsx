@@ -31,7 +31,8 @@ const sessionSchema = z.object({
     endMinute: z.string(),
     endPeriod: z.enum(['AM', 'PM']),
     roomsAllotted: z.string(),
-  }).partial({ subject: true, roomsAllotted: true });
+    relieversRequired: z.string(),
+  }).partial({ subject: true, roomsAllotted: true, relieversRequired: true });
 
 const formSchema = z.object({
   date: z.date({ required_error: 'Date is required.' }),
@@ -60,6 +61,7 @@ const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2
 const minutes = ['00', '15', '30', '45'];
 const periods = ['AM', 'PM'];
 const roomNumbers = Array.from({ length: 50 }, (_, i) => (i + 1).toString());
+const relieverNumbers = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
 
 type ExaminationsStepProps = {
   collegeName: string;
@@ -152,6 +154,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         endMinute: '00',
         endPeriod: 'PM',
         roomsAllotted: '1',
+        relieversRequired: '1',
       },
       session2: {
         subject: 'none',
@@ -162,6 +165,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         endMinute: '00',
         endPeriod: 'PM',
         roomsAllotted: '1',
+        relieversRequired: '1',
       },
     },
   });
@@ -170,7 +174,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
     const newExams: Examination[] = [];
 
     const processSession = (session: z.infer<typeof sessionSchema>) => {
-      if (session.subject && session.subject !== 'none' && session.roomsAllotted) {
+      if (session.subject && session.subject !== 'none' && session.roomsAllotted && session.relieversRequired) {
         const startTime = `${session.startHour}:${session.startMinute} ${session.startPeriod}`;
         const endTime = `${session.endHour}:${session.endMinute} ${session.endPeriod}`;
         
@@ -182,6 +186,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
           startTime,
           endTime,
           roomsAllotted: parseInt(session.roomsAllotted, 10),
+          relieversRequired: parseInt(session.relieversRequired, 10),
         };
       }
       return null;
@@ -238,7 +243,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         const newExams = json
           .map((row, index) => {
             const date = row.Date ? new Date((row.Date - (25567 + 2)) * 86400 * 1000) : null;
-            if (!date || !row.Subject || !row['Start Time'] || !row['End Time'] || !row['No of Rooms']) {
+            if (!date || !row.Subject || !row['Start Time'] || !row['End Time'] || !row['No of Rooms'] || !row['No of Relievers']) {
               return null;
             }
             return {
@@ -249,6 +254,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
               startTime: String(row['Start Time']),
               endTime: String(row['End Time']),
               roomsAllotted: Number(row['No of Rooms']),
+              relieversRequired: Number(row['No of Relievers']),
             };
           })
           .filter((exam): exam is Examination => exam !== null);
@@ -263,7 +269,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         } else {
           toast({
             title: 'No examinations found',
-            description: "Ensure columns for 'Date', 'Subject', 'Start Time', 'End Time', and 'No of Rooms' exist and are correctly formatted.",
+            description: "Ensure columns for 'Date', 'Subject', 'Start Time', 'End Time', 'No of Rooms', and 'No of Relievers' exist and are correctly formatted.",
             variant: 'destructive',
           });
         }
@@ -295,7 +301,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         subject: exam.subject,
         time: `${exam.startTime} - ${exam.endTime}`,
         rooms: exam.roomsAllotted,
-        invigilatorsNeeded: exam.roomsAllotted,
+        invigilatorsNeeded: exam.roomsAllotted, // Relievers are not part of auto-allotment for now
       }));
 
       // For the AI, we only need name, designation, and any pre-existing duties.
@@ -468,6 +474,30 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                         </FormItem>
                       )}
                     />
+                     <FormField
+                      control={form.control}
+                      name="session1.relieversRequired"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>No of Relievers</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select relievers" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {relieverNumbers.map((num) => (
+                                <SelectItem key={`s1-reliever-${num}`} value={num}>
+                                  {num}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
               </div>
 
               {/* Session 2 */}
@@ -523,6 +553,30 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                         </FormItem>
                       )}
                     />
+                    <FormField
+                      control={form.control}
+                      name="session2.relieversRequired"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>No of Relievers</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select relievers" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {relieverNumbers.map((num) => (
+                                <SelectItem key={`s2-reliever-${num}`} value={num}>
+                                  {num}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
               </div>
           </div>
           
@@ -559,6 +613,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
               <TableHead>Subject</TableHead>
               <TableHead>Timings</TableHead>
               <TableHead>No of Rooms</TableHead>
+              <TableHead>No of Relievers</TableHead>
               <TableHead className="text-right w-[100px]">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -572,6 +627,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                   <TableCell className="font-medium">{exam.subject}</TableCell>
                   <TableCell>{exam.startTime} - {exam.endTime}</TableCell>
                   <TableCell className="text-center">{exam.roomsAllotted}</TableCell>
+                  <TableCell className="text-center">{exam.relieversRequired}</TableCell>
                   <TableCell className="text-right">
                     <Button variant="ghost" size="icon" onClick={() => deleteExamination(exam.id)}>
                       <Trash2 className="h-4 w-4 text-destructive" />
@@ -582,7 +638,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
               ))
             ) : (
               <TableRow>
-                <TableCell colSpan={7} className="h-24 text-center">
+                <TableCell colSpan={8} className="h-24 text-center">
                   No examinations added yet.
                 </TableCell>
               </TableRow>

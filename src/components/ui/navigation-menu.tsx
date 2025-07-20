@@ -20,7 +20,7 @@ import {
 type NavigationContext = {
   openMobile: boolean
   setOpenMobile: (open: boolean) => void
-  isMobile: boolean | undefined
+  isMobile: boolean
   toggleMobileMenu: () => void
 }
 
@@ -162,7 +162,7 @@ const NavigationHeader = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex items-center h-[68px] w-full px-4 sm:px-6 md:px-8 border-b", className)}
+      className={cn("flex items-center h-[102px] w-full px-4 sm:px-6 md:px-8 border-b", className)}
       {...props}
     />
   )

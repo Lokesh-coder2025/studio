@@ -350,7 +350,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </TabsContent>
       </Tabs>
       <div className="flex justify-between items-center pt-4 border-t mt-4">
-        <Button variant="outline" onClick={prevStep} disabled={isSendingAllEmails}>
+        <Button onClick={prevStep} disabled={isSendingAllEmails}>
           <ArrowLeft /> Back
         </Button>
         <div className="flex flex-wrap gap-2 justify-end">
@@ -368,7 +368,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 </>
               )}
             </Button>
-           <Button variant="outline" onClick={handleDownloadPdf} disabled={isSendingAllEmails}>
+           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails}>
               <Download /> Download as PDF
             </Button>
             <Button onClick={handleExportExcel} disabled={isSendingAllEmails}>

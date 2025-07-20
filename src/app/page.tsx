@@ -8,7 +8,7 @@ import { InvigilatorsStep } from '@/components/invigilators-step';
 import { ExaminationsStep } from '@/components/examinations-step';
 import { ResultsStep } from '@/components/results-step';
 import { Workflow, BookUser, FileSpreadsheet } from 'lucide-react';
-import { useSearchParams, useRouter } from 'next/navigation';
+import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
 const STEPS = [
@@ -29,6 +29,7 @@ export default function Home() {
   
   const searchParams = useSearchParams();
   const router = useRouter();
+  const pathname = usePathname();
 
   const resetApp = () => {
     setCurrentStep(1);
@@ -38,7 +39,10 @@ export default function Home() {
     setExamTitle('');
     setCollegeName('');
     setAllotmentId(null);
-    router.push('/');
+    // Remove query params to prevent re-loading data
+    if (searchParams.toString()) {
+        router.push(pathname);
+    }
   };
 
   useEffect(() => {
@@ -57,9 +61,7 @@ export default function Home() {
       }
     } else {
         // This ensures that navigating to '/' without a query param resets the state
-        if (currentStep !== 1 || invigilators.length > 0 || examinations.length > 0) {
-            resetApp();
-        }
+        resetApp();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);

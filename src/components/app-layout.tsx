@@ -20,13 +20,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    if (pathname === '/') {
-      // If we are already on the home page, force a re-render/reset by changing the query param
-      const randomQuery = `reset=${new Date().getTime()}`;
-      router.push(`/?${randomQuery}`);
-    } else {
-      router.push('/');
-    }
+    // This logic ensures that navigating to the home page always triggers a state reset,
+    // avoiding hydration issues with client-side-only values like new Date().
+    router.push('/');
   };
   
   return (

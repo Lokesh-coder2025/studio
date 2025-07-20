@@ -147,7 +147,7 @@ const NavigationInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        "flex-1 flex flex-col",
+        "flex-1 flex flex-col pt-16",
         className
       )}
       {...props}

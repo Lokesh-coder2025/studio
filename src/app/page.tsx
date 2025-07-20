@@ -114,11 +114,11 @@ export default function Home() {
 
   return (
     <>
-      <div className="sticky top-[64px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
+      <div className="sticky top-[112px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
         <div className="p-2 sm:p-3 flex justify-center">
             <ol className="flex items-center w-full max-w-2xl">
                 {STEPS.map((item, index) => (
-                    <li key={item.step} className={`flex w-full items-center ${index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-[2px] after:border-b after:border-border after:border-1 after:inline-block" : ""} ${currentStep > item.step ? 'after:border-primary' : ''}`}>
+                    <li key={item.step} className={`flex w-full items-center ${index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-px after:border-b after:border-border after:border-1 after:inline-block" : ""} ${currentStep > item.step ? 'after:border-primary' : ''}`}>
                         <div className="flex flex-col items-center">
                             <span className={`flex items-center justify-center w-6 h-6 rounded-full shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
                                 <item.icon className="w-3 h-3" />

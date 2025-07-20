@@ -42,7 +42,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </NavigationHeader>
         </Navigation>
         <NavigationInset>
-            <nav className="border-b bg-background sticky top-16 z-40">
+            <nav className="border-b bg-background sticky z-40">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
                 <NavigationMenu className="grid grid-cols-6">
                     <NavigationMenuItem className="col-start-2 flex justify-center">

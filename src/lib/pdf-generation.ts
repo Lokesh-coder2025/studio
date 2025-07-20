@@ -3,7 +3,12 @@ import { format, parseISO } from 'date-fns';
 import type { Invigilator, Assignment } from '@/types';
 
 // This function creates the HTML content for the PDF in a structured way.
-const createPdfHtml = (invigilator: Invigilator, duties: (Assignment & { day: string })[]) => {
+const createPdfHtml = (
+    invigilator: Invigilator, 
+    duties: (Assignment & { day: string })[],
+    collegeName: string,
+    examTitle: string
+) => {
   const dutiesHtml = duties.map((duty, index) => `
     <tr>
       <td style="text-align: center; padding: 8px; border: 1px solid #ddd;">${index + 1}</td>
@@ -17,7 +22,9 @@ const createPdfHtml = (invigilator: Invigilator, duties: (Assignment & { day: st
   return `
     <div style="font-family: Arial, sans-serif; color: #333; margin: 20px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); font-size: 12px;">
       <div style="background-color: #000080; color: white; padding: 20px; text-align: center;">
-        <h1 style="margin: 0; font-size: 20px;">Invigilator's Duty Summary</h1>
+        <h1 style="margin: 0; font-size: 20px;">${collegeName || 'College Name'}</h1>
+        <p style="margin: 5px 0 0; font-size: 16px;">${examTitle || 'Examination Name'}</p>
+        <p style="margin: 5px 0 0; font-size: 14px; font-weight: bold;">Invigilator's Duty Summary</p>
       </div>
       <div style="padding: 20px;">
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px;">
@@ -57,11 +64,13 @@ const createPdfHtml = (invigilator: Invigilator, duties: (Assignment & { day: st
 // The main exported function that generates the PDF and returns a Base64 string.
 export const generateInvigilatorPdf = async (
     invigilator: Invigilator, 
-    duties: (Assignment & { day: string })[]
+    duties: (Assignment & { day: string })[],
+    collegeName: string,
+    examTitle: string
 ): Promise<string | null> => {
   try {
     const doc = new jsPDF('p', 'mm', 'a4');
-    const htmlContent = createPdfHtml(invigilator, duties);
+    const htmlContent = createPdfHtml(invigilator, duties, collegeName, examTitle);
     
     await doc.html(htmlContent, {
       callback: function (doc) {

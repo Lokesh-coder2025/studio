@@ -272,7 +272,12 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           }))
           .sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime());
         
-        const pdfBase64 = await generateInvigilatorPdf(inv, duties);
+        const pdfBase64 = await generateInvigilatorPdf(
+            inv, 
+            duties,
+            collegeName,
+            examTitle
+        );
 
         if (!pdfBase64) {
           console.error(`Failed to generate PDF for ${inv.name}`);
@@ -339,6 +344,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             <InvigilatorDutySummary 
               invigilators={invigilators} 
               assignments={assignments} 
+              collegeName={collegeName}
+              examTitle={examTitle}
             />
         </TabsContent>
       </Tabs>
@@ -391,5 +398,3 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
-
-    

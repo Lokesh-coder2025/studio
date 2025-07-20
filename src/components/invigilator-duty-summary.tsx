@@ -26,9 +26,11 @@ import { sendEmail } from '@/ai/flows/send-email-flow';
 type InvigilatorDutySummaryProps = {
   invigilators: Invigilator[];
   assignments: Assignment[];
+  collegeName: string;
+  examTitle: string;
 };
 
-export function InvigilatorDutySummary({ invigilators, assignments }: InvigilatorDutySummaryProps) {
+export function InvigilatorDutySummary({ invigilators, assignments, collegeName, examTitle }: InvigilatorDutySummaryProps) {
   const [selectedInvigilatorId, setSelectedInvigilatorId] = useState<string | null>(null);
   const [isEmailConfirmationOpen, setIsEmailConfirmationOpen] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
@@ -53,7 +55,7 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
 
   const generatePdfBlob = async (): Promise<string | null> => {
      if (!selectedInvigilator) return null;
-     return await generateInvigilatorPdf(selectedInvigilator, invigilatorDuties);
+     return await generateInvigilatorPdf(selectedInvigilator, invigilatorDuties, collegeName, examTitle);
   };
 
   const handleDownloadPdf = async () => {
@@ -133,8 +135,10 @@ export function InvigilatorDutySummary({ invigilators, assignments }: Invigilato
         <>
           <Card className="overflow-hidden">
             <CardHeader className="p-0">
-                <div className="bg-primary text-primary-foreground flex items-center justify-center p-4 min-h-[80px]">
-                    <CardTitle className="text-xl">Invigilator's Duty Summary</CardTitle>
+                <div className="bg-primary text-primary-foreground text-center p-4 min-h-[100px] flex flex-col justify-center">
+                    <CardTitle className="text-xl">{collegeName || "College Name"}</CardTitle>
+                    <p className="text-sm font-light">{examTitle || "Examination Name"}</p>
+                    <p className="text-md font-semibold mt-1">Invigilator's Duty Summary</p>
                 </div>
                 <div className="p-6 pb-4 space-y-2 text-sm">
                     <div className="grid grid-cols-3 gap-x-8">

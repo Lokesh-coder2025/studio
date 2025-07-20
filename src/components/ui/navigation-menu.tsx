@@ -217,7 +217,7 @@ const navigationMenuButtonVariants = cva(
   {
     variants: {
       size: {
-        default: "h-11 text-base",
+        default: "h-11 text-sm",
         sm: "h-9 text-xs",
         lg: "h-14 text-base",
       },

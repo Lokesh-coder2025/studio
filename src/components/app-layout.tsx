@@ -43,8 +43,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <NavigationInset>
             <nav className="border-b bg-background sticky top-16 z-40">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                <NavigationMenu className="grid grid-cols-8">
-                    <NavigationMenuItem className="col-start-3">
+                <NavigationMenu className="grid grid-cols-6">
+                    <NavigationMenuItem className="col-start-2">
                         <NavigationMenuButton asChild isActive={pathname === '/'} tooltip="New Allotment">
                         <Link href="/" onClick={handleNewAllotmentClick}>
                             <FileSpreadsheet />
@@ -68,7 +68,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         </Link>
                         </NavigationMenuButton>
                     </NavigationMenuItem>
-                    <NavigationMenuItem className="col-start-8">
+                    <NavigationMenuItem className="col-start-6">
                         <NavigationMenuButton asChild isActive={pathname === '/about'} tooltip="About DutyFlow">
                         <Link href="/about">
                             <Info />

@@ -21,10 +21,10 @@ const createPdfHtml = (
 
   return `
     <div style="font-family: Arial, sans-serif; color: #333; margin: 20px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); font-size: 12px;">
-      <div style="background-color: #0047AB; color: white; padding: 20px; text-align: center;">
+      <div style="background-color: #0047AB; color: white; padding: 15px; text-align: center;">
         <h1 style="margin: 0; font-size: 20px;">${collegeName || 'College Name'}</h1>
-        <p style="margin: 5px 0 0; font-size: 16px;">${examTitle || 'Examination Name'}</p>
-        <p style="margin: 5px 0 0; font-size: 14px; font-weight: bold;">Invigilator's Duty Summary</p>
+        <p style="margin: 3px 0 0; font-size: 16px;">${examTitle || 'Examination Name'}</p>
+        <p style="margin: 3px 0 0; font-size: 14px; font-weight: bold;">Invigilator's Duty Summary</p>
       </div>
       <div style="padding: 20px;">
         <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px; font-size: 11px;">

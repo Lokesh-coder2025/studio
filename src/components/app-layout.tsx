@@ -31,8 +31,8 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   
   return (
       <NavigationProvider>
-        <Navigation>
-          <div className="sticky top-0 z-50 bg-background/95 shadow-sm backdrop-blur-sm">
+        <div className='flex flex-col min-h-svh'>
+          <Navigation>
             <NavigationHeader>
               <div className="flex items-center gap-4">
                 <div className="text-left">
@@ -79,16 +79,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </NavigationMenu>
                 </div>
             </nav>
-          </div>
-        </Navigation>
-        <NavigationInset>
-            <div className="flex-1">
-                {children}
-            </div>
-            <footer className="text-center text-xs text-muted-foreground p-4 border-t">
-                &copy; {new Date().getFullYear()} DutyFlow
-            </footer>
-        </NavigationInset>
+          </Navigation>
+          <NavigationInset>
+              <div className="flex-1">
+                  {children}
+              </div>
+              <footer className="text-center text-xs text-muted-foreground p-4 border-t">
+                  &copy; {new Date().getFullYear()} DutyFlow
+              </footer>
+          </NavigationInset>
+        </div>
       </NavigationProvider>
   );
 }

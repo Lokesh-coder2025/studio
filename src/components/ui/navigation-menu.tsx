@@ -68,7 +68,7 @@ const NavigationProvider = React.forwardRef<
         <TooltipProvider delayDuration={0}>
           <div
             className={cn(
-              "group/nav-wrapper flex w-full flex-col min-h-svh",
+              "group/nav-wrapper",
               className
             )}
             ref={ref}
@@ -99,7 +99,7 @@ const Navigation = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "sticky top-0 z-50",
+          "sticky top-0 z-50 bg-background/95 shadow-sm backdrop-blur-sm",
           className
         )}
         {...props}
@@ -145,7 +145,7 @@ const NavigationInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        "flex-1 flex flex-col pt-[128px]",
+        "flex-1 flex flex-col",
         className
       )}
       {...props}
@@ -162,7 +162,7 @@ const NavigationHeader = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex items-center h-20 w-full px-4 sm:px-6 md:px-8 border-b", className)}
+      className={cn("flex items-center h-[68px] w-full px-4 sm:px-6 md:px-8 border-b", className)}
       {...props}
     />
   )
@@ -194,7 +194,7 @@ const NavigationMenu = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("items-center gap-2 -mb-px", className)}
+    className={cn("items-center gap-2 -mb-px h-[44px]", className)}
     {...props}
   />
 ))
@@ -217,7 +217,7 @@ const navigationMenuButtonVariants = cva(
   {
     variants: {
       size: {
-        default: "h-12 text-sm",
+        default: "h-11 text-sm",
         sm: "h-9 text-xs",
         lg: "h-14 text-base",
       },

@@ -67,7 +67,7 @@ export default function AboutPage() {
         <div className="max-w-7xl mx-auto space-y-8">
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl font-headline text-accent">What. Who. How.</CardTitle>
+              <CardTitle className="text-2xl font-headline text-primary">What. Who. How.</CardTitle>
             </CardHeader>
             <CardContent className="prose prose-lg max-w-none text-foreground/90 space-y-4">
                 <p>
@@ -87,7 +87,7 @@ export default function AboutPage() {
           
           <Card className="shadow-lg">
             <CardHeader>
-              <CardTitle className="text-2xl font-headline text-accent">Core Features</CardTitle>
+              <CardTitle className="text-2xl font-headline text-primary">Core Features</CardTitle>
               <CardDescription>Everything you need to manage invigilation duties efficiently.</CardDescription>
             </CardHeader>
             <CardContent className="grid md:grid-cols-2 gap-x-8 gap-y-6">

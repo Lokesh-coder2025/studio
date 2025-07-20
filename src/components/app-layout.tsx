@@ -80,7 +80,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </NavigationMenu>
                 </div>
             </nav>
-            {children}
+            <div className="flex-1">
+                {children}
+            </div>
             <footer className="text-center text-xs text-muted-foreground p-4 border-t">
                 &copy; {new Date().getFullYear()} DutyFlow
             </footer>

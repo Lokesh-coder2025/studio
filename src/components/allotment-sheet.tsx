@@ -13,11 +13,13 @@ type AllotmentSheetProps = {
   invigilators: Invigilator[];
   examinations: Examination[];
   assignments: Assignment[];
-  setAssignments: Dispatch<SetStateAction<Assignment[]>>;
+  setAssignments?: Dispatch<SetStateAction<Assignment[]>>;
 };
 
 export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
   ({ invigilators, examinations, assignments, setAssignments }, ref) => {
+    const isEditable = !!setAssignments;
+
     const uniqueExams = useMemo(() => {
       return [...assignments].sort((a,b) => {
           const dateA = new Date(a.date).getTime();
@@ -88,6 +90,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
     }, [dutyData, uniqueExams, examDetailsMap]);
 
     const handleToggleDuty = (invigilatorName: string, examToUpdate: Assignment) => {
+      if (!setAssignments) return;
       setAssignments(prevAssignments => {
         return prevAssignments.map(assignment => {
           if (
@@ -144,9 +147,11 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                         >
                           <button
                             onClick={() => handleToggleDuty(row.name, exam)}
+                            disabled={!isEditable}
                             className={cn(
-                              "w-full h-full p-2 flex items-center justify-center cursor-pointer transition-colors",
-                              !isAssigned && "hover:bg-muted"
+                              "w-full h-full p-2 flex items-center justify-center transition-colors",
+                              isEditable && !isAssigned && "hover:bg-muted",
+                              !isEditable && "cursor-default"
                             )}
                           >
                             {isAssigned ? (
@@ -171,7 +176,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
               </TableRow>
             )}
           </TableBody>
-          {dutyData.length > 0 && (
+          {dutyData.length > 0 && isEditable && (
             <TableFooter>
                 <TableRow className="bg-muted/50 hover:bg-muted/50">
                     <TableCell colSpan={3} className="text-right font-bold">No of Rooms </TableCell>

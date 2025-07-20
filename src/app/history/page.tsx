@@ -110,6 +110,7 @@ export default function HistoryPage() {
                   invigilators={selectedAllotment.invigilators}
                   examinations={selectedAllotment.examinations as Examination[]}
                   assignments={selectedAllotment.assignments}
+                  setAssignments={() => {}}
                 />
               </div>
             </DialogContent>

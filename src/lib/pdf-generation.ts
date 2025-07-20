@@ -16,7 +16,7 @@ const createPdfHtml = (invigilator: Invigilator, duties: (Assignment & { day: st
 
   return `
     <div style="font-family: Arial, sans-serif; color: #333; margin: 20px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); font-size: 12px;">
-      <div style="background-color: #29ABE2; color: white; padding: 20px; text-align: center;">
+      <div style="background-color: #000080; color: white; padding: 20px; text-align: center;">
         <h1 style="margin: 0; font-size: 20px;">Invigilator's Duty Summary</h1>
       </div>
       <div style="padding: 20px;">

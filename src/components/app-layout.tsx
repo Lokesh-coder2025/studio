@@ -21,6 +21,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (pathname === '/') {
+      // If we are already on the home page, force a re-render/reset by changing the query param
       const randomQuery = `reset=${new Date().getTime()}`;
       router.push(`/?${randomQuery}`);
     } else {
@@ -68,7 +69,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         </Link>
                         </NavigationMenuButton>
                     </NavigationMenuItem>
-                    <NavigationMenuItem className="col-start-6">
+                    <NavigationMenuItem className="col-start-6 flex justify-end">
                         <NavigationMenuButton asChild isActive={pathname === '/about'} tooltip="About DutyFlow">
                         <Link href="/about">
                             <Info />

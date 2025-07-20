@@ -2,17 +2,16 @@
 'use client';
 
 import {
-  SidebarProvider,
-  Sidebar,
-  SidebarHeader,
-  SidebarTrigger,
-  SidebarContent,
-  SidebarMenu,
-  SidebarMenuItem,
-  SidebarMenuButton,
-  SidebarInset,
-  SidebarFooter,
-} from '@/components/ui/sidebar';
+  Navigation,
+  NavigationMenu,
+  NavigationMenuItem,
+  NavigationMenuButton,
+  NavigationContent,
+  NavigationHeader,
+  NavigationTrigger,
+  NavigationProvider,
+  NavigationInset,
+} from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { FileSpreadsheet, History, Save, Info } from 'lucide-react';
@@ -24,8 +23,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (pathname === '/') {
-      // This is a bit of a hack to force a re-render of the page component
-      // when we are already on the root path.
       const randomQuery = `reset=${new Date().getTime()}`;
       router.push(`/?${randomQuery}`);
     } else {
@@ -34,62 +31,60 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   };
   
   return (
-      <SidebarProvider>
-        <Sidebar>
-          <SidebarHeader>
-             <div className="p-2 text-center">
-              <h1 className="text-4xl font-bold text-primary font-headline">DutyFlow</h1>
-              <p className="text-sm text-muted-foreground mt-1">Your Smart Exam Partner</p>
+      <NavigationProvider>
+        <Navigation>
+          <NavigationHeader>
+             <div className="flex items-center gap-4">
+              <NavigationTrigger className="md:hidden" />
+              <div className="text-left">
+                <h1 className="text-2xl font-bold text-primary font-headline">DutyFlow</h1>
+                <p className="text-xs text-muted-foreground hidden sm:block">Your Smart Exam Partner</p>
+              </div>
              </div>
-          </SidebarHeader>
-          <SidebarContent>
-            <SidebarMenu>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/'} tooltip="New Allotment">
+          </NavigationHeader>
+          <NavigationContent>
+            <NavigationMenu>
+              <NavigationMenuItem>
+                <NavigationMenuButton asChild isActive={pathname === '/'} tooltip="New Allotment">
                   <Link href="/" onClick={handleNewAllotmentClick}>
                     <FileSpreadsheet />
                     <span>New Allotment</span>
                   </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/saved-allotments'} tooltip="Saved Allotments">
+                </NavigationMenuButton>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuButton asChild isActive={pathname === '/saved-allotments'} tooltip="Saved Allotments">
                   <Link href="/saved-allotments">
                     <Save />
                     <span>Saved Allotments</span>
                   </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-              <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/history'} tooltip="History">
+                </NavigationMenuButton>
+              </NavigationMenuItem>
+              <NavigationMenuItem>
+                <NavigationMenuButton asChild isActive={pathname === '/history'} tooltip="History">
                   <Link href="/history">
                     <History />
                     <span>History</span>
                   </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-               <SidebarMenuItem>
-                <SidebarMenuButton asChild isActive={pathname === '/about'} tooltip="About DutyFlow">
+                </NavigationMenuButton>
+              </NavigationMenuItem>
+               <NavigationMenuItem>
+                <NavigationMenuButton asChild isActive={pathname === '/about'} tooltip="About DutyFlow">
                   <Link href="/about">
                     <Info />
                     <span>About DutyFlow</span>
                   </Link>
-                </SidebarMenuButton>
-              </SidebarMenuItem>
-            </SidebarMenu>
-          </SidebarContent>
-          <SidebarFooter>
-              <div className="text-center text-xs text-muted-foreground p-2 border-t">
-                  &copy; {new Date().getFullYear()} DutyFlow
-              </div>
-          </SidebarFooter>
-        </Sidebar>
-        <SidebarInset>
-          <header className="flex items-center justify-start p-2 border-b md:hidden">
-              <SidebarTrigger />
-          </header>
+                </NavigationMenuButton>
+              </NavigationMenuItem>
+            </NavigationMenu>
+          </NavigationContent>
+        </Navigation>
+        <NavigationInset>
           {children}
-        </SidebarInset>
-      </SidebarProvider>
+          <footer className="text-center text-xs text-muted-foreground p-4 border-t">
+              &copy; {new Date().getFullYear()} DutyFlow
+          </footer>
+        </NavigationInset>
+      </NavigationProvider>
   );
 }

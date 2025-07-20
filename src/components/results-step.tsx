@@ -196,7 +196,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         subject: exam.subject,
         time: `${exam.startTime} - ${exam.endTime}`
         });
-        map.set(examKey, exam);
+        examDetailsMap.set(examKey, exam);
     });
     
     const requiredTotals: (string|number)[] = uniqueExamsForExport.map(exam => {
@@ -391,7 +391,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </TabsContent>
       </Tabs>
       <div className="flex justify-between items-center pt-4 border-t mt-4">
-        <Button onClick={prevStep} disabled={isSendingAllEmails}>
+        <Button onClick={prevStep} disabled={isSendingAllEmails} variant="default">
           <ArrowLeft /> Back
         </Button>
         <div className="flex flex-wrap gap-2 justify-end">
@@ -443,3 +443,4 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     
 
     
+

@@ -188,6 +188,41 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       row.push({ content: inv.totalDuties, styles: { halign: 'center', fontStyle: 'bold' } });
       return row;
     });
+
+    const examDetailsMap = new Map<string, Examination>();
+    examinations.forEach(exam => {
+        const examKey = getExamKeyForExport({
+        date: format(parseISO(exam.date), 'yyyy-MM-dd'),
+        subject: exam.subject,
+        time: `${exam.startTime} - ${exam.endTime}`
+        });
+        map.set(examKey, exam);
+    });
+    
+    const requiredTotals: (string|number)[] = uniqueExamsForExport.map(exam => {
+        const fullExam = examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time);
+        return fullExam?.roomsAllotted || 0;
+    });
+
+    const allottedTotals: (string|number)[] = uniqueExamsForExport.map(exam => {
+        return dutyDataForExport.reduce((sum, inv) => sum + (inv.duties[getExamKeyForExport(exam)] || 0), 0);
+    });
+
+    const requiredGrandTotal = requiredTotals.reduce((sum, current) => sum + (Number(current) || 0), 0);
+    const allottedGrandTotal = allottedTotals.reduce((sum, current) => sum + (Number(current) || 0), 0);
+
+    const foot = [
+        [
+            { content: 'No of Rooms', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
+            ...requiredTotals.map(total => ({ content: total, styles: { halign: 'center', fontStyle: 'bold' }})),
+            { content: requiredGrandTotal, styles: { halign: 'center', fontStyle: 'bold' } },
+        ],
+        [
+            { content: 'Total Duties Allotted', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
+            ...allottedTotals.map(total => ({ content: total, styles: { halign: 'center', fontStyle: 'bold' }})),
+            { content: allottedGrandTotal, styles: { halign: 'center', fontStyle: 'bold' } },
+        ]
+    ];
   
     const finalExamTitle = examTitle || 'Duty Allotment Sheet';
     const pageWidth = doc.internal.pageSize.getWidth();
@@ -196,6 +231,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     doc.autoTable({
       head: head,
       body: body,
+      foot: foot,
       startY: 30,
       didDrawPage: function (data) {
         if (data.pageNumber === 1) {
@@ -214,6 +250,11 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       headStyles: {
         fillColor: [0, 71, 171], // Cobalt Blue
         textColor: 255,
+        fontStyle: 'bold',
+      },
+      footStyles: {
+        fillColor: [230, 230, 230],
+        textColor: 0,
         fontStyle: 'bold',
       },
       alternateRowStyles: {
@@ -368,7 +409,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 </>
               )}
             </Button>
-           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails}>
+           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails} variant="default">
               <Download /> Download as PDF
             </Button>
             <Button onClick={handleExportExcel} disabled={isSendingAllEmails}>

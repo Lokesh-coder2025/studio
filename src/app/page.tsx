@@ -114,7 +114,7 @@ export default function Home() {
 
   return (
     <>
-      <div className="sticky top-[112px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
+      <div className="sticky top-[146px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
         <div className="p-1 flex justify-center">
             <ol className="flex items-center w-full max-w-2xl justify-center ml-[5rem]">
                 {STEPS.map((item, index) => (

@@ -213,11 +213,11 @@ const NavigationMenuItem = React.forwardRef<
 NavigationMenuItem.displayName = "NavigationMenuItem"
 
 const navigationMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center justify-center gap-2 overflow-hidden rounded-md px-3 text-left outline-none ring-primary transition-all focus-visible:ring-2 active:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 border-2 border-transparent text-muted-foreground data-[active=true]:bg-primary data-[active=true]:font-medium data-[active=true]:text-primary-foreground hover:border-primary/50 hover:text-foreground [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center justify-center gap-2 overflow-hidden rounded-md px-3 text-left font-bold outline-none ring-primary transition-all focus-visible:ring-2 active:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 border-2 border-transparent text-muted-foreground data-[active=true]:bg-primary data-[active=true]:text-primary-foreground hover:border-primary/50 hover:text-foreground [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       size: {
-        default: "h-11 text-sm",
+        default: "h-11 text-base",
         sm: "h-9 text-xs",
         lg: "h-14 text-base",
       },

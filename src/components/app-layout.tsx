@@ -15,41 +15,25 @@ import {
 } from '@/components/ui/sidebar';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info, LogOut } from 'lucide-react';
-import { useAuth } from '@/context/AuthContext';
-import { auth } from '@/lib/firebase';
-import { signOut } from 'firebase/auth';
-import { Button } from './ui/button';
-import { AuthWrapper } from '@/context/AuthContext';
+import { FileSpreadsheet, History, Save, Info } from 'lucide-react';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
 
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     if (pathname === '/') {
+      // This is a bit of a hack to force a re-render of the page component
+      // when we are already on the root path.
       const randomQuery = `reset=${new Date().getTime()}`;
       router.push(`/?${randomQuery}`);
     } else {
       router.push('/');
     }
   };
-
-  const handleSignOut = async () => {
-    await signOut(auth);
-    router.push('/login');
-  };
   
-  const isAuthPage = pathname === '/login' || pathname === '/register';
-
-  if (isAuthPage) {
-    return <>{children}</>;
-  }
-
   return (
-    <AuthWrapper>
       <SidebarProvider>
         <Sidebar>
           <SidebarHeader>
@@ -95,15 +79,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             </SidebarMenu>
           </SidebarContent>
           <SidebarFooter>
-              {user && (
-                <div className="p-2">
-                  <p className="text-xs text-center text-muted-foreground truncate mb-2">{user.email}</p>
-                  <Button variant="ghost" size="sm" className="w-full" onClick={handleSignOut}>
-                    <LogOut className="mr-2 h-4 w-4" />
-                    Sign Out
-                  </Button>
-                </div>
-              )}
               <div className="text-center text-xs text-muted-foreground p-2 border-t">
                   &copy; {new Date().getFullYear()} DutyFlow
               </div>
@@ -116,6 +91,5 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           {children}
         </SidebarInset>
       </SidebarProvider>
-    </AuthWrapper>
   );
 }

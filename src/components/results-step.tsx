@@ -212,7 +212,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         cellPadding: 2,
       },
       headStyles: {
-        fillColor: [0, 0, 128], // Navy Blue
+        fillColor: [0, 71, 171], // Cobalt Blue
         textColor: 255,
         fontStyle: 'bold',
       },
@@ -391,3 +391,5 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
+
+    

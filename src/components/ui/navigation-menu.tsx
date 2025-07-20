@@ -95,25 +95,18 @@ const Navigation = React.forwardRef<
     },
     ref
   ) => {
-    const { openMobile, setOpenMobile } = useNavigation()
-
     return (
       <>
         <header
           ref={ref}
           className={cn(
-            "sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm",
+            "sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6 md:px-8",
             className
           )}
           {...props}
         >
           {children}
         </header>
-        <Sheet open={openMobile} onOpenChange={setOpenMobile}>
-            <SheetContent side="left" className="w-[18rem] bg-background p-0">
-                <div className="flex h-full flex-col">{children}</div>
-            </SheetContent>
-        </Sheet>
       </>
     )
   }
@@ -154,7 +147,7 @@ const NavigationInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        "flex-1",
+        "flex-1 flex flex-col",
         className
       )}
       {...props}
@@ -171,7 +164,7 @@ const NavigationHeader = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex items-center", "md:p-0 md:h-auto md:bg-transparent md:shadow-none md:border-0 p-2 h-16 bg-background shadow-sm border-b", className)}
+      className={cn("flex items-center", className)}
       {...props}
     />
   )
@@ -203,7 +196,7 @@ const NavigationMenu = React.forwardRef<
 >(({ className, ...props }, ref) => (
   <ul
     ref={ref}
-    className={cn("flex flex-col gap-1 md:flex-row md:items-center md:gap-2", className)}
+    className={cn("flex items-center gap-2 -mb-px", className)}
     {...props}
   />
 ))
@@ -222,13 +215,13 @@ const NavigationMenuItem = React.forwardRef<
 NavigationMenuItem.displayName = "NavigationMenuItem"
 
 const navigationMenuButtonVariants = cva(
-  "peer/menu-button flex w-full items-center gap-2 overflow-hidden rounded-md px-3 text-left outline-none ring-primary transition-all focus-visible:ring-2 active:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 data-[active=true]:bg-accent data-[active=true]:font-medium data-[active=true]:text-accent-foreground hover:bg-accent/80 hover:text-accent-foreground [&>svg]:size-4 [&>svg]:shrink-0",
+  "peer/menu-button flex w-full items-center justify-center gap-2 overflow-hidden px-3 text-left outline-none ring-primary transition-all focus-visible:ring-2 active:text-accent-foreground disabled:pointer-events-none disabled:opacity-50 aria-disabled:pointer-events-none aria-disabled:opacity-50 border-b-2 border-transparent text-muted-foreground data-[active=true]:border-primary data-[active=true]:font-medium data-[active=true]:text-primary hover:border-primary/50 hover:text-foreground [&>svg]:size-4 [&>svg]:shrink-0",
   {
     variants: {
       size: {
-        default: "h-10 text-sm",
+        default: "h-12 text-sm",
         sm: "h-9 text-xs",
-        lg: "h-12 text-base",
+        lg: "h-14 text-base",
       },
     },
     defaultVariants: {

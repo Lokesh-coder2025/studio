@@ -120,8 +120,8 @@ export default function Home() {
                 {STEPS.map((item, index) => (
                     <li key={item.step} className={`flex w-full items-center ${index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-px after:border-b after:border-border after:border-1 after:inline-block" : ""} ${currentStep > item.step ? 'after:border-primary' : ''}`}>
                         <div className="flex flex-col items-center">
-                            <span className={`flex items-center justify-center w-6 h-6 rounded-full shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                                <item.icon className="w-3 h-3" />
+                            <span className={`flex items-center justify-center w-8 h-8 rounded-full shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                                <item.icon className="w-4 h-4" />
                             </span>
                             <p className={`mt-1 text-[10px] font-medium whitespace-nowrap ${currentStep >= item.step ? 'text-primary' : 'text-muted-foreground'}`}>{item.title}</p>
                         </div>

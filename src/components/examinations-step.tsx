@@ -369,7 +369,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
           <Label htmlFor="exam-title" className="text-sm font-medium">Name of the Examination</Label>
           <Input
             id="exam-title"
-            placeholder="e.g. Final Examinations, June 2024"
+            placeholder="e.g. Annual Examination, March 2025"
             value={examTitle}
             onChange={(e) => setExamTitle(e.target.value)}
             className="mt-2"

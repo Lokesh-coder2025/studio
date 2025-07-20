@@ -114,16 +114,16 @@ export default function Home() {
 
   return (
     <>
-      <div className="sticky top-[112px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
-        <div className="p-4 sm:p-6 md:p-8">
+      <div className="sticky top-[64px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
+        <div className="p-2 sm:p-3 md:p-4">
             <ol className="flex items-center w-full max-w-4xl mx-auto">
                 {STEPS.map((item, index) => (
-                    <li key={item.step} className={`flex w-full items-center ${index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-1 after:border-b after:border-border after:border-2 after:inline-block" : ""} ${currentStep > item.step ? 'after:border-primary' : ''}`}>
+                    <li key={item.step} className={`flex w-full items-center ${index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-0.5 after:border-b after:border-border after:border-1 after:inline-block" : ""} ${currentStep > item.step ? 'after:border-primary' : ''}`}>
                         <div className="flex flex-col items-center">
-                            <span className={`flex items-center justify-center w-10 h-10 rounded-full lg:h-12 lg:w-12 shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                                <item.icon className="w-5 h-5 lg:w-6 lg:h-6" />
+                            <span className={`flex items-center justify-center w-6 h-6 rounded-full lg:h-8 lg:w-8 shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
+                                <item.icon className="w-3 h-3 lg:w-4 lg:h-4" />
                             </span>
-                            <p className={`mt-2 text-sm font-medium whitespace-nowrap ${currentStep >= item.step ? 'text-primary' : 'text-muted-foreground'}`}>{item.title}</p>
+                            <p className={`mt-1 text-xs font-medium whitespace-nowrap ${currentStep >= item.step ? 'text-primary' : 'text-muted-foreground'}`}>{item.title}</p>
                         </div>
                     </li>
                 ))}

@@ -53,46 +53,51 @@ export default function AboutPage() {
     ];
 
   return (
-    <div className="p-4 sm:p-6 md:p-8">
-      <div className="max-w-7xl mx-auto space-y-8">
-        <header className="text-center">
-          <div>
-            <h1 className="text-4xl font-bold text-primary font-headline">About DutyFlow</h1>
-          </div>
-        </header>
-
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-headline text-accent">What. Who. How.</CardTitle>
-          </CardHeader>
-          <CardContent className="prose prose-lg max-w-none text-foreground/90 space-y-4">
-              <p>
-                DutyFlow is an intelligent, AI-powered platform designed to revolutionize how educational institutions assign and manage invigilation duties. With just a few simple steps, DutyFlow transforms the complex and time-consuming process of exam duty allotment into a streamlined, fair, and highly efficient experience. Whether you're handling large-scale exam schedules or a small set of tests, DutyFlow adapts with precision. 
-              </p>
-              <p>
-                DutyFlow was envisioned by Lokesh D, a dedicated educator from Bangalore and an aspiring web developer, driven by a passion for creating meaningful solutions to academic challenges. With almost 20 years of experience in the education sector, Lokesh deeply understands the complexities institutions face during exam seasons.By fusing his academic expertise with cutting-edge web technologies, he created DutyFlow-a forward-thinking platform that reimagines how institutions manage invigilation duties through automation, intelligence, and precision.
-              </p>
-              <p>
-                Behind the scenes, DutyFlow leverages modern technology: Next.js and React for speed and responsiveness, ShadCN UI with Tailwind CSS for elegant design, and Genkit AI powered by Google’s models for intelligent duty distribution and email automation. With support for Excel and PDF exports, and session persistence via browser local storage, DutyFlow is built not only for performance but also for reliability and ease of use.
-              </p>
-               <p>
-                Whether you're an exam coordinator, principal, or educator, DutyFlow is thoughtfully designed with your needs in mind. Join the growing community of institutions transforming their exam management with ease, fairness, and intelligence.
-              </p>
-          </CardContent>
-        </Card>
-        
-        <Card className="shadow-lg">
-          <CardHeader>
-            <CardTitle className="text-2xl font-headline text-accent">Core Features</CardTitle>
-            <CardDescription>Everything you need to manage invigilation duties efficiently.</CardDescription>
-          </CardHeader>
-          <CardContent className="grid md:grid-cols-2 gap-x-8 gap-y-6">
-            {features.map(feature => (
-                <FeatureCard key={feature.title} {...feature} />
-            ))}
-          </CardContent>
-        </Card>
+    <>
+      <div className="sticky top-[112px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
+        <div className="flex h-[52px] items-center justify-center">
+            <header className="text-center">
+              <div>
+                <h1 className="text-xl font-bold text-primary">About DutyFlow</h1>
+              </div>
+            </header>
+        </div>
       </div>
-    </div>
+      <div className="p-4 sm:p-6 md:p-8">
+        <div className="max-w-7xl mx-auto space-y-8">
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-headline text-accent">What. Who. How.</CardTitle>
+            </CardHeader>
+            <CardContent className="prose prose-lg max-w-none text-foreground/90 space-y-4">
+                <p>
+                  DutyFlow is an intelligent, AI-powered platform designed to revolutionize how educational institutions assign and manage invigilation duties. With just a few simple steps, DutyFlow transforms the complex and time-consuming process of exam duty allotment into a streamlined, fair, and highly efficient experience. Whether you're handling large-scale exam schedules or a small set of tests, DutyFlow adapts with precision. 
+                </p>
+                <p>
+                  DutyFlow was envisioned by Lokesh D, a dedicated educator from Bangalore and an aspiring web developer, driven by a passion for creating meaningful solutions to academic challenges. With almost 20 years of experience in the education sector, Lokesh deeply understands the complexities institutions face during exam seasons.By fusing his academic expertise with cutting-edge web technologies, he created DutyFlow-a forward-thinking platform that reimagines how institutions manage invigilation duties through automation, intelligence, and precision.
+                </p>
+                <p>
+                  Behind the scenes, DutyFlow leverages modern technology: Next.js and React for speed and responsiveness, ShadCN UI with Tailwind CSS for elegant design, and Genkit AI powered by Google’s models for intelligent duty distribution and email automation. With support for Excel and PDF exports, and session persistence via browser local storage, DutyFlow is built not only for performance but also for reliability and ease of use.
+                </p>
+                 <p>
+                  Whether you're an exam coordinator, principal, or educator, DutyFlow is thoughtfully designed with your needs in mind. Join the growing community of institutions transforming their exam management with ease, fairness, and intelligence.
+                </p>
+            </CardContent>
+          </Card>
+          
+          <Card className="shadow-lg">
+            <CardHeader>
+              <CardTitle className="text-2xl font-headline text-accent">Core Features</CardTitle>
+              <CardDescription>Everything you need to manage invigilation duties efficiently.</CardDescription>
+            </CardHeader>
+            <CardContent className="grid md:grid-cols-2 gap-x-8 gap-y-6">
+              {features.map(feature => (
+                  <FeatureCard key={feature.title} {...feature} />
+              ))}
+            </CardContent>
+          </Card>
+        </div>
+      </div>
+    </>
   );
 }

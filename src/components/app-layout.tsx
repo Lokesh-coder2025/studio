@@ -42,7 +42,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           </NavigationHeader>
         </Navigation>
         <NavigationInset>
-            <nav className="border-b bg-background sticky top-0 z-40">
+            <nav className="border-b bg-background sticky z-40 top-16">
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
                 <NavigationMenu className="grid grid-cols-5">
                     <NavigationMenuItem className="col-start-2 flex justify-center">
@@ -62,10 +62,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         </NavigationMenuButton>
                     </NavigationMenuItem>
                     <NavigationMenuItem className="flex justify-center">
-                        <NavigationMenuButton asChild isActive={pathname === '/history1'} tooltip="History1">
-                          <Link href="/history1">
+                        <NavigationMenuButton asChild isActive={pathname === '/history'} tooltip="History">
+                          <Link href="/history">
                               <History />
-                              <span>History1</span>
+                              <span>History</span>
                           </Link>
                         </NavigationMenuButton>
                     </NavigationMenuItem>

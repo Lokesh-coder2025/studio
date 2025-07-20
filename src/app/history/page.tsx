@@ -22,7 +22,7 @@ import {
 } from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 
-export default function History1Page() {
+export default function HistoryPage() {
   const [history, setHistory] = useState<SavedAllotment[]>([]);
   const [selectedAllotment, setSelectedAllotment] = useState<SavedAllotment | null>(null);
   const [allotmentToDeleteId, setAllotmentToDeleteId] = useState<string | null>(null);
@@ -49,7 +49,7 @@ export default function History1Page() {
       <div className="max-w-7xl mx-auto">
         <header className="mb-8 text-center">
           <div>
-            <h1 className="text-4xl font-bold text-primary font-headline">History 1</h1>
+            <h1 className="text-4xl font-bold text-primary font-headline">History</h1>
             <p className="text-muted-foreground mt-2">Previously generated duty allotments</p>
           </div>
         </header>

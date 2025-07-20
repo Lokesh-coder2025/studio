@@ -85,7 +85,7 @@ NavigationProvider.displayName = "NavigationProvider"
 
 const Navigation = React.forwardRef<
   HTMLDivElement,
-  React.ComponentProps<"header">
+  React.ComponentProps<"div">
 >(
   (
     {
@@ -96,18 +96,16 @@ const Navigation = React.forwardRef<
     ref
   ) => {
     return (
-      <>
-        <header
-          ref={ref}
-          className={cn(
-            "sticky top-0 z-50 flex h-16 w-full items-center justify-between border-b bg-background/95 px-4 shadow-sm backdrop-blur-sm sm:px-6 md:px-8",
-            className
-          )}
-          {...props}
-        >
-          {children}
-        </header>
-      </>
+      <div
+        ref={ref}
+        className={cn(
+          "sticky top-0 z-50 bg-background/95 shadow-sm backdrop-blur-sm",
+          className
+        )}
+        {...props}
+      >
+        {children}
+      </div>
     )
   }
 )
@@ -147,7 +145,7 @@ const NavigationInset = React.forwardRef<
     <main
       ref={ref}
       className={cn(
-        "flex-1 flex flex-col pt-16",
+        "flex-1 flex flex-col pt-[112px]",
         className
       )}
       {...props}
@@ -164,7 +162,7 @@ const NavigationHeader = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex items-center", className)}
+      className={cn("flex items-center h-16 w-full px-4 sm:px-6 md:px-8 border-b", className)}
       {...props}
     />
   )

@@ -40,46 +40,46 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
              </div>
           </NavigationHeader>
+          <nav className="border-b bg-background">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
+              <NavigationMenu className="grid grid-cols-4">
+                  <NavigationMenuItem className="col-start-1 flex justify-center">
+                      <NavigationMenuButton asChild isActive={pathname === '/'} tooltip="New Allotment">
+                      <Link href="/" onClick={handleNewAllotmentClick}>
+                          <FileSpreadsheet />
+                          <span>New Allotment</span>
+                      </Link>
+                      </NavigationMenuButton>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem className="flex justify-center">
+                      <NavigationMenuButton asChild isActive={pathname === '/saved-allotments'} tooltip="Saved Allotments">
+                      <Link href="/saved-allotments">
+                          <Save />
+                          <span>Saved Allotments</span>
+                      </Link>
+                      </NavigationMenuButton>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem className="flex justify-center">
+                      <NavigationMenuButton asChild isActive={pathname === '/history'} tooltip="History">
+                        <Link href="/history">
+                            <History />
+                            <span>History</span>
+                        </Link>
+                      </NavigationMenuButton>
+                  </NavigationMenuItem>
+                  <NavigationMenuItem className="col-start-4 flex justify-end">
+                      <NavigationMenuButton asChild isActive={pathname === '/about'} tooltip="About DutyFlow">
+                      <Link href="/about">
+                          <Info />
+                          <span>About DutyFlow</span>
+                      </Link>
+                      </NavigationMenuButton>
+                  </NavigationMenuItem>
+                  </NavigationMenu>
+              </div>
+          </nav>
         </Navigation>
         <NavigationInset>
-            <nav className="border-b bg-background sticky z-40 top-16">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                <NavigationMenu className="grid grid-cols-5">
-                    <NavigationMenuItem className="col-start-2 flex justify-center">
-                        <NavigationMenuButton asChild isActive={pathname === '/'} tooltip="New Allotment">
-                        <Link href="/" onClick={handleNewAllotmentClick}>
-                            <FileSpreadsheet />
-                            <span>New Allotment</span>
-                        </Link>
-                        </NavigationMenuButton>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem className="flex justify-center">
-                        <NavigationMenuButton asChild isActive={pathname === '/saved-allotments'} tooltip="Saved Allotments">
-                        <Link href="/saved-allotments">
-                            <Save />
-                            <span>Saved Allotments</span>
-                        </Link>
-                        </NavigationMenuButton>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem className="flex justify-center">
-                        <NavigationMenuButton asChild isActive={pathname === '/history'} tooltip="History">
-                          <Link href="/history">
-                              <History />
-                              <span>History</span>
-                          </Link>
-                        </NavigationMenuButton>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem className="col-start-5 flex justify-end">
-                        <NavigationMenuButton asChild isActive={pathname === '/about'} tooltip="About DutyFlow">
-                        <Link href="/about">
-                            <Info />
-                            <span>About DutyFlow</span>
-                        </Link>
-                        </NavigationMenuButton>
-                    </NavigationMenuItem>
-                    </NavigationMenu>
-                </div>
-            </nav>
             <div className="flex-1">
                 {children}
             </div>

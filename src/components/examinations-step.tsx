@@ -301,7 +301,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         subject: exam.subject,
         time: `${exam.startTime} - ${exam.endTime}`,
         rooms: exam.roomsAllotted,
-        invigilatorsNeeded: exam.roomsAllotted, // Relievers are not part of auto-allotment for now
+        invigilatorsNeeded: exam.roomsAllotted + exam.relieversRequired,
       }));
 
       // For the AI, we only need name, designation, and any pre-existing duties.

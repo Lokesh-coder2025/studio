@@ -151,7 +151,24 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       });
       return row;
     });
-    exportToExcelWithFormulas(headers, dataRows, 'Duty Allotment', 'duty-allotment-sheet');
+    
+    const roomTotals = uniqueExamsForExport.map(exam => {
+        const fullExam = examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time);
+        return fullExam?.roomsAllotted || 0;
+    });
+
+    const relieverTotals = uniqueExamsForExport.map(exam => {
+        const fullExam = examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time);
+        return fullExam?.relieversRequired || 0;
+    });
+
+    const footerRows = [
+        ['', '', 'No of Rooms', ...roomTotals],
+        ['', '', 'No of Relievers', ...relieverTotals],
+        ['', '', 'Total Duties Allotted'], // Label for sum, formulas will be added
+    ];
+
+    exportToExcelWithFormulas(headers, dataRows, footerRows, 'Duty Allotment', 'duty-allotment-sheet');
   };
 
   const handleDownloadPdf = () => {
@@ -199,23 +216,24 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         examDetailsMap.set(examKey, exam);
     });
     
-    const requiredTotals: (string|number)[] = uniqueExamsForExport.map(exam => {
-        const fullExam = examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time);
-        return fullExam?.roomsAllotted || 0;
-    });
+    const roomTotals = uniqueExamsForExport.map(exam => examDetailsMap.get(getExamKeyForExport(exam))?.roomsAllotted || 0);
+    const relieverTotals = uniqueExamsForExport.map(exam => examDetailsMap.get(getExamKeyForExport(exam))?.relieversRequired || 0);
+    const allottedTotals = uniqueExamsForExport.map(exam => dutyDataForExport.reduce((sum, inv) => sum + (inv.duties[getExamKeyForExport(exam)] || 0), 0));
 
-    const allottedTotals: (string|number)[] = uniqueExamsForExport.map(exam => {
-        return dutyDataForExport.reduce((sum, inv) => sum + (inv.duties[getExamKeyForExport(exam)] || 0), 0);
-    });
-
-    const requiredGrandTotal = requiredTotals.reduce((sum, current) => sum + (Number(current) || 0), 0);
-    const allottedGrandTotal = allottedTotals.reduce((sum, current) => sum + (Number(current) || 0), 0);
+    const roomGrandTotal = roomTotals.reduce((a, b) => a + b, 0);
+    const relieverGrandTotal = relieverTotals.reduce((a, b) => a + b, 0);
+    const allottedGrandTotal = allottedTotals.reduce((a, b) => a + b, 0);
 
     const foot = [
         [
             { content: 'No of Rooms', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
-            ...requiredTotals.map(total => ({ content: total, styles: { halign: 'center', fontStyle: 'bold' }})),
-            { content: requiredGrandTotal, styles: { halign: 'center', fontStyle: 'bold' } },
+            ...roomTotals.map(total => ({ content: total, styles: { halign: 'center', fontStyle: 'bold' }})),
+            { content: roomGrandTotal, styles: { halign: 'center', fontStyle: 'bold' } },
+        ],
+        [
+            { content: 'No of Relievers', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
+            ...relieverTotals.map(total => ({ content: total, styles: { halign: 'center', fontStyle: 'bold' }})),
+            { content: relieverGrandTotal, styles: { halign: 'center', fontStyle: 'bold' } },
         ],
         [
             { content: 'Total Duties Allotted', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
@@ -439,8 +457,3 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
-
-    
-
-    
-

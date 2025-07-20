@@ -67,26 +67,33 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
       return map;
     }, [examinations]);
 
-    const { columnTotals, grandTotal, requiredTotals, requiredGrandTotal } = useMemo(() => {
-      const allotted: { [key: string]: number } = {};
-      let allottedGrand = 0;
-      
-      const required: { [key: string]: number } = {};
-      let requiredGrand = 0;
-      
-      uniqueExams.forEach(exam => {
-        const examKey = getExamKey(exam);
-        const examTotal = dutyData.reduce((sum, inv) => sum + (inv.duties[examKey] || 0), 0);
-        allotted[examKey] = examTotal;
-        
-        const details = examDetailsMap.get(examKey);
-        required[examKey] = details?.roomsAllotted || 0;
-      });
+    const { allottedTotals, allottedGrandTotal, roomTotals, relieverTotals, requiredGrandTotal } = useMemo(() => {
+        const allotted: { [key: string]: number } = {};
+        const rooms: { [key: string]: number } = {};
+        const relievers: { [key: string]: number } = {};
 
-      allottedGrand = dutyData.reduce((sum, inv) => sum + inv.totalDuties, 0);
-      requiredGrand = Object.values(required).reduce((sum, rooms) => sum + rooms, 0);
+        uniqueExams.forEach(exam => {
+            const examKey = getExamKey(exam);
+            
+            // Calculate allotted duties
+            allotted[examKey] = dutyData.reduce((sum, inv) => sum + (inv.duties[examKey] || 0), 0);
+            
+            // Get required duties from original examination data
+            const details = examDetailsMap.get(examKey);
+            rooms[examKey] = details?.roomsAllotted || 0;
+            relievers[examKey] = details?.relieversRequired || 0;
+        });
 
-      return { columnTotals: allotted, grandTotal: allottedGrand, requiredTotals: required, requiredGrandTotal: requiredGrand };
+        const allottedGrand = dutyData.reduce((sum, inv) => sum + inv.totalDuties, 0);
+        const requiredGrand = Object.values(rooms).reduce((sum, r) => sum + r, 0) + Object.values(relievers).reduce((sum, r) => sum + r, 0);
+
+        return { 
+            allottedTotals: allotted, 
+            allottedGrandTotal: allottedGrand, 
+            roomTotals: rooms, 
+            relieverTotals: relievers, 
+            requiredGrandTotal: requiredGrand 
+        };
     }, [dutyData, uniqueExams, examDetailsMap]);
 
     const handleToggleDuty = (invigilatorName: string, examToUpdate: Assignment) => {
@@ -183,18 +190,31 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                     {uniqueExams.map(exam => {
                         const examKey = getExamKey(exam);
                         return (
-                            <TableCell key={`required-${examKey}`} className="text-center font-bold">
-                                {requiredTotals[examKey]}
+                            <TableCell key={`rooms-${examKey}`} className="text-center font-bold">
+                                {roomTotals[examKey]}
                             </TableCell>
                         )
                     })}
-                    <TableCell className="text-center font-bold">{requiredGrandTotal}</TableCell>
+                    <TableCell className="text-center font-bold">{Object.values(roomTotals).reduce((a, b) => a + b, 0)}</TableCell>
+                </TableRow>
+                <TableRow className="bg-muted/50 hover:bg-muted/50">
+                    <TableCell colSpan={3} className="text-right font-bold">No of Relievers </TableCell>
+                    {uniqueExams.map(exam => {
+                        const examKey = getExamKey(exam);
+                        return (
+                            <TableCell key={`relievers-${examKey}`} className="text-center font-bold">
+                                {relieverTotals[examKey]}
+                            </TableCell>
+                        )
+                    })}
+                    <TableCell className="text-center font-bold">{Object.values(relieverTotals).reduce((a, b) => a + b, 0)}</TableCell>
                 </TableRow>
                 <TableRow className="bg-muted/50 font-medium hover:bg-muted/50">
                 <TableCell colSpan={3} className="text-right font-bold">Total Duties Allotted</TableCell>
                 {uniqueExams.map(exam => {
                     const examKey = getExamKey(exam);
-                    const isMismatch = columnTotals[examKey] !== requiredTotals[examKey];
+                    const required = (roomTotals[examKey] || 0) + (relieverTotals[examKey] || 0);
+                    const isMismatch = allottedTotals[examKey] !== required;
                     return (
                         <TableCell 
                             key={`total-${examKey}`} 
@@ -203,11 +223,11 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                                 isMismatch && "text-destructive"
                             )}
                         >
-                            {columnTotals[examKey]}
+                            {allottedTotals[examKey]}
                         </TableCell>
                     )
                 })}
-                <TableCell className={cn("text-center font-bold", grandTotal !== requiredGrandTotal && "text-destructive")}>{grandTotal}</TableCell>
+                <TableCell className={cn("text-center font-bold", allottedGrandTotal !== requiredGrandTotal && "text-destructive")}>{allottedGrandTotal}</TableCell>
                 </TableRow>
             </TableFooter>
           )}

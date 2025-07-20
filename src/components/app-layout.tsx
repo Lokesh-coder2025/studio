@@ -63,10 +63,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </NavigationMenuItem>
                     <NavigationMenuItem className="flex justify-center">
                         <NavigationMenuButton asChild isActive={pathname === '/history'} tooltip="History">
-                        <Link href="/history">
-                            <History />
-                            <span>History</span>
-                        </Link>
+                          <Link href="/history">
+                              <History />
+                              <span>History</span>
+                          </Link>
                         </NavigationMenuButton>
                     </NavigationMenuItem>
                     <NavigationMenuItem className="col-start-6 flex justify-end">

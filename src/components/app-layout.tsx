@@ -21,8 +21,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     // This logic ensures that navigating to the home page always triggers a state reset,
-    // avoiding hydration issues with client-side-only values like new Date().
-    router.push('/');
+    // avoiding hydration issues with client-side-only values.
+    if (pathname === '/') {
+        window.location.reload();
+    } else {
+        router.push('/');
+    }
   };
   
   return (

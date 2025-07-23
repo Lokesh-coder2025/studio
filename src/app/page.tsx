@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useEffect, useState } from 'react';
+import { Suspense, useEffect, useState } from 'react';
 import type { Invigilator, Examination, Assignment, SavedAllotment } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InvigilatorsStep } from '@/components/invigilators-step';
@@ -10,6 +10,7 @@ import { ResultsStep } from '@/components/results-step';
 import { Workflow, BookUser, FileSpreadsheet } from 'lucide-react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const STEPS = [
   { step: 1, title: "Invigilators' Details", description: "Add all available invigilators.", icon: BookUser },
@@ -17,7 +18,7 @@ const STEPS = [
   { step: 3, title: "Duty Allotment", description: "View and export the generated schedule.", icon: FileSpreadsheet },
 ];
 
-export default function Home() {
+function HomeClient() {
   const [currentStep, setCurrentStep] = useState(1);
   const [invigilators, setInvigilators] = useState<Invigilator[]>([]);
   const [examinations, setExaminations] = useState<Examination[]>([]);
@@ -148,5 +149,14 @@ export default function Home() {
         </Card>
       </div>
     </>
+  );
+}
+
+
+export default function Home() {
+  return (
+    <Suspense fallback={<div className="p-4 sm:p-6 md:p-8"><Skeleton className="h-[400px] w-full" /></div>}>
+      <HomeClient />
+    </Suspense>
   );
 }

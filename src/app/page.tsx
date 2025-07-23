@@ -155,7 +155,7 @@ function HomeClient() {
 
 export default function Home() {
   return (
-    <Suspense fallback={<div className="p-4 sm:p-6 md:p-8"><Skeleton className="h-[400px] w-full" /></div>}>
+    <Suspense fallback={<div>Loading...</div>}>
       <HomeClient />
     </Suspense>
   );

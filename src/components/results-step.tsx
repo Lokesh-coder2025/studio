@@ -277,7 +277,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         cellPadding: 2,
       },
       headStyles: {
-        fillColor: [41, 171, 226],
+        fillColor: [75, 0, 130],
         textColor: 255,
         fontStyle: 'bold',
       },

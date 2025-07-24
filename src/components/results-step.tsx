@@ -246,25 +246,36 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const defaultStartY = 15; // Default startY for pages without main headers
+    let finalStartY = defaultStartY;
 
     doc.autoTable({
       head: head,
       body: body,
       foot: foot,
-      startY: defaultStartY,
+      startY: finalStartY,
       didDrawPage: function (data) {
         // Only draw the main header on the first page
         if (data.pageNumber === 1) {
+          // Draw a background rectangle
+          doc.setFillColor(0, 71, 171); // Cobalt Blue
+          doc.rect(0, 0, pageWidth, 40, 'F');
+          
+          // Set text color to white for the header
+          doc.setTextColor(255, 255, 255);
+
           doc.setFontSize(20);
-          doc.setTextColor(40);
           doc.text(collegeName || 'College Name', pageWidth / 2, 15, { align: 'center' });
           
           doc.setFontSize(16);
           doc.text(finalExamTitle, pageWidth / 2, 24, { align: 'center' });
           doc.text("Invigilation Duty Allotment Sheet", pageWidth / 2, 31, { align: 'center' });
           
+          // Reset text color for the rest of the document
+          doc.setTextColor(40);
+          
           // Adjust table startY for the first page to make space for the header
-          data.settings.startY = 45;
+          finalStartY = 45;
+          data.settings.startY = finalStartY;
         }
 
         // Page footer for all pages

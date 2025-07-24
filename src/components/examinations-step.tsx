@@ -61,7 +61,7 @@ const hours = Array.from({ length: 12 }, (_, i) => (i + 1).toString().padStart(2
 const minutes = ['00', '15', '30', '45'];
 const periods = ['AM', 'PM'];
 const roomNumbers = Array.from({ length: 50 }, (_, i) => (i + 1).toString());
-const relieverNumbers = Array.from({ length: 10 }, (_, i) => (i + 1).toString());
+const relieverNumbers = Array.from({ length: 11 }, (_, i) => i.toString());
 
 type ExaminationsStepProps = {
   collegeName: string;
@@ -154,7 +154,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         endMinute: '00',
         endPeriod: 'PM',
         roomsAllotted: '1',
-        relieversRequired: '1',
+        relieversRequired: '0',
       },
       session2: {
         subject: 'none',
@@ -165,7 +165,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         endMinute: '00',
         endPeriod: 'PM',
         roomsAllotted: '1',
-        relieversRequired: '1',
+        relieversRequired: '0',
       },
     },
   });

@@ -238,14 +238,26 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         const workbook = XLSX.read(data, { type: 'binary' });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json<any>(worksheet);
+        const json = XLSX.utils.sheet_to_json<any>(worksheet, { raw: false, dateNF: 'yyyy-mm-dd' });
 
         const newExams = json
           .map((row, index) => {
-            const date = row.Date ? new Date((row.Date - (25567 + 2)) * 86400 * 1000) : null;
-            if (!date || !row.Subject || !row['Start Time'] || !row['End Time'] || !row['No of Rooms'] || !row['No of Relievers']) {
+            const dateValue = row.Date;
+            let date = null;
+            
+            if (typeof dateValue === 'number') {
+              // Handle Excel serial date number
+              date = new Date((dateValue - (25567 + 2)) * 86400 * 1000);
+            } else if (typeof dateValue === 'string') {
+              // Handle date string (e.g., '2024-05-21' or '05/21/2024')
+              date = new Date(dateValue);
+            }
+            
+            if (!date || isNaN(date.getTime()) || !row.Subject || !row['Start Time'] || !row['End Time'] || row['No of Rooms'] == null || row['No of Relievers'] == null) {
+              console.warn(`Skipping row ${index + 2} due to missing or invalid data:`, row);
               return null;
             }
+
             return {
               id: `${new Date().getTime()}-${index}`,
               date: date.toISOString(),
@@ -268,14 +280,14 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
           });
         } else {
           toast({
-            title: 'No examinations found',
+            title: 'No valid examinations found',
             description: "Ensure columns for 'Date', 'Subject', 'Start Time', 'End Time', 'No of Rooms', and 'No of Relievers' exist and are correctly formatted.",
             variant: 'destructive',
           });
         }
       } catch (error) {
         console.error("Error parsing exam Excel:", error);
-        toast({ title: 'Import Failed', description: 'Could not parse the file.', variant: 'destructive' });
+        toast({ title: 'Import Failed', description: 'Could not parse the file. Check console for details.', variant: 'destructive' });
       } finally {
         if (e.target) e.target.value = '';
       }

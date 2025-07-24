@@ -244,29 +244,39 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   
     const finalExamTitle = examTitle || 'Duty Allotment Sheet';
     const pageWidth = doc.internal.pageSize.getWidth();
+    const pageHeight = doc.internal.pageSize.getHeight();
     
     doc.autoTable({
       head: head,
       body: body,
       foot: foot,
-      startY: 20, // Start table 2cm from top
+      startY: 20,
       didDrawPage: function (data) {
-        if (data.pageNumber === 1) {
-          // Add header text without background
-          doc.setTextColor(0, 0, 0); // Black text
-          doc.setFontSize(16);
-          doc.text(collegeName || 'College Name', pageWidth / 2, 8, { align: 'center' });
-          doc.setFontSize(12);
-          doc.text(finalExamTitle, pageWidth / 2, 14, { align: 'center' });
-        }
+        // Header
+        doc.setTextColor(0, 0, 0);
+        doc.setFontSize(16);
+        doc.text(collegeName || 'College Name', pageWidth / 2, 8, { align: 'center' });
+        doc.setFontSize(12);
+        doc.text(finalExamTitle, pageWidth / 2, 14, { align: 'center' });
+
+        // Footer
+        const pageCount = doc.internal.pages.length;
+        doc.setFontSize(10);
+        doc.setTextColor(100);
+        doc.text(
+            `Page ${data.pageNumber} of ${pageCount}`,
+            pageWidth / 2,
+            pageHeight - 10,
+            { align: 'center' }
+        );
       },
       styles: {
         fontSize: 9,
         cellPadding: 2,
       },
       headStyles: {
-        fillColor: [41, 171, 226], // Blue background for table header
-        textColor: 255, // White text for table header
+        fillColor: [41, 171, 226],
+        textColor: 255,
         fontStyle: 'bold',
       },
       footStyles: {

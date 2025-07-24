@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, parse as parseDate } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
@@ -231,57 +231,103 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
 
     const reader = new FileReader();
     reader.onload = (event) => {
-      try {
-        const data = event.target?.result;
-        if (!data) throw new Error('File could not be read.');
+        try {
+            const data = event.target?.result;
+            if (!data) throw new Error('File could not be read.');
 
-        const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
-        const sheetName = workbook.SheetNames[0];
-        const worksheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json<any>(worksheet);
+            const workbook = XLSX.read(data, { type: 'binary' });
+            const sheetName = workbook.SheetNames[0];
+            const worksheet = workbook.Sheets[sheetName];
+            const json = XLSX.utils.sheet_to_json<any>(worksheet, {
+                raw: false, // This ensures dates are parsed as strings in a consistent format
+            });
 
-        const newExams = json
-          .map((row, index) => {
-            const date = row.Date;
+            const findHeader = (headers: string[], keywords: string[]): string | undefined => {
+                return headers.find(h => keywords.some(k => h.toLowerCase().includes(k)));
+            };
+
+            const headers = Object.keys(json[0] || {});
+            const keyMap = {
+                date: findHeader(headers, ['date']),
+                subject: findHeader(headers, ['subject']),
+                startTime: findHeader(headers, ['start', 'from']),
+                endTime: findHeader(headers, ['end', 'to']),
+                roomsAllotted: findHeader(headers, ['room']),
+                relieversRequired: findHeader(headers, ['reliever']),
+            };
             
-            if (!date || !(date instanceof Date) || isNaN(date.getTime()) || !row.Subject || !row['Start Time'] || !row['End Time'] || row['No of Rooms'] == null || row['No of Relievers'] == null) {
-              console.warn(`Skipping row ${index + 2} due to missing or invalid data:`, row);
-              return null;
+            const missingKeys = Object.entries(keyMap).filter(([, value]) => !value).map(([key]) => key);
+            if (missingKeys.length > 0) {
+                toast({
+                    title: 'Import Failed: Missing Columns',
+                    description: `Could not find columns for: ${missingKeys.join(', ')}. Please check your Excel headers.`,
+                    variant: 'destructive',
+                    duration: 10000,
+                });
+                return;
             }
 
-            return {
-              id: `${new Date().getTime()}-${index}`,
-              date: date.toISOString(),
-              day: format(date, 'EEE'),
-              subject: String(row.Subject),
-              startTime: String(row['Start Time']),
-              endTime: String(row['End Time']),
-              roomsAllotted: Number(row['No of Rooms']),
-              relieversRequired: Number(row['No of Relievers']),
-            };
-          })
-          .filter((exam): exam is Examination => exam !== null);
+            const newExams = json
+                .map((row, index) => {
+                    const dateValue = row[keyMap.date!];
+                    const subjectValue = row[keyMap.subject!];
+                    const startTimeValue = row[keyMap.startTime!];
+                    const endTimeValue = row[keyMap.endTime!];
+                    const roomsValue = row[keyMap.roomsAllotted!];
+                    const relieversValue = row[keyMap.relieversRequired!];
+                    
+                    if (!dateValue || !subjectValue || !startTimeValue || !endTimeValue || roomsValue == null || relieversValue == null) {
+                        console.warn(`Skipping row ${index + 2} due to missing data:`, row);
+                        return null;
+                    }
 
-        if (newExams.length > 0) {
-          setExaminations(prev => [...prev, ...newExams].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
-          toast({
-            title: 'Import Successful',
-            description: `${newExams.length} examinations added.`,
-            className: 'bg-accent text-accent-foreground',
-          });
-        } else {
-          toast({
-            title: 'No valid examinations found',
-            description: "Ensure columns for 'Date', 'Subject', 'Start Time', 'End Time', 'No of Rooms', and 'No of Relievers' exist and are correctly formatted.",
-            variant: 'destructive',
-          });
+                    // Attempt to parse date from various common formats
+                    const parsedDate = 
+                        parseDate(dateValue, 'M/d/yy', new Date()) || 
+                        parseDate(dateValue, 'MM/dd/yyyy', new Date()) ||
+                        parseDate(dateValue, 'yyyy-MM-dd', new Date()) ||
+                        parseDate(dateValue, 'dd-MMM-yy', new Date()) ||
+                        new Date(dateValue); // Fallback for ISO strings or other direct formats
+
+                    if (isNaN(parsedDate.getTime())) {
+                        console.warn(`Skipping row ${index + 2} due to invalid date format:`, dateValue);
+                        return null;
+                    }
+                    
+                    return {
+                        id: `${new Date().getTime()}-${index}`,
+                        date: parsedDate.toISOString(),
+                        day: format(parsedDate, 'EEE'),
+                        subject: String(subjectValue),
+                        startTime: String(startTimeValue),
+                        endTime: String(endTimeValue),
+                        roomsAllotted: Number(roomsValue),
+                        relieversRequired: Number(relieversValue),
+                    };
+                })
+                .filter((exam): exam is Examination => exam !== null);
+
+            if (newExams.length > 0) {
+                setExaminations(prev => [...prev, ...newExams].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+                toast({
+                    title: 'Import Successful',
+                    description: `${newExams.length} examinations added.`,
+                    className: 'bg-accent text-accent-foreground',
+                });
+            } else {
+                toast({
+                    title: 'No valid examinations found',
+                    description: "Check that your file has data and that dates are in a recognizable format (e.g., YYYY-MM-DD, MM/DD/YYYY).",
+                    variant: 'destructive',
+                });
+            }
+        } catch (error) {
+            console.error("Error parsing exam Excel:", error);
+            const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
+            toast({ title: 'Import Failed', description: `Could not parse the file. ${errorMessage}`, variant: 'destructive' });
+        } finally {
+            if (e.target) e.target.value = '';
         }
-      } catch (error) {
-        console.error("Error parsing exam Excel:", error);
-        toast({ title: 'Import Failed', description: 'Could not parse the file. Check console for details.', variant: 'destructive' });
-      } finally {
-        if (e.target) e.target.value = '';
-      }
     };
     reader.readAsBinaryString(file);
   };
@@ -593,7 +639,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                 id="excel-exam-upload"
                 type="file"
                 className="hidden"
-                accept=".xlsx, .xls"
+                accept=".xlsx, .xls, .csv"
                 onChange={handleExamFileUpload}
               />
               <Button asChild>

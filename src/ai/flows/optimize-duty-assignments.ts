@@ -49,35 +49,12 @@ const OptimizeDutyAssignmentsOutputSchema = z.array(
 
 export type OptimizeDutyAssignmentsOutput = z.infer<typeof OptimizeDutyAssignmentsOutputSchema>;
 
-// This will hold the invigilator data for the current request, allowing the tool to access it.
-let currentInvigilators: OptimizeDutyAssignmentsInput['invigilators'] = [];
-
-// Define the tool to check invigilator availability for pre-existing duties
-const checkInvigilatorAvailability = ai.defineTool({
-  name: 'checkInvigilatorAvailability',
-  description: 'Checks if an invigilator has a pre-existing duty on a given date by looking at their `duties` array in the input.',
-  inputSchema: z.object({
-    invigilatorName: z.string().describe('The name of the invigilator to check.'),
-    date: z.string().describe('The date to check for availability (format: YYYY-MM-DD).'),
-  }),
-  outputSchema: z.boolean().describe('True if the invigilator is available (no pre-existing duty), false otherwise.'),
-}, async ({ invigilatorName, date }) => {
-  const invigilator = currentInvigilators.find(i => i.name === invigilatorName);
-  
-  if (!invigilator || !invigilator.duties) {
-    return true; // Available if not found or no duties array
-  }
-  
-  // Check if any of their pre-existing duties match the given date
-  return !invigilator.duties.some(duty => duty.date === date);
-});
 
 // Define the prompt for optimizing duty assignments
 const optimizeDutyAssignmentsPrompt = ai.definePrompt({
   name: 'optimizeDutyAssignmentsPrompt',
   input: { schema: OptimizeDutyAssignmentsInputSchema },
   output: { schema: OptimizeDutyAssignmentsOutputSchema },
-  tools: [checkInvigilatorAvailability],
   system: `You are an expert at creating fair and optimized invigilation duty schedules. Your task is to generate duty assignments based on a list of invigilators and examinations. You must produce a valid JSON array matching the output schema.`,
   prompt: `Please generate a duty schedule by following these steps and rules precisely:
 
@@ -89,14 +66,11 @@ const optimizeDutyAssignmentsPrompt = ai.definePrompt({
 **Step 2: Assign Duties based on Strict Rules**
 You must generate a duty schedule that adheres to the following rules, in this exact order of priority:
 
-**Rule 0: Respect Pre-existing Duties (Hardest Constraint)**
-- Before assigning any duty, you MUST use the \`checkInvigilatorAvailability\` tool to ensure the invigilator does not have a pre-existing duty on that specific day. An invigilator with a pre-existing duty on a date is completely unavailable for any exam on that date.
-
 **Rule 1: Fulfill Examination Needs (Hard Constraint)**
 - Every examination must have exactly the number of invigilators specified by 'invigilatorsNeeded'.
 
 **Rule 2: No Same-Day Double Duty (Hard Constraint)**
-- An invigilator CANNOT be assigned to more than one examination on the same day. This includes both the newly assigned duties and their pre-existing ones.
+- An invigilator CANNOT be assigned to more than one examination on the same day.
 
 **Rule 3: Equal Distribution (Primary Goal)**
 - Distribute duties so that most invigilators have the base number of duties calculated in Step 1.
@@ -110,9 +84,9 @@ You must generate a duty schedule that adheres to the following rules, in this e
 
 **Input Data:**
 
-Invigilators (The order is important for Rule 4. Check their 'duties' array for pre-existing commitments):
+Invigilators (The order is important for Rule 4):
 {{#each invigilators}}
-- Name: {{this.name}}, Designation: {{this.designation}}, Pre-existing Duties: {{#if this.duties}}{{json this.duties}}{{else}}None{{/if}}
+- Name: {{this.name}}, Designation: {{this.designation}}
 {{/each}}
 
 Examinations:
@@ -120,7 +94,7 @@ Examinations:
 - Date: {{this.date}}, Subject: {{this.subject}}, Time: {{this.time}}, Invigilators Needed: {{this.invigilatorsNeeded}}
 {{/each}}
 
-Generate the complete and optimized list of duty assignments based on these rules. Remember to use the 'checkInvigilatorAvailability' tool for every potential assignment.`, 
+Generate the complete and optimized list of duty assignments based on these rules.`, 
 });
 
 // Define the flow for optimizing duty assignments
@@ -131,11 +105,7 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
     outputSchema: OptimizeDutyAssignmentsOutputSchema,
   },
   async input => {
-    // Set the invigilator data for the tool to access within this request
-    currentInvigilators = input.invigilators;
     const { output } = await optimizeDutyAssignmentsPrompt(input);
-    // Clear the data after the request is done
-    currentInvigilators = [];
     return output!;
   }
 );

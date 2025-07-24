@@ -244,24 +244,20 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   
     const finalExamTitle = examTitle || 'Duty Allotment Sheet';
     const pageWidth = doc.internal.pageSize.getWidth();
-    let finalStartY = 20;
-
+    
     doc.autoTable({
       head: head,
       body: body,
       foot: foot,
-      startY: finalStartY,
+      startY: 20, // Start table 2cm from top
       didDrawPage: function (data) {
         if (data.pageNumber === 1) {
-          doc.setFillColor(41, 171, 226);
-          doc.rect(0, 0, pageWidth, 18, 'F');
-          doc.setTextColor(255, 255, 255);
+          // Add header text without background
+          doc.setTextColor(0, 0, 0); // Black text
           doc.setFontSize(16);
           doc.text(collegeName || 'College Name', pageWidth / 2, 8, { align: 'center' });
           doc.setFontSize(12);
           doc.text(finalExamTitle, pageWidth / 2, 14, { align: 'center' });
-          finalStartY = 20;
-          data.settings.startY = finalStartY;
         }
       },
       styles: {
@@ -269,8 +265,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         cellPadding: 2,
       },
       headStyles: {
-        fillColor: [41, 171, 226],
-        textColor: 255,
+        fillColor: [41, 171, 226], // Blue background for table header
+        textColor: 255, // White text for table header
         fontStyle: 'bold',
       },
       footStyles: {

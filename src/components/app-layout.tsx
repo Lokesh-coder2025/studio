@@ -37,7 +37,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="flex justify-center w-full">
                 <div className="text-center">
                   <h1 className="text-5xl font-bold text-primary font-headline">DutyFlow</h1>
-                  <p className="text-xs font-bold text-muted-foreground hidden sm:block w-full tracking-[0.2em] text-center">Automated Invigilation Allotments</p>
+                  <p className="text-xs font-bold text-muted-foreground hidden sm:block w-full tracking-[0.2em] text-center mt-1">Automated Invigilation Allotments</p>
                 </div>
               </div>
             </NavigationHeader>

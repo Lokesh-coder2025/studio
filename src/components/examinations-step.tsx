@@ -238,13 +238,13 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
             const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            const json = XLSX.utils.sheet_to_json<any>(worksheet);
+            const json = XLSX.utils.sheet_to_json<any>(worksheet, { raw: false }); // raw: false is crucial for date strings
 
             const findHeader = (headers: string[], keywords: string[]): string | undefined => {
                 return headers.find(h => keywords.some(k => h.toLowerCase().includes(k)));
             };
 
-            const headers = Object.keys(json[0] || {});
+            const headers = Object.keys(json[0] || {}).map(h => h.toLowerCase());
             const keyMap = {
                 date: findHeader(headers, ['date']),
                 subject: findHeader(headers, ['subject']),
@@ -254,6 +254,16 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                 relieversRequired: findHeader(headers, ['reliever']),
             };
             
+            const originalHeaders = Object.keys(json[0] || {});
+            const originalKeyMap = {
+                date: findHeader(originalHeaders, ['date']),
+                subject: findHeader(originalHeaders, ['subject']),
+                startTime: findHeader(originalHeaders, ['start', 'from']),
+                endTime: findHeader(originalHeaders, ['end', 'to']),
+                roomsAllotted: findHeader(originalHeaders, ['room']),
+                relieversRequired: findHeader(originalHeaders, ['reliever']),
+            };
+
             const missingKeys = Object.entries(keyMap).filter(([, value]) => !value).map(([key]) => key);
             if (missingKeys.length > 0) {
                 toast({
@@ -267,12 +277,12 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
 
             const newExams = json
                 .map((row, index) => {
-                    const dateValue = row[keyMap.date!];
-                    const subjectValue = row[keyMap.subject!];
-                    const startTimeValue = row[keyMap.startTime!];
-                    const endTimeValue = row[keyMap.endTime!];
-                    const roomsValue = row[keyMap.roomsAllotted!];
-                    const relieversValue = row[keyMap.relieversRequired!];
+                    const dateValue = row[originalKeyMap.date!];
+                    const subjectValue = row[originalKeyMap.subject!];
+                    const startTimeValue = row[originalKeyMap.startTime!];
+                    const endTimeValue = row[originalKeyMap.endTime!];
+                    const roomsValue = row[originalKeyMap.roomsAllotted!];
+                    const relieversValue = row[originalKeyMap.relieversRequired!];
                     
                     if (!dateValue || !subjectValue || !startTimeValue || !endTimeValue || roomsValue == null || relieversValue == null) {
                         console.warn(`Skipping row ${index + 2} due to missing data:`, row);
@@ -280,22 +290,31 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                     }
 
                     let parsedDate: Date;
-                    if (dateValue instanceof Date) {
+                    if (dateValue instanceof Date && !isNaN(dateValue.getTime())) {
                         parsedDate = dateValue;
-                    } else {
-                        // Fallback for string dates
-                        const fallbackDate = 
-                            parseDate(dateValue, 'M/d/yy', new Date()) || 
-                            parseDate(dateValue, 'MM/dd/yyyy', new Date()) ||
-                            parseDate(dateValue, 'yyyy-MM-dd', new Date()) ||
-                            parseDate(dateValue, 'dd-MMM-yy', new Date()) ||
-                            new Date(dateValue);
+                    } else if (typeof dateValue === 'string') {
+                        const supportedFormats = [
+                            'MM/dd/yy', 'MM/dd/yyyy', 'M/d/yy', 'M/d/yyyy',
+                            'yyyy-MM-dd', 'dd-MMM-yy', 'dd-MM-yyyy'
+                        ];
+                        let foundDate = null;
+                        for (const fmt of supportedFormats) {
+                            const d = parseDate(dateValue, fmt, new Date());
+                            if (!isNaN(d.getTime())) {
+                                foundDate = d;
+                                break;
+                            }
+                        }
                         
-                        if (isNaN(fallbackDate.getTime())) {
-                            console.warn(`Skipping row ${index + 2} due to invalid date format:`, dateValue);
+                        if (foundDate) {
+                            parsedDate = foundDate;
+                        } else {
+                            console.warn(`Skipping row ${index + 2} due to invalid date string format:`, dateValue);
                             return null;
                         }
-                        parsedDate = fallbackDate;
+                    } else {
+                         console.warn(`Skipping row ${index + 2} due to invalid date type:`, dateValue);
+                         return null;
                     }
                     
                     return {
@@ -321,7 +340,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
             } else {
                 toast({
                     title: 'No valid examinations found',
-                    description: "Check that your file has data and that dates are in a recognizable format (e.g., YYYY-MM-DD, MM/DD/YYYY).",
+                    description: "Check your file for missing data or dates that are not in a recognizable format (e.g., YYYY-MM-DD, MM/DD/YYYY).",
                     variant: 'destructive',
                 });
             }

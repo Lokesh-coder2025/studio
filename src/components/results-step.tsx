@@ -211,7 +211,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         const examKey = getExamKeyForExport({
         date: format(parseISO(exam.date), 'yyyy-MM-dd'),
         subject: exam.subject,
-        time: `${exam.startTime} - ${e.endTime}`
+        time: `${exam.startTime} - ${exam.endTime}`
         });
         examDetailsMap.set(examKey, exam);
     });

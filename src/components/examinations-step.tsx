@@ -235,25 +235,16 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         const data = event.target?.result;
         if (!data) throw new Error('File could not be read.');
 
-        const workbook = XLSX.read(data, { type: 'binary' });
+        const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
         const sheetName = workbook.SheetNames[0];
         const worksheet = workbook.Sheets[sheetName];
-        const json = XLSX.utils.sheet_to_json<any>(worksheet, { raw: false, dateNF: 'yyyy-mm-dd' });
+        const json = XLSX.utils.sheet_to_json<any>(worksheet);
 
         const newExams = json
           .map((row, index) => {
-            const dateValue = row.Date;
-            let date = null;
+            const date = row.Date;
             
-            if (typeof dateValue === 'number') {
-              // Handle Excel serial date number
-              date = new Date((dateValue - (25567 + 2)) * 86400 * 1000);
-            } else if (typeof dateValue === 'string') {
-              // Handle date string (e.g., '2024-05-21' or '05/21/2024')
-              date = new Date(dateValue);
-            }
-            
-            if (!date || isNaN(date.getTime()) || !row.Subject || !row['Start Time'] || !row['End Time'] || row['No of Rooms'] == null || row['No of Relievers'] == null) {
+            if (!date || !(date instanceof Date) || isNaN(date.getTime()) || !row.Subject || !row['Start Time'] || !row['End Time'] || row['No of Rooms'] == null || row['No of Relievers'] == null) {
               console.warn(`Skipping row ${index + 2} due to missing or invalid data:`, row);
               return null;
             }

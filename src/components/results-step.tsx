@@ -244,7 +244,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   
     const finalExamTitle = examTitle || 'Duty Allotment Sheet';
     const pageWidth = doc.internal.pageSize.getWidth();
-    let finalStartY = 15;
+    let finalStartY = 20;
 
     doc.autoTable({
       head: head,
@@ -253,15 +253,14 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       startY: finalStartY,
       didDrawPage: function (data) {
         if (data.pageNumber === 1) {
-          doc.setFillColor(44, 152, 224); // Cobalt Blue
-          doc.rect(0, 0, pageWidth, 40, 'F');
+          doc.setFillColor(41, 171, 226);
+          doc.rect(0, 0, pageWidth, 18, 'F');
           doc.setTextColor(255, 255, 255);
-          doc.setFontSize(20);
-          doc.text(collegeName || 'College Name', pageWidth / 2, 15, { align: 'center' });
           doc.setFontSize(16);
-          doc.text(finalExamTitle, pageWidth / 2, 24, { align: 'center' });
-          doc.text("Invigilation Duty Allotment Sheet", pageWidth / 2, 31, { align: 'center' });
-          finalStartY = 45; // Start table below the header
+          doc.text(collegeName || 'College Name', pageWidth / 2, 8, { align: 'center' });
+          doc.setFontSize(12);
+          doc.text(finalExamTitle, pageWidth / 2, 14, { align: 'center' });
+          finalStartY = 20;
           data.settings.startY = finalStartY;
         }
       },
@@ -270,8 +269,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         cellPadding: 2,
       },
       headStyles: {
-        fillColor: [230, 230, 230],
-        textColor: 0,
+        fillColor: [41, 171, 226],
+        textColor: 255,
         fontStyle: 'bold',
       },
       footStyles: {

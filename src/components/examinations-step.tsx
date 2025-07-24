@@ -235,12 +235,10 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
             const data = event.target?.result;
             if (!data) throw new Error('File could not be read.');
 
-            const workbook = XLSX.read(data, { type: 'binary' });
+            const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
             const sheetName = workbook.SheetNames[0];
             const worksheet = workbook.Sheets[sheetName];
-            const json = XLSX.utils.sheet_to_json<any>(worksheet, {
-                raw: false, // This ensures dates are parsed as strings in a consistent format
-            });
+            const json = XLSX.utils.sheet_to_json<any>(worksheet);
 
             const findHeader = (headers: string[], keywords: string[]): string | undefined => {
                 return headers.find(h => keywords.some(k => h.toLowerCase().includes(k)));
@@ -281,17 +279,23 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                         return null;
                     }
 
-                    // Attempt to parse date from various common formats
-                    const parsedDate = 
-                        parseDate(dateValue, 'M/d/yy', new Date()) || 
-                        parseDate(dateValue, 'MM/dd/yyyy', new Date()) ||
-                        parseDate(dateValue, 'yyyy-MM-dd', new Date()) ||
-                        parseDate(dateValue, 'dd-MMM-yy', new Date()) ||
-                        new Date(dateValue); // Fallback for ISO strings or other direct formats
-
-                    if (isNaN(parsedDate.getTime())) {
-                        console.warn(`Skipping row ${index + 2} due to invalid date format:`, dateValue);
-                        return null;
+                    let parsedDate: Date;
+                    if (dateValue instanceof Date) {
+                        parsedDate = dateValue;
+                    } else {
+                        // Fallback for string dates
+                        const fallbackDate = 
+                            parseDate(dateValue, 'M/d/yy', new Date()) || 
+                            parseDate(dateValue, 'MM/dd/yyyy', new Date()) ||
+                            parseDate(dateValue, 'yyyy-MM-dd', new Date()) ||
+                            parseDate(dateValue, 'dd-MMM-yy', new Date()) ||
+                            new Date(dateValue);
+                        
+                        if (isNaN(fallbackDate.getTime())) {
+                            console.warn(`Skipping row ${index + 2} due to invalid date format:`, dateValue);
+                            return null;
+                        }
+                        parsedDate = fallbackDate;
                     }
                     
                     return {
@@ -715,3 +719,5 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
     </div>
   );
 }
+
+    

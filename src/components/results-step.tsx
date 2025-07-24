@@ -245,7 +245,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     const finalExamTitle = examTitle || 'Duty Allotment Sheet';
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-    let startY = 20; // Default startY
+    let startY = 15; // Default startY for pages without main headers
 
     doc.autoTable({
       head: head,
@@ -264,7 +264,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           doc.text("Invigilation Duty Allotment Sheet", pageWidth / 2, 31, { align: 'center' });
           
           // Adjust table startY for the first page to make space for the header
-          data.settings.startY = 40;
+          data.settings.startY = 45;
         }
 
         // Page footer

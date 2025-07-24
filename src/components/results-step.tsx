@@ -245,21 +245,27 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     const finalExamTitle = examTitle || 'Duty Allotment Sheet';
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
-  
+    let startY = 20; // Default startY
+
     doc.autoTable({
       head: head,
       body: body,
       foot: foot,
-      startY: 40,
+      startY: startY,
       didDrawPage: function (data) {
-        // Page header
-        doc.setFontSize(20);
-        doc.setTextColor(40);
-        doc.text(collegeName || 'College Name', pageWidth / 2, 15, { align: 'center' });
-        
-        doc.setFontSize(16);
-        doc.text(finalExamTitle, pageWidth / 2, 24, { align: 'center' });
-        doc.text("Invigilation Duty Allotment Sheet", pageWidth / 2, 31, { align: 'center' });
+        // Only draw the header on the first page
+        if (data.pageNumber === 1) {
+          doc.setFontSize(20);
+          doc.setTextColor(40);
+          doc.text(collegeName || 'College Name', pageWidth / 2, 15, { align: 'center' });
+          
+          doc.setFontSize(16);
+          doc.text(finalExamTitle, pageWidth / 2, 24, { align: 'center' });
+          doc.text("Invigilation Duty Allotment Sheet", pageWidth / 2, 31, { align: 'center' });
+          
+          // Adjust table startY for the first page to make space for the header
+          data.settings.startY = 40;
+        }
 
         // Page footer
         const pageCount = doc.internal.getNumberOfPages();

@@ -211,7 +211,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         const examKey = getExamKeyForExport({
         date: format(parseISO(exam.date), 'yyyy-MM-dd'),
         subject: exam.subject,
-        time: `${exam.startTime} - ${exam.endTime}`
+        time: `${exam.startTime} - ${e.endTime}`
         });
         examDetailsMap.set(examKey, exam);
     });
@@ -250,24 +250,26 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       head: head,
       body: body,
       foot: foot,
-      startY: 20,
+      startY: 25,
       didDrawPage: function (data) {
-        // Header
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(16);
-        doc.text(collegeName || 'College Name', pageWidth / 2, 8, { align: 'center' });
-        doc.setFontSize(12);
-        doc.text(finalExamTitle, pageWidth / 2, 14, { align: 'center' });
+        if (data.pageNumber === 1) {
+            // Header
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(16);
+            doc.text(collegeName || 'College Name', pageWidth / 2, 10, { align: 'center' });
+            doc.setFontSize(12);
+            doc.text(finalExamTitle, pageWidth / 2, 18, { align: 'center' });
+        }
 
         // Footer
-        const pageCount = doc.internal.pages.length;
+        const pageCount = (doc as any).internal.getNumberOfPages();
         doc.setFontSize(10);
         doc.setTextColor(100);
         doc.text(
             `Page ${data.pageNumber} of ${pageCount}`,
-            pageWidth / 2,
+            pageWidth - data.settings.margin.right,
             pageHeight - 10,
-            { align: 'center' }
+            { align: 'right' }
         );
       },
       styles: {

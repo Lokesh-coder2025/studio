@@ -69,22 +69,20 @@ You must generate a duty schedule that adheres to the following rules, in this e
 **Rule 1: Fulfill Examination Needs (Hard Constraint)**
 - Every examination must have exactly the number of invigilators specified by 'invigilatorsNeeded'.
 
-**Rule 2: Equal Distribution (Primary Goal)**
-- Distribute duties so that most invigilators have the base number of duties calculated in Step 1.
+**Rule 2: Equal Distribution and Hierarchical Assignment (Primary Goal)**
+- First, distribute duties so that most invigilators have the base number of duties calculated in Step 1.
+- Then, assign the excess duties one by one strictly according to the invigilator list order. Assign the first excess duty to the invigilator at the **VERY END** of the list, the second to the second-to-last, and so on, moving upwards. The order of the invigilator list provided below is crucial for this rule.
 
-**Rule 3: Assign Excess Duties Hierarchically (Strict Order)**
-- Assign the excess duties one by one to invigilators starting from the **VERY END** of the provided invigilator list and moving upwards. For example, if there are 3 excess duties and 10 invigilators, invigilator #10 gets an extra duty, invigilator #9 gets an extra duty, and invigilator #8 gets an extra duty. This means the lecturers at the top of the list will have fewer duties than the lecturers at the bottom. The order of the invigilator list provided below is crucial for this rule.
+**Rule 3: Fairly Distribute Same-Day Double Duties (Preference)**
+- AFTER fulfilling the above rules, if it was necessary to assign an invigilator to more than one exam on the same day, these double duties should be distributed as fairly as possible across all invigilators.
 
-**Rule 4: Fairly Distribute Same-Day Double Duties (Preference)**
-- If it is necessary to assign an invigilator to more than one exam on the same day to meet demand, these double duties should also be distributed as fairly as possible across all invigilators. Avoid loading up one person with multiple same-day duties if others have none.
-
-**Rule 5: Avoid Subject Conflicts (Soft Constraint / Preference)**
-- As a preference, AVOID assigning an invigilator to an exam for a subject they teach. You can infer their subject from their 'designation' (e.g., a "Lecturer in English" teaches "English").
-- You should only break this rule if it is absolutely necessary to meet the hard constraints and distribution principles.
+**Rule 4: Avoid Subject Conflicts (Soft Constraint / Preference)**
+- As a final preference, try to AVOID assigning an invigilator to an exam for a subject they teach. You can infer their subject from their 'designation' (e.g., a "Lecturer in English" teaches "English").
+- You should only break this rule if it is absolutely necessary to meet the hard constraints and distribution principles above.
 
 **Input Data:**
 
-Invigilators (The order is important for Rule 3):
+Invigilators (The order is important for Rule 2):
 {{#each invigilators}}
 - Name: {{this.name}}, Designation: {{this.designation}}
 {{/each}}

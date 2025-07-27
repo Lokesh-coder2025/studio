@@ -35,10 +35,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <Navigation>
             <NavigationHeader>
               <div className="flex justify-start w-full">
-                <div className="text-left">
+                <Link href="/" onClick={handleNewAllotmentClick} className="text-left cursor-pointer">
                   <h1 className="text-[2.7rem] font-bold text-primary font-headline">DutyFlow</h1>
                   <p className="text-xs font-bold text-muted-foreground w-full -mt-2 tracking-widest">The AI-Assisted Allotments</p>
-                </div>
+                </Link>
               </div>
             </NavigationHeader>
             <nav className="border-b bg-background">

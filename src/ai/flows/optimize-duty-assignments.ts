@@ -71,7 +71,7 @@ const optimizeDutyAssignmentsPrompt = ai.definePrompt({
 **Rule 2: Enforce Hierarchical Duty Assignment (Hard Constraint - CRITICAL PRIORITY)**
 - After ensuring Rule 1 is met, you *must* distribute duties according to a strict hierarchical model.
 - First, ensure every invigilator is assigned the 'base number' of duties calculated in Step 1.
-- Then, assign the 'excess duties' one by one, starting from the **VERY END** of the provided invigilator list and moving upwards. For example, if there are 3 excess duties, the last invigilator on the list gets one, the second-to-last gets one, and the third-to-last gets one.
+- Then, assign the 'excess duties' one by one, starting from the **VERY END** of the provided invigilator list and moving upwards without skipping anyone. For example, if there are 3 excess duties, the last invigilator on the list gets one, the second-to-last gets one, and the third-to-last gets one.
 - The order of the invigilator list provided below is absolutely critical for this rule. This rule takes precedence over all fairness considerations below.
 
 **Rule 3: Fairly Distribute Same-Day Double Duties (Preference)**

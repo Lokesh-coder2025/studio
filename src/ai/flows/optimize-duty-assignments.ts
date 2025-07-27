@@ -56,29 +56,30 @@ const optimizeDutyAssignmentsPrompt = ai.definePrompt({
   input: { schema: OptimizeDutyAssignmentsInputSchema },
   output: { schema: OptimizeDutyAssignmentsOutputSchema },
   system: `You are an expert at creating fair and optimized invigilation duty schedules. Your task is to generate duty assignments based on a list of invigilators and examinations. You must produce a valid JSON array matching the output schema.`,
-  prompt: `Please generate a duty schedule by following these steps and rules precisely:
+  prompt: `Please generate a duty schedule by following these steps and rules precisely. The order of the rules signifies their priority.
 
 **Step 1: Calculate Total Duties and Distribution**
 1.  Calculate the total number of duties required. This is the sum of 'invigilatorsNeeded' for all examinations.
 2.  Calculate the base number of duties per invigilator by performing integer division of total duties by the number of invigilators.
 3.  Calculate the number of excess duties, which is the remainder from the division.
 
-**Step 2: Assign Duties based on Strict Rules**
-You must generate a duty schedule that adheres to the following rules, in this exact order of priority:
+**Step 2: Assign Duties based on a Strict Hierarchy of Rules**
 
-**Rule 1: Fulfill Examination Needs (Hard Constraint)**
-- Every examination must have exactly the number of invigilators specified by 'invigilatorsNeeded'.
+**Rule 1: Fulfill Examination Needs (Hard Constraint - HIGHEST PRIORITY)**
+- Every examination *must* have exactly the number of invigilators specified by 'invigilatorsNeeded'. This is the most important rule.
 
-**Rule 2: Equal Distribution and Hierarchical Assignment (Primary Goal)**
-- First, distribute duties so that most invigilators have the base number of duties calculated in Step 1.
-- Then, assign the excess duties one by one strictly according to the invigilator list order. Assign the first excess duty to the invigilator at the **VERY END** of the list, the second to the second-to-last, and so on, moving upwards. The order of the invigilator list provided below is crucial for this rule.
+**Rule 2: Enforce Hierarchical Duty Assignment (Hard Constraint - CRITICAL PRIORITY)**
+- After ensuring Rule 1 is met, you *must* distribute duties according to a strict hierarchical model.
+- First, ensure every invigilator is assigned the 'base number' of duties calculated in Step 1.
+- Then, assign the 'excess duties' one by one, starting from the **VERY END** of the provided invigilator list and moving upwards. For example, if there are 3 excess duties, the last invigilator on the list gets one, the second-to-last gets one, and the third-to-last gets one.
+- The order of the invigilator list provided below is absolutely critical for this rule. This rule takes precedence over all fairness considerations below.
 
 **Rule 3: Fairly Distribute Same-Day Double Duties (Preference)**
-- AFTER fulfilling the above rules, if it was necessary to assign an invigilator to more than one exam on the same day, these double duties should be distributed as fairly as possible across all invigilators.
+- *Only after* the above two hard constraints have been perfectly satisfied, try to distribute any necessary same-day double duties as fairly as possible across all invigilators. Do not break Rule 2 to satisfy this preference.
 
-**Rule 4: Avoid Subject Conflicts (Soft Constraint / Preference)**
-- As a final preference, try to AVOID assigning an invigilator to an exam for a subject they teach. You can infer their subject from their 'designation' (e.g., a "Lecturer in English" teaches "English").
-- You should only break this rule if it is absolutely necessary to meet the hard constraints and distribution principles above.
+**Rule 4: Avoid Subject Conflicts (Soft Constraint / Final Preference)**
+- As a final preference, try to avoid assigning an invigilator to an exam for a subject they teach (e.g., a "Lecturer in English" for an "English" exam).
+- This is the lowest priority rule. You should only follow it if it does not conflict with Rules 1, 2, or 3.
 
 **Input Data:**
 

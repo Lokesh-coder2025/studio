@@ -23,7 +23,7 @@ const OptimizeDutyAssignmentsInputSchema = z.object({
         subject: z.string().describe('The subject of the duty.'),
       })).optional(),
     })
-  ).describe('An array of invigilators with their names, designations, and existing duties. The order is important for handling excess duties.'),
+  ).describe('An array of invigilators with their names, designations, and existing duties. The order of this list is critical for duty assignment.'),
   examinations: z.array(
     z.object({
       date: z.string().describe('The date of the examination.'),
@@ -58,32 +58,23 @@ const optimizeDutyAssignmentsPrompt = ai.definePrompt({
   system: `You are an expert at creating fair and optimized invigilation duty schedules. Your task is to generate duty assignments based on a list of invigilators and examinations. You must produce a valid JSON array matching the output schema.`,
   prompt: `Please generate a duty schedule by following these steps and rules precisely. The order of the rules signifies their priority.
 
-**Step 1: Calculate Total Duties and Distribution**
-1.  Calculate the total number of duties required. This is the sum of 'invigilatorsNeeded' for all examinations.
-2.  Calculate the base number of duties per invigilator by performing integer division of total duties by the number of invigilators.
-3.  Calculate the number of excess duties, which is the remainder from the division.
+**Primary Goal: Fulfill All Examination Duties**
+Your main objective is to ensure every single examination has the exact number of invigilators specified by 'invigilatorsNeeded'. This is a hard, non-negotiable requirement.
 
-**Step 2: Assign Duties based on a Strict Hierarchy of Rules**
+**Core Allotment Rule: Strict Bottom-to-Top Assignment**
+You must allot all duties using a single, continuous method. Start from the **last person** on the invigilator list and assign them a duty. Then, move to the second-to-last person, then the third-to-last, and so on, ascending up the list. Once you reach the first person, cycle back to the last person and repeat the process until all duty slots for all exams are filled.
 
-**Rule 1: Fulfill Examination Needs (Hard Constraint - HIGHEST PRIORITY)**
-- Every examination *must* have exactly the number of invigilators specified by 'invigilatorsNeeded'. This is the most important rule.
+- The invigilator list order is critical. Do not deviate from it.
+- This bottom-to-top cycle is the *only* method you should use for assignment. Do not use any other logic like "base" or "excess" duties.
+- This process ensures that invigilators at the bottom of the list will always have an equal or greater number of duties than those at the top.
 
-**Rule 2: Enforce Hierarchical Duty Assignment (Hard Constraint - CRITICAL PRIORITY)**
-- After ensuring Rule 1 is met, you *must* distribute duties according to a strict hierarchical model.
-- First, ensure every invigilator is assigned the 'base number' of duties calculated in Step 1.
-- Then, assign the 'excess duties' one by one, starting from the **VERY END** of the provided invigilator list and moving upwards without skipping anyone. For example, if there are 3 excess duties, the last invigilator on the list gets one, the second-to-last gets one, and the third-to-last gets one.
-- The order of the invigilator list provided below is absolutely critical for this rule. This rule takes precedence over all fairness considerations below.
-
-**Rule 3: Fairly Distribute Same-Day Double Duties (Preference)**
-- *Only after* the above two hard constraints have been perfectly satisfied, try to distribute any necessary same-day double duties as fairly as possible across all invigilators. Do not break Rule 2 to satisfy this preference.
-
-**Rule 4: Avoid Subject Conflicts (Soft Constraint / Final Preference)**
-- As a final preference, try to avoid assigning an invigilator to an exam for a subject they teach (e.g., a "Lecturer in English" for an "English" exam).
-- This is the lowest priority rule. You should only follow it if it does not conflict with Rules 1, 2, or 3.
+**Secondary Preferences (Apply only if they DO NOT conflict with the core rules)**
+1.  **Fair Double Duty Distribution:** If an invigilator must be assigned two duties on the same day, try to distribute this load across different invigilators over the course of the full schedule. Do not break the bottom-to-top rule to achieve this.
+2.  **Avoid Subject Conflicts:** As a final, lowest-priority preference, try to avoid assigning an invigilator to an exam for a subject they teach.
 
 **Input Data:**
 
-Invigilators (The order is important for Rule 2):
+Invigilators (The order is critical for the bottom-to-top rule):
 {{#each invigilators}}
 - Name: {{this.name}}, Designation: {{this.designation}}
 {{/each}}

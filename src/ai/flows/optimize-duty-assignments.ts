@@ -69,14 +69,14 @@ You must generate a duty schedule that adheres to the following rules, in this e
 **Rule 1: Fulfill Examination Needs (Hard Constraint)**
 - Every examination must have exactly the number of invigilators specified by 'invigilatorsNeeded'.
 
-**Rule 2: No Same-Day Double Duty (Hard Constraint)**
-- An invigilator CANNOT be assigned to more than one examination on the same day.
-
-**Rule 3: Equal Distribution (Primary Goal)**
+**Rule 2: Equal Distribution (Primary Goal)**
 - Distribute duties so that most invigilators have the base number of duties calculated in Step 1.
 
-**Rule 4: Assign Excess Duties Hierarchically (Strict Order)**
+**Rule 3: Assign Excess Duties Hierarchically (Strict Order)**
 - Assign the excess duties one by one to invigilators starting from the **VERY END** of the provided invigilator list and moving upwards. For example, if there are 3 excess duties and 10 invigilators, invigilator #10 gets an extra duty, invigilator #9 gets an extra duty, and invigilator #8 gets an extra duty. This means the lecturers at the top of the list will have fewer duties than the lecturers at the bottom. The order of the invigilator list provided below is crucial for this rule.
+
+**Rule 4: Fairly Distribute Same-Day Double Duties (Preference)**
+- If it is necessary to assign an invigilator to more than one exam on the same day to meet demand, these double duties should also be distributed as fairly as possible across all invigilators. Avoid loading up one person with multiple same-day duties if others have none.
 
 **Rule 5: Avoid Subject Conflicts (Soft Constraint / Preference)**
 - As a preference, AVOID assigning an invigilator to an exam for a subject they teach. You can infer their subject from their 'designation' (e.g., a "Lecturer in English" teaches "English").
@@ -84,7 +84,7 @@ You must generate a duty schedule that adheres to the following rules, in this e
 
 **Input Data:**
 
-Invigilators (The order is important for Rule 4):
+Invigilators (The order is important for Rule 3):
 {{#each invigilators}}
 - Name: {{this.name}}, Designation: {{this.designation}}
 {{/each}}

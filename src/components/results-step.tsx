@@ -374,8 +374,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     <div className="space-y-6">
       <Tabs defaultValue="allotment-sheet">
         <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="allotment-sheet" className="border-2 border-primary/50 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md">Duty Allotment Sheet</TabsTrigger>
-          <TabsTrigger value="individual-dashboard" className="border-2 border-primary/50 data-[state=active]:border-primary data-[state=active]:bg-primary data-[state=active]:text-primary-foreground data-[state=active]:shadow-md">Individual Dashboard</TabsTrigger>
+          <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
+          <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
         </TabsList>
         <TabsContent value="allotment-sheet" className="mt-4">
             <AllotmentSheet 
@@ -396,11 +396,11 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </TabsContent>
       </Tabs>
       <div className="flex justify-between items-center pt-4 border-t mt-4">
-        <Button onClick={prevStep} disabled={isSendingAllEmails} variant="default">
+        <Button onClick={prevStep} disabled={isSendingAllEmails} variant="outline">
           <ArrowLeft /> Back
         </Button>
         <div className="flex flex-wrap gap-2 justify-end">
-           <Button onClick={handleSave} disabled={isSendingAllEmails}>
+           <Button onClick={handleSave} disabled={isSendingAllEmails} variant="outline">
               <Save /> Save Allotment
             </Button>
            <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAllEmails}>
@@ -414,7 +414,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 </>
               )}
             </Button>
-           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails} variant="default">
+           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails} variant="outline">
               <Download /> Download as PDF
             </Button>
             <Button onClick={handleExportExcel} disabled={isSendingAllEmails}>

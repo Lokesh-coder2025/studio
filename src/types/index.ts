@@ -5,6 +5,7 @@ export interface Invigilator {
   designation: string;
   mobileNo: string;
   email: string;
+  availableDays?: string[];
 }
 
 export interface Examination {

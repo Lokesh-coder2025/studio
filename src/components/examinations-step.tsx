@@ -376,12 +376,11 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         invigilatorsNeeded: exam.roomsAllotted + exam.relieversRequired,
       }));
 
-      // For the AI, we only need name, designation, and any pre-existing duties.
-      // We will create a simplified version of the invigilator list.
-      const invigilatorsForAI = invigilators.map(({ name, designation }) => ({ 
+      const invigilatorsForAI = invigilators.map(({ id, name, designation, availableDays }) => ({ 
+        id,
         name, 
-        designation, 
-        duties: [] // Assuming no pre-existing duties from this UI for now
+        designation,
+        availableDays: availableDays || [],
       }));
 
       const aiInput = {
@@ -389,7 +388,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         examinations: formattedExams,
       };
 
-      const result = await optimizeDutyAssignments(aiInput);
+      const result = await optimizeDutyAssignments(aiInput as any);
       setAssignments(result);
       
       const newAllotmentId = new Date().toISOString();
@@ -738,5 +737,3 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
     </div>
   );
 }
-
-    

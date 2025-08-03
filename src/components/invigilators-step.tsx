@@ -1,6 +1,8 @@
+
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
+import { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -9,9 +11,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose } from '@/components/ui/dialog';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
 import type { Invigilator } from '@/types';
-import { UserPlus, Trash2, ArrowRight, Upload } from 'lucide-react';
+import { UserPlus, Trash2, ArrowRight, Upload, CalendarDays, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Badge } from '@/components/ui/badge';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -19,6 +25,60 @@ const formSchema = z.object({
   designation: z.string().min(3, { message: 'Designation must be at least 3 characters.' }),
   email: z.string().email({ message: 'Please enter a valid email address.' }),
 });
+
+const weekdays = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
+
+type AvailabilityDialogProps = {
+  invigilator: Invigilator | null;
+  onSave: (id: string, availableDays: string[]) => void;
+  onClose: () => void;
+};
+
+function AvailabilityDialog({ invigilator, onSave, onClose }: AvailabilityDialogProps) {
+  const [selectedDays, setSelectedDays] = useState<string[]>(invigilator?.availableDays || []);
+
+  if (!invigilator) return null;
+
+  const handleDayToggle = (day: string) => {
+    setSelectedDays(prev => 
+      prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
+    );
+  };
+
+  const handleSave = () => {
+    onSave(invigilator.id, selectedDays);
+    onClose();
+  };
+
+  return (
+    <Dialog open={!!invigilator} onOpenChange={(isOpen) => !isOpen && onClose()}>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Set Availability for {invigilator.name}</DialogTitle>
+        </DialogHeader>
+        <div className="py-4 grid grid-cols-3 gap-4">
+          {weekdays.map(day => (
+            <div key={day} className="flex items-center space-x-2">
+              <Checkbox
+                id={`day-${day}`}
+                checked={selectedDays.includes(day)}
+                onCheckedChange={() => handleDayToggle(day)}
+              />
+              <Label htmlFor={`day-${day}`} className="cursor-pointer">{day}</Label>
+            </div>
+          ))}
+        </div>
+        <DialogFooter>
+          <DialogClose asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogClose>
+          <Button onClick={handleSave}>Save Availability</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
 
 type InvigilatorsStepProps = {
   invigilators: Invigilator[];
@@ -28,6 +88,8 @@ type InvigilatorsStepProps = {
 
 export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: InvigilatorsStepProps) {
   const { toast } = useToast();
+  const [editingInvigilator, setEditingInvigilator] = useState<Invigilator | null>(null);
+
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: { name: '', mobileNo: '', designation: '', email: '' },
@@ -37,6 +99,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
     const newInvigilator: Invigilator = {
       id: new Date().getTime().toString(),
       ...values,
+      availableDays: [], // Default to full-time
     };
     setInvigilators((prev) => [...prev, newInvigilator]);
     form.reset();
@@ -46,6 +109,12 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
     setInvigilators((prev) => prev.filter((inv) => inv.id !== id));
   }
 
+  const handleAvailabilitySave = (id: string, availableDays: string[]) => {
+    setInvigilators(prev => 
+      prev.map(inv => inv.id === id ? { ...inv, availableDays } : inv)
+    );
+  };
+  
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) {
@@ -81,6 +150,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
               designation: String(row[designationKey]),
               mobileNo: String(row[mobileKey]),
               email: String(row[emailKey]),
+              availableDays: [],
             };
           })
           .filter((inv): inv is Invigilator => inv !== null);
@@ -133,131 +203,151 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
   };
 
   return (
-    <div className="space-y-8">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Invigilator’s Name</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Lokesh D" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="designation"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Designation</FormLabel>
-                  <FormControl>
-                    <Input placeholder="e.g. Lecturer in English" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="mobileNo"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Mobile No</FormLabel>
-                  <FormControl>
-                    <Input type="tel" placeholder="e.g. 9876543210" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-             <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>E-Mail ID</FormLabel>
-                  <FormControl>
-                    <Input type="email" placeholder="e.g. lokesh@example.com" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-          <div className="flex flex-wrap items-center gap-4 pt-2">
-            <Button type="submit">
-              <UserPlus className="mr-2" /> Add Invigilator
-            </Button>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">or</span>
-              <Input
-                id="excel-upload"
-                type="file"
-                className="hidden"
-                accept=".xlsx, .xls"
-                onChange={handleFileUpload}
+    <>
+      <div className="space-y-8">
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Invigilator’s Name</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Lokesh D" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-              <Button asChild>
-                <label htmlFor="excel-upload" className="cursor-pointer">
-                  <Upload className="mr-2" /> Import from Excel
-                </label>
-              </Button>
+              <FormField
+                control={form.control}
+                name="designation"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Designation</FormLabel>
+                    <FormControl>
+                      <Input placeholder="e.g. Lecturer in English" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="mobileNo"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Mobile No</FormLabel>
+                    <FormControl>
+                      <Input type="tel" placeholder="e.g. 9876543210" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>E-Mail ID</FormLabel>
+                    <FormControl>
+                      <Input type="email" placeholder="e.g. lokesh@example.com" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </div>
-          </div>
-        </form>
-      </Form>
+            <div className="flex flex-wrap items-center gap-4 pt-2">
+              <Button type="submit">
+                <UserPlus className="mr-2" /> Add Invigilator
+              </Button>
+              <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">or</span>
+                <Input
+                  id="excel-upload"
+                  type="file"
+                  className="hidden"
+                  accept=".xlsx, .xls"
+                  onChange={handleFileUpload}
+                />
+                <Button asChild>
+                  <label htmlFor="excel-upload" className="cursor-pointer">
+                    <Upload className="mr-2" /> Import from Excel
+                  </label>
+                </Button>
+              </div>
+            </div>
+          </form>
+        </Form>
 
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px]">Sl. No</TableHead>
-              <TableHead>Invigilator's Name</TableHead>
-              <TableHead>Designation</TableHead>
-              <TableHead>Mobile No</TableHead>
-              <TableHead>E-Mail ID</TableHead>
-              <TableHead className="text-right w-[100px]">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {invigilators.length > 0 ? (
-              invigilators.map((invigilator, index) => (
-                <TableRow key={invigilator.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell className="font-medium">{invigilator.name}</TableCell>
-                  <TableCell>{invigilator.designation}</TableCell>
-                  <TableCell>{invigilator.mobileNo}</TableCell>
-                  <TableCell>{invigilator.email}</TableCell>
-                  <TableCell className="text-right">
-                    <Button variant="ghost" size="icon" onClick={() => deleteInvigilator(invigilator.id)}>
-                      <Trash2 className="h-4 w-4 text-destructive" />
-                      <span className="sr-only">Delete</span>
-                    </Button>
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead className="w-[50px]">Sl. No</TableHead>
+                <TableHead>Invigilator's Name</TableHead>
+                <TableHead>Designation</TableHead>
+                <TableHead>Availability</TableHead>
+                <TableHead>E-Mail ID</TableHead>
+                <TableHead className="text-right w-[100px]">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {invigilators.length > 0 ? (
+                invigilators.map((invigilator, index) => (
+                  <TableRow key={invigilator.id}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell className="font-medium">{invigilator.name}</TableCell>
+                    <TableCell>{invigilator.designation}</TableCell>
+                    <TableCell>
+                      {invigilator.availableDays && invigilator.availableDays.length > 0 ? 
+                        <div className="flex flex-wrap gap-1">
+                          {invigilator.availableDays.map(day => <Badge key={day} variant="secondary">{day.substring(0,3)}</Badge>)}
+                        </div>
+                         : 
+                        <Badge variant="outline">Full-Time</Badge>
+                      }
+                    </TableCell>
+                    <TableCell>{invigilator.email}</TableCell>
+                    <TableCell className="text-right">
+                       <Button variant="ghost" size="icon" onClick={() => setEditingInvigilator(invigilator)}>
+                        <Pencil className="h-4 w-4 text-primary" />
+                        <span className="sr-only">Edit Availability</span>
+                      </Button>
+                      <Button variant="ghost" size="icon" onClick={() => deleteInvigilator(invigilator.id)}>
+                        <Trash2 className="h-4 w-4 text-destructive" />
+                        <span className="sr-only">Delete</span>
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell colSpan={6} className="h-24 text-center">
+                    No invigilators added yet.
                   </TableCell>
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
-                  No invigilators added yet.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+        
+        <div className="flex justify-end">
+          <Button onClick={nextStep} disabled={invigilators.length === 0}>
+            Continue to Examination Details <ArrowRight className="ml-2" />
+          </Button>
+        </div>
       </div>
       
-      <div className="flex justify-end">
-        <Button onClick={nextStep} disabled={invigilators.length === 0}>
-          Continue to Examination Details <ArrowRight className="ml-2" />
-        </Button>
-      </div>
-    </div>
+      <AvailabilityDialog
+        invigilator={editingInvigilator}
+        onSave={handleAvailabilitySave}
+        onClose={() => setEditingInvigilator(null)}
+      />
+    </>
   );
 }

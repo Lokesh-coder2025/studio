@@ -376,15 +376,8 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         invigilatorsNeeded: exam.roomsAllotted + exam.relieversRequired,
       }));
 
-      const invigilatorsForAI = invigilators.map(({ id, name, designation, availableDays }) => ({ 
-        id,
-        name, 
-        designation,
-        availableDays: availableDays || [],
-      }));
-
       const aiInput = {
-        invigilators: invigilatorsForAI,
+        invigilators,
         examinations: formattedExams,
       };
 

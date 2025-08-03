@@ -10,7 +10,7 @@
  */
 
 import { ai } from '@/ai/genkit';
-import { z } from 'genkit';
+import { z } from 'zod';
 import { format, parseISO, getDay } from 'date-fns';
 
 // Define the input schema for the flow

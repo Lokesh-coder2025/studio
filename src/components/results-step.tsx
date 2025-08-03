@@ -400,7 +400,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           <ArrowLeft /> Back
         </Button>
         <div className="flex flex-wrap gap-2 justify-end">
-           <Button onClick={handleSave} disabled={isSendingAllEmails} variant="outline">
+           <Button onClick={handleSave} disabled={isSendingAllEmails}>
               <Save /> Save Allotment
             </Button>
            <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAllEmails}>
@@ -414,7 +414,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 </>
               )}
             </Button>
-           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails} variant="outline">
+           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails}>
               <Download /> Download as PDF
             </Button>
             <Button onClick={handleExportExcel} disabled={isSendingAllEmails}>

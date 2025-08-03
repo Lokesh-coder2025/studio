@@ -5,7 +5,7 @@ import type { Dispatch, SetStateAction } from 'react';
 import type { Invigilator, Examination, Assignment } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { useMemo, forwardRef } from 'react';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, getDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 
 
@@ -66,6 +66,27 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
       });
       return map;
     }, [examinations]);
+
+    const dayColors = useMemo(() => {
+        const colors = [
+            'bg-pink-100 text-pink-800',       // Sunday
+            'bg-yellow-100 text-yellow-800',  // Monday
+            'bg-purple-100 text-purple-800',  // Tuesday
+            'bg-green-100 text-green-800',    // Wednesday
+            'bg-blue-100 text-blue-800',      // Thursday
+            'bg-orange-100 text-orange-800',  // Friday
+            'bg-red-100 text-red-800'         // Saturday
+        ];
+        const dateColorMap = new Map<string, string>();
+        const uniqueDates = [...new Set(uniqueExams.map(exam => exam.date))];
+        
+        uniqueDates.forEach(dateStr => {
+            const dayIndex = getDay(parseISO(dateStr));
+            dateColorMap.set(dateStr, colors[dayIndex]);
+        });
+
+        return dateColorMap;
+    }, [uniqueExams]);
 
     const { allottedTotals, allottedGrandTotal, roomTotals, relieverTotals, requiredGrandTotal } = useMemo(() => {
         const allotted: { [key: string]: number } = {};
@@ -147,6 +168,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                   {uniqueExams.map(exam => {
                     const examKey = getExamKey(exam);
                     const isAssigned = row.duties[examKey] === 1;
+                    const colorClass = dayColors.get(exam.date) || 'bg-primary/20 text-primary';
                     return (
                         <TableCell 
                           key={`${row.id}-${examKey}`} 
@@ -162,7 +184,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                             )}
                           >
                             {isAssigned ? (
-                              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-primary/20 text-primary font-semibold">
+                              <div className={cn("flex items-center justify-center w-6 h-6 rounded-full font-semibold", colorClass)}>
                                 1
                               </div>
                             ) : (
@@ -213,7 +235,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                 <TableCell colSpan={3} className="text-right font-bold">Total Duties Allotted</TableCell>
                 {uniqueExams.map(exam => {
                     const examKey = getExamKey(exam);
-                    const required = (roomTotals[examKey] || 0) + (relieverTotals[examKey] || 0);
+                    const required = (roomTotals[examKey] || 0) + (relieversTotals[examKey] || 0);
                     const isMismatch = allottedTotals[examKey] !== required;
                     return (
                         <TableCell 

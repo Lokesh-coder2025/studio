@@ -78,7 +78,8 @@ export default function HistoryPage() {
                   <CardDescription>Click on a row to view allotment details. Use the delete icon to remove an entry.</CardDescription>
                 </div>
                 <Button 
-                  variant="destructive" 
+                  variant="destructive"
+                  size="sm"
                   onClick={() => setIsDeleteAllAlertOpen(true)}
                   disabled={history.length === 0}
                 >

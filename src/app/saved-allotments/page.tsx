@@ -81,7 +81,8 @@ export default function SavedAllotmentsPage() {
                   <CardDescription>Click on an allotment to load it for editing and exporting.</CardDescription>
                 </div>
                 <Button 
-                  variant="destructive" 
+                  variant="destructive"
+                  size="sm"
                   onClick={() => setIsDeleteAllAlertOpen(true)}
                   disabled={savedAllotments.length === 0}
                 >

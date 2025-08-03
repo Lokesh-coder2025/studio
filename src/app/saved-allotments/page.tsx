@@ -24,6 +24,7 @@ import { useToast } from '@/hooks/use-toast';
 export default function SavedAllotmentsPage() {
   const [savedAllotments, setSavedAllotments] = useState<SavedAllotment[]>([]);
   const [allotmentToDeleteId, setAllotmentToDeleteId] = useState<string | null>(null);
+  const [isDeleteAllAlertOpen, setIsDeleteAllAlertOpen] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
 
@@ -47,6 +48,17 @@ export default function SavedAllotmentsPage() {
     });
   };
 
+  const handleDeleteAll = () => {
+    setSavedAllotments([]);
+    localStorage.removeItem('savedAllotments');
+    setIsDeleteAllAlertOpen(false);
+    toast({
+      title: "All Saved Allotments Deleted",
+      description: "All saved sessions have been permanently removed.",
+      variant: "destructive",
+    });
+  };
+
   return (
     <>
        <div className="sticky top-[112px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
@@ -63,8 +75,20 @@ export default function SavedAllotmentsPage() {
         <div className="max-w-7xl mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle>Saved Sessions</CardTitle>
-              <CardDescription>Click on an allotment to load it for editing and exporting.</CardDescription>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle>Saved Sessions</CardTitle>
+                  <CardDescription>Click on an allotment to load it for editing and exporting.</CardDescription>
+                </div>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => setIsDeleteAllAlertOpen(true)}
+                  disabled={savedAllotments.length === 0}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete All
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
@@ -128,6 +152,26 @@ export default function SavedAllotmentsPage() {
                   }}
                 >
                   Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          
+          <AlertDialog open={isDeleteAllAlertOpen} onOpenChange={setIsDeleteAllAlertOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete ALL saved allotments.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={handleDeleteAll}
+                >
+                  Yes, Delete All
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

@@ -26,6 +26,7 @@ export default function HistoryPage() {
   const [history, setHistory] = useState<SavedAllotment[]>([]);
   const [selectedAllotment, setSelectedAllotment] = useState<SavedAllotment | null>(null);
   const [allotmentToDeleteId, setAllotmentToDeleteId] = useState<string | null>(null);
+  const [isDeleteAllAlertOpen, setIsDeleteAllAlertOpen] = useState(false);
   const { toast } = useToast();
 
   useEffect(() => {
@@ -40,7 +41,18 @@ export default function HistoryPage() {
     setAllotmentToDeleteId(null);
     toast({
       title: "Allotment Deleted",
-      description: "The saved allotment has been successfully removed.",
+      description: "The saved allotment has been successfully removed from history.",
+    });
+  };
+
+  const handleDeleteAll = () => {
+    setHistory([]);
+    localStorage.removeItem('dutyHistory');
+    setIsDeleteAllAlertOpen(false);
+    toast({
+      title: "History Cleared",
+      description: "All previously generated allotments have been deleted from history.",
+      variant: "destructive",
     });
   };
 
@@ -60,8 +72,20 @@ export default function HistoryPage() {
         <div className="max-w-7xl mx-auto">
           <Card>
             <CardHeader>
-              <CardTitle>Saved Allotments</CardTitle>
-              <CardDescription>Click on a row to view allotment details. Use the delete icon to remove an entry.</CardDescription>
+              <div className="flex justify-between items-start">
+                <div>
+                  <CardTitle>Saved Allotments</CardTitle>
+                  <CardDescription>Click on a row to view allotment details. Use the delete icon to remove an entry.</CardDescription>
+                </div>
+                <Button 
+                  variant="destructive" 
+                  onClick={() => setIsDeleteAllAlertOpen(true)}
+                  disabled={history.length === 0}
+                >
+                  <Trash2 className="mr-2 h-4 w-4" />
+                  Delete All
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               <div className="rounded-md border">
@@ -140,6 +164,26 @@ export default function HistoryPage() {
                   }}
                 >
                   Delete
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
+          
+          <AlertDialog open={isDeleteAllAlertOpen} onOpenChange={setIsDeleteAllAlertOpen}>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle>Are you sure you want to delete all history?</AlertDialogTitle>
+                <AlertDialogDescription>
+                  This action cannot be undone. This will permanently delete ALL previously generated allotments from your history.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                  onClick={handleDeleteAll}
+                >
+                  Yes, Delete All
                 </AlertDialogAction>
               </AlertDialogFooter>
             </AlertDialogContent>

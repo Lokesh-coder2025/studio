@@ -7,6 +7,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFoo
 import { useMemo, forwardRef } from 'react';
 import { format, parseISO, getDay } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 type AllotmentSheetProps = {
@@ -174,23 +175,30 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                           key={`${row.id}-${examKey}`} 
                           className="text-center p-0"
                         >
-                          <button
-                            onClick={() => handleToggleDuty(row.name, exam)}
-                            disabled={!isEditable}
-                            className={cn(
-                              "w-full h-full p-2 flex items-center justify-center transition-colors",
-                              isEditable && !isAssigned && "hover:bg-muted",
-                              !isEditable && "cursor-default"
-                            )}
-                          >
-                            {isAssigned ? (
-                              <div className={cn("flex items-center justify-center w-6 h-6 rounded-full font-semibold", colorClass)}>
-                                1
-                              </div>
-                            ) : (
-                              <span className="text-muted-foreground opacity-20">0</span>
-                            )}
-                          </button>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <button
+                                onClick={() => handleToggleDuty(row.name, exam)}
+                                disabled={!isEditable}
+                                className={cn(
+                                  "w-full h-full p-2 flex items-center justify-center transition-colors",
+                                  isEditable && !isAssigned && "hover:bg-muted",
+                                  !isEditable && "cursor-default"
+                                )}
+                              >
+                                {isAssigned ? (
+                                  <div className={cn("flex items-center justify-center w-6 h-6 rounded-full font-semibold", colorClass)}>
+                                    1
+                                  </div>
+                                ) : (
+                                  <span className="text-muted-foreground opacity-20">0</span>
+                                )}
+                              </button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>{format(parseISO(exam.date), 'PPP')} ({format(parseISO(exam.date), 'EEEE')})</p>
+                            </TooltipContent>
+                          </Tooltip>
                         </TableCell>
                     )
                   })}

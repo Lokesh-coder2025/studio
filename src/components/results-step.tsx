@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { AllotmentSheet } from '@/components/allotment-sheet';
 import { InvigilatorDutySummary } from '@/components/invigilator-duty-summary';
-import { ArrowLeft, Save, Download, Send, Loader2, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Save, Download, Send, Loader2, MessageSquare, Maximize } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { exportToExcelWithFormulas } from '@/lib/excel-export';
@@ -24,6 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { generateInvigilatorPdf } from '@/lib/pdf-generation';
 import { sendBulkEmails } from '@/ai/flows/send-bulk-emails-flow';
 
@@ -50,6 +51,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
   const [isSendingAllEmails, setIsSendingAllEmails] = useState(false);
   const [isEmailAllConfirmOpen, setIsEmailAllConfirmOpen] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const allotmentSheetRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -373,10 +375,16 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   return (
     <div className="space-y-6">
       <Tabs defaultValue="allotment-sheet">
-        <TabsList className="grid w-full grid-cols-2">
-          <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
-          <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
-        </TabsList>
+        <div className="flex justify-between items-center">
+            <TabsList className="grid w-full max-w-md grid-cols-2">
+            <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
+            <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
+            </TabsList>
+            <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
+                <Maximize />
+                <span className="sr-only">Full Screen</span>
+            </Button>
+        </div>
         <TabsContent value="allotment-sheet" className="mt-4">
             <AllotmentSheet 
               ref={allotmentSheetRef}
@@ -441,6 +449,25 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+      
+      <Dialog open={isFullScreen} onOpenChange={setIsFullScreen}>
+        <DialogContent className="max-w-[95vw] w-full h-[90vh] flex flex-col">
+            <DialogHeader>
+                <DialogTitle>{examTitle || "Duty Allotment Sheet"}</DialogTitle>
+                <DialogDescription>
+                    Full-screen view. You can edit the allotments here, but changes will only be reflected once you close this view.
+                </DialogDescription>
+            </DialogHeader>
+            <div className="flex-grow overflow-auto py-4">
+                <AllotmentSheet
+                    invigilators={invigilators}
+                    examinations={examinations}
+                    assignments={assignments}
+                    setAssignments={setAssignments}
+                />
+            </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

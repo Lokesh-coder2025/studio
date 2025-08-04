@@ -27,6 +27,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { generateInvigilatorPdf } from '@/lib/pdf-generation';
 import { sendBulkEmails } from '@/ai/flows/send-bulk-emails-flow';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 
 // Extend jsPDF with the autoTable method
@@ -380,10 +381,17 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
             <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
             </TabsList>
-            <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
-                <Maximize />
-                <span className="sr-only">Full Screen</span>
-            </Button>
+            <Tooltip>
+                <TooltipTrigger asChild>
+                    <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
+                        <Maximize />
+                        <span className="sr-only">Full Screen</span>
+                    </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                    <p>View Full-Screen</p>
+                </TooltipContent>
+            </Tooltip>
         </div>
         <TabsContent value="allotment-sheet" className="mt-4">
             <AllotmentSheet 

@@ -315,14 +315,16 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                     </TableCell>
                     <TableCell>{invigilator.email}</TableCell>
                     <TableCell className="text-right">
-                       <Button variant="ghost" size="icon" className="group" onClick={() => setEditingInvigilator(invigilator)}>
-                        <Pencil className="h-4 w-4 text-primary group-hover:text-primary-foreground" />
-                        <span className="sr-only">Edit Availability</span>
-                      </Button>
-                      <Button variant="ghost" size="icon" className="group hover:bg-destructive" onClick={() => deleteInvigilator(invigilator.id)}>
-                        <Trash2 className="h-4 w-4 text-destructive group-hover:text-destructive-foreground" />
-                        <span className="sr-only">Delete</span>
-                      </Button>
+                       <div className="flex justify-end items-center">
+                        <Button variant="ghost" size="icon" className="group" onClick={() => setEditingInvigilator(invigilator)}>
+                          <Pencil className="h-4 w-4 text-primary" />
+                          <span className="sr-only">Edit Availability</span>
+                        </Button>
+                        <Button variant="ghost" size="icon" className="group hover:bg-destructive" onClick={() => deleteInvigilator(invigilator.id)}>
+                          <Trash2 className="h-4 w-4 text-destructive group-hover:text-destructive-foreground" />
+                          <span className="sr-only">Delete</span>
+                        </Button>
+                      </div>
                     </TableCell>
                   </TableRow>
                 ))

@@ -61,7 +61,7 @@ const getWeekday = (dateString: string) => {
  */
 function deterministicDutyAllocation(input: OptimizeDutyAssignmentsInput): OptimizeDutyAssignmentsOutput {
     // 1. Create a flat list of all duty slots that need to be filled
-    let dutySlots: { date: string, subject: string, time: string, day: string, assigned: boolean, invigilatorName: string | null }[] = [];
+    let dutySlots: { date: string, subject: string, time: string, day: string }[] = [];
     input.examinations.forEach(exam => {
         for (let i = 0; i < exam.invigilatorsNeeded; i++) {
             dutySlots.push({ 
@@ -69,76 +69,92 @@ function deterministicDutyAllocation(input: OptimizeDutyAssignmentsInput): Optim
                 subject: exam.subject, 
                 time: exam.time,
                 day: getWeekday(exam.date), 
-                assigned: false,
-                invigilatorName: null
             });
         }
     });
     dutySlots.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // 2. Separate invigilators into full-time and part-time
+    // 2. Separate invigilators by type and prepare for weighted allocation
     const fullTimeInvigilators = input.invigilators.filter(inv => !inv.availableDays || inv.availableDays.length === 0);
     const partTimeInvigilators = input.invigilators.filter(inv => inv.availableDays && inv.availableDays.length > 0);
 
-    // Create a map to track duties assigned to each invigilator
-    const invigilatorDutyCount: { [name: string]: number } = {};
-    input.invigilators.forEach(inv => invigilatorDutyCount[inv.name] = 0);
-    
-    // 3. Calculate base duties
-    const totalDutySlots = dutySlots.length;
-    // For calculation, treat 2 part-timers as 1 full-timer
-    const fullTimeEquivalents = fullTimeInvigilators.length + (partTimeInvigilators.length / 2);
-    const baseDutiesPerFullTimer = fullTimeEquivalents > 0 ? Math.floor(totalDutySlots / fullTimeEquivalents) : 0;
-    const baseDutiesPerPartTimer = Math.floor(baseDutiesPerFullTimer / 2);
+    // Create a roster with weights (2 for full-time, 1 for part-time)
+    // Reverse the order to follow the last-in, first-out principle from the UI
+    const weightedRoster = [
+      ...fullTimeInvigilators.reverse().map(inv => ({ ...inv, weight: 2, dutiesAssigned: 0 })),
+      ...partTimeInvigilators.reverse().map(inv => ({ ...inv, weight: 1, dutiesAssigned: 0 }))
+    ];
 
-    // 4. Assign duties to part-time invigilators first
-    const partTimeOrder = [...partTimeInvigilators].reverse();
-    for (const inv of partTimeOrder) {
-        let dutiesAssigned = 0;
-        for (const slot of dutySlots) {
-            if (!slot.assigned && dutiesAssigned < baseDutiesPerPartTimer && inv.availableDays!.includes(slot.day)) {
-                slot.assigned = true;
-                slot.invigilatorName = inv.name;
-                invigilatorDutyCount[inv.name]++;
-                dutiesAssigned++;
+    const finalAssignments: { [key: string]: { date: string, subject: string, time: string, invigilators: string[] } } = {};
+    const assignedDutiesToInvigilators: { [name: string]: { date: string, time: string }[] } = {};
+    input.invigilators.forEach(inv => {
+      assignedDutiesToInvigilators[inv.name] = [];
+    });
+
+    // 3. Assign duties slot by slot
+    for (const slot of dutySlots) {
+        let assigned = false;
+        
+        // Sort roster before each assignment to prioritize fairness
+        // Priority: fewest duties, then highest weight (full-timers first)
+        weightedRoster.sort((a, b) => {
+            if (a.dutiesAssigned !== b.dutiesAssigned) {
+                return a.dutiesAssigned - b.dutiesAssigned;
+            }
+            return b.weight - a.weight;
+        });
+
+        for (const invigilator of weightedRoster) {
+            // Check availability
+            const isAvailable = invigilator.weight === 2 || (invigilator.availableDays && invigilator.availableDays.includes(slot.day));
+            
+            // Check if already assigned a duty on the same day and time
+            const hasDutyAtSameTime = assignedDutiesToInvigilators[invigilator.name].some(
+                d => d.date === slot.date && d.time === slot.time
+            );
+
+            if (isAvailable && !hasDutyAtSameTime) {
+                const key = `${slot.date}|${slot.subject}|${slot.time}`;
+                if (!finalAssignments[key]) {
+                    finalAssignments[key] = {
+                        date: slot.date,
+                        subject: slot.subject,
+                        time: slot.time,
+                        invigilators: []
+                    };
+                }
+                finalAssignments[key].invigilators.push(invigilator.name);
+                
+                // Update tracking
+                invigilator.dutiesAssigned++;
+                assignedDutiesToInvigilators[invigilator.name].push({ date: slot.date, time: slot.time });
+                
+                assigned = true;
+                break; // Move to the next slot
+            }
+        }
+        
+        if (!assigned) {
+           console.warn(`Could not find an available invigilator for a duty on ${slot.date} at ${slot.time}. All available invigilators may already be assigned for that time slot.`);
+           // Fallback: assign to someone, even if it breaks the "one duty per timeslot" rule, to ensure the slot is filled.
+           // This should ideally not happen if there are enough invigilators.
+            for (const invigilator of weightedRoster) {
+                 const isAvailable = invigilator.weight === 2 || (invigilator.availableDays && invigilator.availableDays.includes(slot.day));
+                 if(isAvailable) {
+                     const key = `${slot.date}|${slot.subject}|${slot.time}`;
+                     if (!finalAssignments[key]) {
+                         finalAssignments[key] = { date: slot.date, subject: slot.subject, time: slot.time, invigilators: [] };
+                     }
+                     finalAssignments[key].invigilators.push(invigilator.name);
+                     invigilator.dutiesAssigned++;
+                     assignedDutiesToInvigilators[invigilator.name].push({ date: slot.date, time: slot.time });
+                     break;
+                 }
             }
         }
     }
 
-    // 5. Assign duties to full-time invigilators (base + remaining)
-    const fullTimeOrder = [...fullTimeInvigilators].reverse();
-    let unassignedSlots = dutySlots.filter(s => !s.assigned);
-    let invigilatorIndex = 0;
-
-    while (unassignedSlots.length > 0) {
-        const invigilator = fullTimeOrder[invigilatorIndex % fullTimeOrder.length];
-        const slotToAssign = unassignedSlots.shift(); // Take the next available slot
-        if (slotToAssign) {
-            slotToAssign.assigned = true;
-            slotToAssign.invigilatorName = invigilator.name;
-            invigilatorDutyCount[invigilator.name]++;
-        }
-        invigilatorIndex++;
-    }
-
-    // 6. Format the output
-    const assignmentsMap: { [key: string]: { date: string, subject: string, time: string, invigilators: string[] } } = {};
-    dutySlots.forEach(slot => {
-        const key = `${slot.date}|${slot.subject}|${slot.time}`;
-        if (!assignmentsMap[key]) {
-            assignmentsMap[key] = {
-                date: slot.date,
-                subject: slot.subject,
-                time: slot.time,
-                invigilators: []
-            };
-        }
-        if (slot.invigilatorName) {
-            assignmentsMap[key].invigilators.push(slot.invigilatorName);
-        }
-    });
-
-    return Object.values(assignmentsMap);
+    return Object.values(finalAssignments);
 }
 
 

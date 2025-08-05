@@ -5,7 +5,6 @@ import {
   Navigation,
   NavigationMenu,
   NavigationMenuItem,
-  NavigationMenuButton,
   NavigationHeader,
   NavigationProvider,
   NavigationInset,
@@ -14,6 +13,7 @@ import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { FileSpreadsheet, History, Save, Info, GanttChartSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { cn } from '@/lib/utils';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -53,28 +53,28 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                       </Button>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuButton asChild isActive={pathname === '/saved-allotments'} size="sm">
+                        <Button asChild variant={pathname === '/saved-allotments' ? 'default' : 'outline'} size="sm" className={cn(pathname === '/saved-allotments' && 'shadow-lg')}>
                         <Link href="/saved-allotments">
                             <Save />
                             <span>Saved Allotments</span>
                         </Link>
-                        </NavigationMenuButton>
+                        </Button>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuButton asChild isActive={pathname === '/history'} size="sm">
+                        <Button asChild variant={pathname === '/history' ? 'default' : 'outline'} size="sm" className={cn(pathname === '/history' && 'shadow-lg')}>
                           <Link href="/history">
                               <History />
                               <span>History</span>
                           </Link>
-                        </NavigationMenuButton>
+                        </Button>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <NavigationMenuButton asChild isActive={pathname === '/about'} size="sm">
+                        <Button asChild variant={pathname === '/about' ? 'default' : 'outline'} size="sm" className={cn(pathname === '/about' && 'shadow-lg')}>
                         <Link href="/about">
                             <Info />
                             <span>About DutyFlow</span>
                         </Link>
-                        </NavigationMenuButton>
+                        </Button>
                     </NavigationMenuItem>
                 </NavigationMenu>
               </div>

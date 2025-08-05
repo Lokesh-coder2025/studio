@@ -117,16 +117,20 @@ function HomeClient() {
 
   return (
     <>
-      <div className="sticky top-[146px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
+      <div className="sticky top-[100px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
         <div className="p-1 flex justify-center">
-            <ol className="flex items-center w-full max-w-2xl justify-center ml-[5rem]">
+            <ol className="flex items-center w-full max-w-2xl justify-center">
                 {STEPS.map((item, index) => (
-                    <li key={item.step} className={`flex w-full items-center ${index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-px after:border-b after:border-border after:border-1 after:inline-block" : ""} ${currentStep > item.step ? 'after:border-primary' : ''}`}>
+                    <li key={item.step} className={cn("flex w-full items-center text-sm font-medium text-center text-muted-foreground", 
+                      index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-px after:border-b after:border-border after:border-1 after:inline-block after:mx-6" : "", 
+                      currentStep > item.step ? 'after:border-primary' : '',
+                      currentStep >= item.step ? 'text-primary' : ''
+                    )}>
                         <div className="flex flex-col items-center">
-                            <span className={`flex items-center justify-center w-[40px] h-[40px] rounded-full shrink-0 ${currentStep >= item.step ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'}`}>
-                                <item.icon className="w-5 h-5" />
+                            <span className={cn("flex items-center justify-center w-8 h-8 rounded-full shrink-0 mb-2 border-2", currentStep >= item.step ? 'bg-primary/10 border-primary' : 'border-border')}>
+                                <item.icon className={cn("w-4 h-4", currentStep >= item.step ? 'text-primary' : 'text-muted-foreground')} />
                             </span>
-                            <p className={`mt-1 text-[10px] font-medium whitespace-nowrap ${currentStep >= item.step ? 'text-primary' : 'text-muted-foreground'}`}>{item.title}</p>
+                            <p className="text-xs whitespace-nowrap">{item.title}</p>
                         </div>
                     </li>
                 ))}

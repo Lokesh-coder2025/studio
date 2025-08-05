@@ -208,7 +208,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
       <div className="space-y-8">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-4 gap-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-4">
               <FormField
                 control={form.control}
                 name="name"
@@ -262,7 +262,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                 )}
               />
             </div>
-            <div className="flex flex-wrap items-center gap-4 pt-2">
+            <div className="flex flex-wrap items-center gap-4 pt-4">
               <Button type="submit">
                 <UserPlus className="mr-2" /> Add Invigilator
               </Button>
@@ -275,7 +275,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                   accept=".xlsx, .xls"
                   onChange={handleFileUpload}
                 />
-                <Button asChild>
+                <Button type='button' variant='outline' asChild>
                   <label htmlFor="excel-upload" className="cursor-pointer">
                     <Upload className="mr-2" /> Import from Excel
                   </label>

@@ -13,6 +13,7 @@ import {
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { FileSpreadsheet, History, Save, Info } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,8 +21,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    // This logic ensures that navigating to the home page always triggers a state reset,
-    // avoiding hydration issues with client-side-only values.
     if (pathname === '/') {
         window.location.reload();
     } else {
@@ -34,58 +33,57 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
         <div className='flex flex-col min-h-svh'>
           <Navigation>
             <NavigationHeader>
-              <div className="flex justify-start w-full">
+              <div className="flex justify-start items-center">
                 <Link href="/" onClick={handleNewAllotmentClick} className="text-left cursor-pointer">
                   <h1 className="text-[1.65rem] font-bold text-primary font-headline">DutyFlow</h1>
                   <p className="text-[0.5rem] font-bold text-muted-foreground w-full -mt-1 tracking-widest">The AI-Assisted Allotments</p>
                 </Link>
               </div>
-            </NavigationHeader>
-            <nav className="border-b bg-background">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 md:px-8">
-                <NavigationMenu className="grid grid-cols-4">
-                    <NavigationMenuItem className="col-start-1 flex justify-center">
-                        <NavigationMenuButton asChild isActive={pathname === '/'} tooltip="New Allotment">
+              <div className="flex-grow flex justify-center">
+                <NavigationMenu>
+                    <NavigationMenuItem>
+                      <Button asChild variant="default" size="sm" className='shadow-lg'>
                         <Link href="/" onClick={handleNewAllotmentClick}>
                             <FileSpreadsheet />
                             <span>New Allotment</span>
                         </Link>
-                        </NavigationMenuButton>
+                      </Button>
                     </NavigationMenuItem>
-                    <NavigationMenuItem className="flex justify-center">
-                        <NavigationMenuButton asChild isActive={pathname === '/saved-allotments'} tooltip="Saved Allotments">
+                    <NavigationMenuItem>
+                        <NavigationMenuButton asChild isActive={pathname === '/saved-allotments'} size="sm">
                         <Link href="/saved-allotments">
                             <Save />
                             <span>Saved Allotments</span>
                         </Link>
                         </NavigationMenuButton>
                     </NavigationMenuItem>
-                    <NavigationMenuItem className="flex justify-center">
-                        <NavigationMenuButton asChild isActive={pathname === '/history'} tooltip="History">
+                    <NavigationMenuItem>
+                        <NavigationMenuButton asChild isActive={pathname === '/history'} size="sm">
                           <Link href="/history">
                               <History />
                               <span>History</span>
                           </Link>
                         </NavigationMenuButton>
                     </NavigationMenuItem>
-                    <NavigationMenuItem className="col-start-4 flex justify-end">
-                        <NavigationMenuButton asChild isActive={pathname === '/about'} tooltip="About DutyFlow">
+                    <NavigationMenuItem>
+                        <NavigationMenuButton asChild isActive={pathname === '/about'} size="sm">
                         <Link href="/about">
                             <Info />
                             <span>About DutyFlow</span>
                         </Link>
                         </NavigationMenuButton>
                     </NavigationMenuItem>
-                    </NavigationMenu>
-                </div>
-            </nav>
+                </NavigationMenu>
+              </div>
+              <div className="w-[180px]"></div>
+            </NavigationHeader>
           </Navigation>
           <NavigationInset>
               <div className="flex-1">
                   {children}
               </div>
               <footer className="text-center text-xs text-muted-foreground p-4 border-t">
-                  &copy; {new Date().getFullYear()} DutyFlow
+                  &copy; 2025 DutyFlow
               </footer>
           </NavigationInset>
         </div>

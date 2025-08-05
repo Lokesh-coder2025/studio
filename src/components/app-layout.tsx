@@ -37,7 +37,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link href="/" onClick={handleNewAllotmentClick} className="flex items-center gap-3 text-left cursor-pointer">
                   <GanttChartSquare className="w-10 h-10 text-primary" />
                   <div>
-                    <h1 className="text-[1.65rem] font-bold text-primary font-headline">DutyFlow</h1>
+                    <h1 className="text-[1.72rem] font-bold text-primary font-headline">DutyFlow</h1>
                     <p className="text-[0.5rem] font-bold text-muted-foreground w-full -mt-1 tracking-widest">The AI-Assisted Allotments</p>
                   </div>
                 </Link>

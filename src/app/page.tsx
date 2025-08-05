@@ -67,6 +67,10 @@ function HomeClient() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [searchParams]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [currentStep]);
+
   const nextStep = () => setCurrentStep((prev) => prev + 1);
   const prevStep = () => {
     if (searchParams.get('load')) {

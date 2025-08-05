@@ -53,7 +53,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                       </Button>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <Button asChild variant={pathname === '/saved-allotments' ? 'default' : 'outline'} size="sm" className={cn(pathname === '/saved-allotments' && 'shadow-lg')}>
+                        <Button asChild variant="default" size="sm" className={cn(pathname === '/saved-allotments' ? 'shadow-lg' : '')}>
                         <Link href="/saved-allotments">
                             <Save />
                             <span>Saved Allotments</span>
@@ -61,7 +61,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         </Button>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <Button asChild variant={pathname === '/history' ? 'default' : 'outline'} size="sm" className={cn(pathname === '/history' && 'shadow-lg')}>
+                        <Button asChild variant="default" size="sm" className={cn(pathname === '/history' ? 'shadow-lg' : '')}>
                           <Link href="/history">
                               <History />
                               <span>History</span>
@@ -69,7 +69,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         </Button>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
-                        <Button asChild variant={pathname === '/about' ? 'default' : 'outline'} size="sm" className={cn(pathname === '/about' && 'shadow-lg')}>
+                        <Button asChild variant="default" size="sm" className={cn(pathname === '/about' ? 'shadow-lg' : '')}>
                         <Link href="/about">
                             <Info />
                             <span>About DutyFlow</span>

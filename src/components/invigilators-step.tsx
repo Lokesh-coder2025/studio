@@ -2,7 +2,7 @@
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -36,10 +36,17 @@ type AvailabilityDialogProps = {
 };
 
 function AvailabilityDialog({ invigilator, onSave, onClose }: AvailabilityDialogProps) {
-  const [selectedDays, setSelectedDays] = useState<string[]>(invigilator?.availableDays || []);
+  const [selectedDays, setSelectedDays] = useState<string[]>([]);
+
+  useEffect(() => {
+    // Reset state when the dialog is opened for a new invigilator, but not on re-renders
+    if (invigilator) {
+      setSelectedDays(invigilator.availableDays || []);
+    }
+  }, [invigilator]);
 
   if (!invigilator) return null;
-
+  
   const handleDayToggle = (day: string) => {
     setSelectedDays(prev => 
       prev.includes(day) ? prev.filter(d => d !== day) : [...prev, day]
@@ -52,7 +59,7 @@ function AvailabilityDialog({ invigilator, onSave, onClose }: AvailabilityDialog
   };
 
   return (
-    <Dialog open={!!invigilator} onOpenChange={(isOpen) => !isOpen && onClose()}>
+    <Dialog open={!!invigilator} onOpenChange={(isOpen) => { if (!isOpen) onClose(); }}>
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Set Availability for {invigilator.name}</DialogTitle>
@@ -70,6 +77,8 @@ function AvailabilityDialog({ invigilator, onSave, onClose }: AvailabilityDialog
           ))}
         </div>
         <DialogFooter>
+          <Button variant="ghost" onClick={() => setSelectedDays([])}>Clear All</Button>
+          <div className="flex-grow" />
           <DialogClose asChild>
             <Button variant="outline">Cancel</Button>
           </DialogClose>
@@ -202,6 +211,11 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
 
     reader.readAsBinaryString(file);
   };
+  
+  const handleEditClick = (invigilator: Invigilator) => {
+    setEditingInvigilator(invigilator);
+  };
+
 
   return (
     <>
@@ -316,7 +330,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                     <TableCell>{invigilator.email}</TableCell>
                     <TableCell className="text-right">
                        <div className="flex justify-end items-center">
-                        <Button variant="ghost" size="icon" className="group" onClick={() => setEditingInvigilator(invigilator)}>
+                        <Button variant="ghost" size="icon" className="group" onClick={() => handleEditClick(invigilator)}>
                           <Pencil className="h-4 w-4 text-primary" />
                           <span className="sr-only">Edit Availability</span>
                         </Button>
@@ -354,3 +368,5 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
     </>
   );
 }
+
+    

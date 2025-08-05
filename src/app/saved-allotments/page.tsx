@@ -110,8 +110,8 @@ export default function SavedAllotmentsPage() {
                           <TableCell onClick={() => handleLoad(item.id)}>{format(parseISO(item.firstExamDate), 'd-MMM-yy')}</TableCell>
                           <TableCell className="font-medium" onClick={() => handleLoad(item.id)}>{item.examTitle}</TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="icon" onClick={() => handleLoad(item.id)}>
-                              <Edit className="h-4 w-4 text-primary" />
+                            <Button variant="ghost" size="icon" className="group hover:bg-primary" onClick={() => handleLoad(item.id)}>
+                              <Edit className="h-4 w-4 text-primary group-hover:text-primary-foreground" />
                               <span className="sr-only">Load</span>
                             </Button>
                             <Button variant="ghost" size="icon" className="group hover:bg-destructive" onClick={() => setAllotmentToDeleteId(item.id)}>

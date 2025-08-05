@@ -41,7 +41,7 @@ function AvailabilityDialog({ invigilator, onSave, onClose }: AvailabilityDialog
   useEffect(() => {
     // Reset state when the dialog is opened for a new invigilator, but not on re-renders
     if (invigilator) {
-      setSelectedDays(invigilator.availableDays || []);
+      setSelectedDays([]);
     }
   }, [invigilator]);
 
@@ -289,7 +289,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                   accept=".xlsx, .xls"
                   onChange={handleFileUpload}
                 />
-                <Button type='button' variant='outline' asChild>
+                <Button type='button' asChild className="bg-[#000080] text-white hover:bg-[#000080]/90">
                   <label htmlFor="excel-upload" className="cursor-pointer">
                     <Upload className="mr-2" /> Import from Excel
                   </label>
@@ -368,5 +368,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
     </>
   );
 }
+
+    
 
     

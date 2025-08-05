@@ -657,7 +657,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                 accept=".xlsx, .xls, .csv"
                 onChange={handleExamFileUpload}
               />
-              <Button asChild>
+              <Button asChild className="bg-[#000080] text-white hover:bg-[#000080]/90">
                 <label htmlFor="excel-exam-upload" className="cursor-pointer flex items-center gap-2">
                   <Upload /> Import from Excel
                 </label>
@@ -730,3 +730,5 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
     </div>
   );
 }
+
+    

@@ -107,8 +107,8 @@ export default function HistoryPage() {
                           <TableCell className="cursor-pointer" onClick={() => setSelectedAllotment(item)}>{format(parseISO(item.firstExamDate), 'd-MMM-yy')}</TableCell>
                           <TableCell className="font-medium cursor-pointer" onClick={() => setSelectedAllotment(item)}>{item.examTitle}</TableCell>
                           <TableCell className="text-right">
-                            <Button variant="ghost" size="icon" onClick={() => setAllotmentToDeleteId(item.id)}>
-                              <Trash2 className="h-4 w-4 text-destructive" />
+                            <Button variant="ghost" size="icon" className="group hover:bg-destructive" onClick={() => setAllotmentToDeleteId(item.id)}>
+                              <Trash2 className="h-4 w-4 text-destructive group-hover:text-destructive-foreground" />
                               <span className="sr-only">Delete</span>
                             </Button>
                           </TableCell>

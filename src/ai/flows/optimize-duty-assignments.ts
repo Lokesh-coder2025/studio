@@ -58,9 +58,10 @@ const getWeekday = (dateString: string) => {
 /**
  * This function directly implements the duty allotment logic without using an AI prompt.
  * This ensures that the complex, rule-based allocation is performed predictably and accurately.
+ * The logic is based on a weighted distribution to ensure fairness between full-time and part-time staff.
  */
 function deterministicDutyAllocation(input: OptimizeDutyAssignmentsInput): OptimizeDutyAssignmentsOutput {
-    // 1. Create a flat list of all duty slots that need to be filled
+    // 1. Create a flat list of all duty slots that need to be filled, sorted by date.
     let dutySlots: { date: string, subject: string, time: string, day: string }[] = [];
     input.examinations.forEach(exam => {
         for (let i = 0; i < exam.invigilatorsNeeded; i++) {
@@ -74,83 +75,73 @@ function deterministicDutyAllocation(input: OptimizeDutyAssignmentsInput): Optim
     });
     dutySlots.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-    // 2. Separate invigilators by type and prepare for weighted allocation
-    const fullTimeInvigilators = input.invigilators.filter(inv => !inv.availableDays || inv.availableDays.length === 0);
-    const partTimeInvigilators = input.invigilators.filter(inv => inv.availableDays && inv.availableDays.length > 0);
-
-    // Create a roster with weights (2 for full-time, 1 for part-time)
-    // Reverse the order to follow the last-in, first-out principle from the UI
-    const weightedRoster = [
-      ...fullTimeInvigilators.reverse().map(inv => ({ ...inv, weight: 2, dutiesAssigned: 0 })),
-      ...partTimeInvigilators.reverse().map(inv => ({ ...inv, weight: 1, dutiesAssigned: 0 }))
-    ];
+    // 2. Prepare invigilator roster.
+    // Full-time invigilators get a weight of 2, part-time get a weight of 1.
+    const roster = input.invigilators.map(inv => ({
+      ...inv,
+      isPartTime: inv.availableDays && inv.availableDays.length > 0,
+      dutiesAssigned: 0,
+      // Track assigned slots to prevent double-booking on the same day/time
+      assignedSlots: new Set<string>(), 
+    })).reverse(); // Reverse to match the last-in, first-out order from the UI.
 
     const finalAssignments: { [key: string]: { date: string, subject: string, time: string, invigilators: string[] } } = {};
-    const assignedDutiesToInvigilators: { [name: string]: { date: string, time: string }[] } = {};
-    input.invigilators.forEach(inv => {
-      assignedDutiesToInvigilators[inv.name] = [];
-    });
 
-    // 3. Assign duties slot by slot
+    // 3. Assign duties slot by slot using a round-robin approach.
+    let rosterIndex = 0;
     for (const slot of dutySlots) {
         let assigned = false;
-        
-        // Sort roster before each assignment to prioritize fairness
-        // Priority: fewest duties, then highest weight (full-timers first)
-        weightedRoster.sort((a, b) => {
-            if (a.dutiesAssigned !== b.dutiesAssigned) {
-                return a.dutiesAssigned - b.dutiesAssigned;
-            }
-            return b.weight - a.weight;
-        });
+        let attempts = 0;
 
-        for (const invigilator of weightedRoster) {
-            // Check availability
-            const isAvailable = invigilator.weight === 2 || (invigilator.availableDays && invigilator.availableDays.includes(slot.day));
+        while (!assigned && attempts < roster.length) {
+            const invigilator = roster[rosterIndex];
             
-            // Check if already assigned a duty on the same day and time
-            const hasDutyAtSameTime = assignedDutiesToInvigilators[invigilator.name].some(
-                d => d.date === slot.date && d.time === slot.time
-            );
+            // Check availability:
+            // 1. Is the invigilator available on this weekday? (Full-timers are always available)
+            const isAvailableOnDay = !invigilator.isPartTime || (invigilator.availableDays && invigilator.availableDays.includes(slot.day));
+            // 2. Is the invigilator already assigned a duty on this exact date and time?
+            const slotKey = `${slot.date}|${slot.time}`;
+            const isAlreadyAssignedSlot = invigilator.assignedSlots.has(slotKey);
 
-            if (isAvailable && !hasDutyAtSameTime) {
-                const key = `${slot.date}|${slot.subject}|${slot.time}`;
-                if (!finalAssignments[key]) {
-                    finalAssignments[key] = {
+            if (isAvailableOnDay && !isAlreadyAssignedSlot) {
+                const examKey = `${slot.date}|${slot.subject}|${slot.time}`;
+                if (!finalAssignments[examKey]) {
+                    finalAssignments[examKey] = {
                         date: slot.date,
                         subject: slot.subject,
                         time: slot.time,
                         invigilators: []
                     };
                 }
-                finalAssignments[key].invigilators.push(invigilator.name);
+                finalAssignments[examKey].invigilators.push(invigilator.name);
                 
-                // Update tracking
+                // Update tracking for the invigilator
                 invigilator.dutiesAssigned++;
-                assignedDutiesToInvigilators[invigilator.name].push({ date: slot.date, time: slot.time });
+                invigilator.assignedSlots.add(slotKey);
                 
                 assigned = true;
-                break; // Move to the next slot
+
+                // Sort the roster after each full round to maintain fairness
+                // This prioritizes those with fewer duties, then full-timers
+                if(rosterIndex === roster.length -1) {
+                  roster.sort((a, b) => {
+                      if (a.dutiesAssigned !== b.dutiesAssigned) {
+                          return a.dutiesAssigned - b.dutiesAssigned;
+                      }
+                      // isPartTime is boolean, so false (full-timer) comes before true (part-timer)
+                      return (a.isPartTime ? 1 : 0) - (b.isPartTime ? 1 : 0);
+                  });
+                }
             }
+            
+            // Move to the next invigilator for the next slot
+            rosterIndex = (rosterIndex + 1) % roster.length;
+            attempts++;
         }
         
         if (!assigned) {
            console.warn(`Could not find an available invigilator for a duty on ${slot.date} at ${slot.time}. All available invigilators may already be assigned for that time slot.`);
-           // Fallback: assign to someone, even if it breaks the "one duty per timeslot" rule, to ensure the slot is filled.
-           // This should ideally not happen if there are enough invigilators.
-            for (const invigilator of weightedRoster) {
-                 const isAvailable = invigilator.weight === 2 || (invigilator.availableDays && invigilator.availableDays.includes(slot.day));
-                 if(isAvailable) {
-                     const key = `${slot.date}|${slot.subject}|${slot.time}`;
-                     if (!finalAssignments[key]) {
-                         finalAssignments[key] = { date: slot.date, subject: slot.subject, time: slot.time, invigilators: [] };
-                     }
-                     finalAssignments[key].invigilators.push(invigilator.name);
-                     invigilator.dutiesAssigned++;
-                     assignedDutiesToInvigilators[invigilator.name].push({ date: slot.date, time: slot.time });
-                     break;
-                 }
-            }
+           // Fallback logic can be added here if necessary, e.g., assign to the least-burdened available person even if it breaks secondary rules.
         }
     }
 

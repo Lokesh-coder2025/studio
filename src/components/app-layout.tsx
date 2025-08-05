@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info, GanttChartSquare } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info, UsersRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
@@ -35,7 +35,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <NavigationHeader>
               <div className="flex justify-start items-center">
                 <Link href="/" onClick={handleNewAllotmentClick} className="flex items-center gap-3 text-left cursor-pointer">
-                  <GanttChartSquare className="w-10 h-10 text-primary" />
+                  <UsersRound className="w-10 h-10 text-primary" />
                   <div>
                     <h1 className="text-[1.72rem] font-bold text-primary font-headline">DutyFlow</h1>
                     <p className="text-[0.5rem] font-bold text-muted-foreground w-full -mt-1 tracking-widest">The AI-Assisted Allotments</p>

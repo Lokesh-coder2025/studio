@@ -12,7 +12,7 @@ import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
 
 const GenerateMotivationalQuoteInputSchema = z.object({
-  name: z.string().describe('The name of the invigilator for whom the quote is intended.'),
+  // No input is needed for a general quote.
 });
 export type GenerateMotivationalQuoteInput = z.infer<typeof GenerateMotivationalQuoteInputSchema>;
 
@@ -29,7 +29,7 @@ const prompt = ai.definePrompt({
   name: 'generateMotivationalQuotePrompt',
   input: {schema: GenerateMotivationalQuoteInputSchema},
   output: {schema: GenerateMotivationalQuoteOutputSchema},
-  prompt: `You are a creative assistant. Generate a short, unique, and uplifting motivational quote suitable for an educator or invigilator named {{{name}}}. The quote should be inspiring and relevant to their role in ensuring a fair and smooth examination process. It should be one or two sentences long.`,
+  prompt: `You are a creative assistant. Generate a short, unique, and uplifting motivational quote. The quote should be inspiring and general in nature, suitable for an educator. It can be about life, education, or personal growth. It should be one or two sentences long.`,
 });
 
 const generateMotivationalQuoteFlow = ai.defineFlow(

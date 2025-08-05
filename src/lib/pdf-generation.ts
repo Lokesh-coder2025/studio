@@ -74,7 +74,7 @@ export const generateInvigilatorPdf = async (
     examTitle: string
 ): Promise<string | null> => {
   try {
-    const quoteResponse = await generateMotivationalQuote({ name: invigilator.name });
+    const quoteResponse = await generateMotivationalQuote({});
     const quote = quoteResponse.quote;
     
     const doc = new jsPDF('p', 'mm', 'a4');

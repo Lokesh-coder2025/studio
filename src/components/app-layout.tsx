@@ -12,7 +12,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info, GanttChartSquare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -34,9 +34,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
           <Navigation>
             <NavigationHeader>
               <div className="flex justify-start items-center">
-                <Link href="/" onClick={handleNewAllotmentClick} className="text-left cursor-pointer">
-                  <h1 className="text-[1.65rem] font-bold text-primary font-headline">DutyFlow</h1>
-                  <p className="text-[0.5rem] font-bold text-muted-foreground w-full -mt-1 tracking-widest">The AI-Assisted Allotments</p>
+                <Link href="/" onClick={handleNewAllotmentClick} className="flex items-center gap-3 text-left cursor-pointer">
+                  <GanttChartSquare className="w-10 h-10 text-primary" />
+                  <div>
+                    <h1 className="text-[1.65rem] font-bold text-primary font-headline">DutyFlow</h1>
+                    <p className="text-[0.5rem] font-bold text-muted-foreground w-full -mt-1 tracking-widest">The AI-Assisted Allotments</p>
+                  </div>
                 </Link>
               </div>
               <div className="flex-grow flex justify-center">

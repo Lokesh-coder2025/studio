@@ -150,8 +150,8 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
               <TableHead className="align-middle">Invigilator’s Name</TableHead>
               <TableHead className="align-middle">Designation</TableHead>
               {uniqueExams.map(exam => (
-                <TableHead key={getExamKey(exam)} className="text-center w-[120px]">
-                    <div>{format(parseISO(exam.date), 'dd-MMM')}</div>
+                <TableHead key={getExamKey(exam)} className="text-center w-[90px]">
+                    <div>{format(parseISO(exam.date), 'dd/MM')}</div>
                     <div className="font-normal">{exam.subject}</div>
                     <div className="text-xs font-light">{exam.time}</div>
                 </TableHead>
@@ -243,7 +243,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                 <TableCell colSpan={3} className="text-right font-bold">Total Duties Allotted</TableCell>
                 {uniqueExams.map(exam => {
                     const examKey = getExamKey(exam);
-                    const required = (roomTotals[examKey] || 0) + (relieverTotals[examKey] || 0);
+                    const required = (roomTotals[examKey] || 0) + (relievers[examKey] || 0);
                     const isMismatch = allottedTotals[examKey] !== required;
                     return (
                         <TableCell 

@@ -208,7 +208,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <div className="flex items-center justify-center">
-                          <div className="flex items-center justify-center w-6 h-6 rounded-md" style={{backgroundColor: '#F8F8FF'}}>
+                          <div className="flex items-center justify-center w-6 h-6 rounded-md" style={{backgroundColor: '#FFF5EE'}}>
                             {row.totalDuties}
                           </div>
                         </div>

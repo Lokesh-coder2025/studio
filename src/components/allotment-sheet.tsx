@@ -204,7 +204,14 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                         </TableCell>
                     )
                   })}
-                  <TableCell className="font-bold text-center">{row.totalDuties}</TableCell>
+                  <TableCell className="font-bold text-center">
+                    <Tooltip>
+                      <TooltipTrigger>{row.totalDuties}</TooltipTrigger>
+                      <TooltipContent>
+                        <p>{row.name}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TableCell>
                 </TableRow>
               ))
             ) : (

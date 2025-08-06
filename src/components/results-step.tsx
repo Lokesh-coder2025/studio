@@ -303,25 +303,35 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         }
       },
       didDrawCell: function (data) {
-        if (data.section === 'head' && data.column.index > 2 && data.column.index < head[0].length-1) {
-            const cell = data.cell;
-            // Clear the cell content
-            doc.setFillColor(headStyles.fillColor[0], headStyles.fillColor[1], headStyles.fillColor[2]);
-            doc.rect(cell.x, cell.y, cell.width, cell.height, 'F');
-            
-            // Set text properties
-            doc.setTextColor(headStyles.textColor);
-            doc.setFont(doc.getFont().fontName, 'bold');
-            doc.setFontSize(8);
+        if (data.section === 'head' && data.column.index > 2 && data.column.index < head[0].length - 1) {
+          const cell = data.cell;
+          // The text is an array due to '\n'.
+          const text = Array.isArray(cell.text) ? cell.text.join('\n') : cell.text;
 
-            // Save context, rotate, draw text, and restore
-            doc.saveGraphicsState();
-            doc.text(cell.text, cell.x + cell.width / 2, cell.y + cell.height - 3, {
-              align: 'center',
-              baseline: 'bottom',
-              angle: -90
-            });
-            doc.restoreGraphicsState();
+          // Clear the cell content
+          doc.setFillColor(headStyles.fillColor[0], headStyles.fillColor[1], headStyles.fillColor[2]);
+          doc.rect(cell.x, cell.y, cell.width, cell.height, 'F');
+          
+          doc.saveGraphicsState();
+          
+          // Set text properties
+          doc.setTextColor(headStyles.textColor);
+          doc.setFont(doc.getFont().fontName, 'bold');
+          doc.setFontSize(8);
+          
+          // Manually handle multi-line text with rotation
+          const lines = doc.splitTextToSize(text, cell.width - 2); // Get lines that fit
+          const textHeight = lines.length * doc.getLineHeight() / doc.internal.scaleFactor;
+          const textY = cell.y + cell.height - 3; // Position at the bottom of the cell before rotation
+          const textX = cell.x + cell.width / 2; // Center horizontally before rotation
+
+          doc.text(lines, textX, textY, {
+            align: 'center',
+            baseline: 'bottom',
+            angle: -90
+          });
+          
+          doc.restoreGraphicsState();
         }
       },
       styles: {
@@ -329,7 +339,6 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         cellPadding: 2,
       },
       headStyles: {
-        // We set minCellHeight to accommodate the rotated text
         minCellHeight: 40,
         valign: 'bottom',
       },
@@ -528,3 +537,5 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
+
+    

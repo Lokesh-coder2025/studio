@@ -206,7 +206,13 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                   })}
                   <TableCell className="font-bold text-center">
                     <Tooltip>
-                      <TooltipTrigger>{row.totalDuties}</TooltipTrigger>
+                      <TooltipTrigger asChild>
+                        <div className="flex items-center justify-center">
+                          <div className="flex items-center justify-center w-6 h-6 rounded-md" style={{backgroundColor: '#F8F8FF'}}>
+                            {row.totalDuties}
+                          </div>
+                        </div>
+                      </TooltipTrigger>
                       <TooltipContent>
                         <p>{row.name}</p>
                       </TooltipContent>

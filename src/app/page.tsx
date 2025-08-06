@@ -121,27 +121,6 @@ function HomeClient() {
 
   return (
     <>
-      <div className="sticky top-[100px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
-        <div className="p-1 flex justify-center">
-            <ol className="flex items-center w-full max-w-2xl justify-center">
-                {STEPS.map((item, index) => (
-                    <li key={item.step} className={cn("flex w-full items-center text-sm font-medium text-center text-muted-foreground", 
-                      index < STEPS.length - 1 ? "after:content-[''] after:w-full after:h-px after:border-b after:border-border after:border-1 after:inline-block after:mx-6" : "", 
-                      currentStep > item.step ? 'after:border-primary' : '',
-                      currentStep >= item.step ? 'text-primary' : ''
-                    )}>
-                        <div className="flex flex-col items-center">
-                            <span className={cn("flex items-center justify-center w-8 h-8 rounded-full shrink-0 mb-2 border-2", currentStep >= item.step ? 'bg-primary/10 border-primary' : 'border-border')}>
-                                <item.icon className={cn("w-4 h-4", currentStep >= item.step ? 'text-primary' : 'text-muted-foreground')} />
-                            </span>
-                            <p className="text-xs whitespace-nowrap">{item.title}</p>
-                        </div>
-                    </li>
-                ))}
-            </ol>
-        </div>
-      </div>
-
       <div className="p-4 sm:p-6 md:p-8">
         <Card className={cn(
             "mx-auto shadow-lg",

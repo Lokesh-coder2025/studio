@@ -645,7 +645,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
           </div>
           
           <div className="flex justify-end flex-wrap items-center gap-4">
-            <Button type="submit">
+            <Button type="submit" size="sm">
                +Add Examination(s)
             </Button>
             <div className="flex items-center gap-2">
@@ -657,7 +657,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                 accept=".xlsx, .xls, .csv"
                 onChange={handleExamFileUpload}
               />
-              <Button asChild className="bg-[#6666cc] text-white hover:bg-[#6666cc]/90">
+              <Button asChild size="sm" className="bg-[#6666cc] text-white hover:bg-[#6666cc]/90">
                 <label htmlFor="excel-exam-upload" className="cursor-pointer flex items-center gap-2">
                   <Upload /> Import from Excel
                 </label>
@@ -712,10 +712,10 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
       </div>
 
       <div className="flex justify-between">
-        <Button type="button" onClick={prevStep} disabled={isGenerating}>
+        <Button type="button" onClick={prevStep} disabled={isGenerating} size="sm">
           <ArrowLeft className="mr-2" /> Back to Invigilators
         </Button>
-        <Button onClick={handleGenerate} disabled={isGenerating || examinations.length === 0}>
+        <Button onClick={handleGenerate} disabled={isGenerating || examinations.length === 0} size="sm">
           {isGenerating ? (
             <>
               <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Generating...
@@ -730,5 +730,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
     </div>
   );
 }
+
+    
 
     

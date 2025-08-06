@@ -245,7 +245,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                 <TableCell colSpan={3} className="text-right font-bold">Total Duties Allotted</TableCell>
                 {uniqueExams.map(exam => {
                     const examKey = getExamKey(exam);
-                    const required = (roomTotals[examKey] || 0) + (relieverTotals[examKey] || 0);
+                    const required = (roomTotals[examKey] || 0) + (relievers[examKey] || 0);
                     const isMismatch = allottedTotals[examKey] !== required;
                     return (
                         <TableCell 

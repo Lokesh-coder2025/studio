@@ -330,8 +330,8 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                     <TableCell>{invigilator.email}</TableCell>
                     <TableCell className="text-right">
                        <div className="flex justify-end items-center">
-                        <Button variant="ghost" size="icon" className="group" onClick={() => handleEditClick(invigilator)}>
-                          <Pencil className="h-4 w-4 text-primary" />
+                        <Button variant="ghost" size="icon" className="group hover:bg-primary" onClick={() => handleEditClick(invigilator)}>
+                          <Pencil className="h-4 w-4 text-primary group-hover:text-primary-foreground" />
                           <span className="sr-only">Edit Availability</span>
                         </Button>
                         <Button variant="ghost" size="icon" className="group hover:bg-destructive" onClick={() => deleteInvigilator(invigilator.id)}>
@@ -368,8 +368,8 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
     </>
   );
 }
-
     
 
     
+
 

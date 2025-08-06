@@ -54,7 +54,7 @@ export default function AboutPage() {
 
   return (
     <>
-      <div className="sticky top-[112px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
+      <div className="sticky top-[70px] bg-background/95 backdrop-blur-sm z-30 border-b shadow-sm">
         <div className="flex h-[52px] items-center justify-center">
             <header className="text-center">
               <div>

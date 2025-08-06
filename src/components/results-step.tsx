@@ -180,23 +180,24 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     }) as jsPDFWithAutoTable;
 
     const headStyles = {
-        fillColor: [31, 69, 110], // Dark blue
+        fillColor: [31, 69, 110],
         textColor: 255,
         fontStyle: 'bold',
         halign: 'center',
         valign: 'middle',
+        fontSize: 8,
     };
   
     const head = [
       [
-        { content: 'Sl No', styles: headStyles },
-        { content: 'Invigilator’s Name', styles: { ...headStyles, halign: 'left' } },
-        { content: 'Designation', styles: { ...headStyles, halign: 'left' } },
+        { content: 'Sl No', styles: { ...headStyles, fontSize: 9 } },
+        { content: 'Invigilator’s Name', styles: { ...headStyles, halign: 'left', fontSize: 9 } },
+        { content: 'Designation', styles: { ...headStyles, halign: 'left', fontSize: 9 } },
         ...uniqueExamsForExport.map(exam => ({
           content: `${format(parseISO(exam.date), 'dd-MMM-yy')}\n${exam.subject}\n${exam.time}`,
-          styles: { ...headStyles, fontSize: 8 },
+          styles: headStyles,
         })),
-        { content: 'Total', styles: headStyles },
+        { content: 'Total', styles: { ...headStyles, fontSize: 9 } },
       ],
     ];
 
@@ -302,45 +303,12 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             );
         }
       },
-      didDrawCell: function (data) {
-        if (data.section === 'head' && data.column.index > 2 && data.column.index < head[0].length - 1) {
-          const cell = data.cell;
-          // The text is an array due to '\n'.
-          const text = Array.isArray(cell.text) ? cell.text.join('\n') : cell.text;
-
-          // Clear the cell content
-          doc.setFillColor(headStyles.fillColor[0], headStyles.fillColor[1], headStyles.fillColor[2]);
-          doc.rect(cell.x, cell.y, cell.width, cell.height, 'F');
-          
-          doc.saveGraphicsState();
-          
-          // Set text properties
-          doc.setTextColor(headStyles.textColor);
-          doc.setFont(doc.getFont().fontName, 'bold');
-          doc.setFontSize(8);
-          
-          // Manually handle multi-line text with rotation
-          const lines = doc.splitTextToSize(text, cell.width - 2); // Get lines that fit
-          const textHeight = lines.length * doc.getLineHeight() / doc.internal.scaleFactor;
-          const textY = cell.y + cell.height - 3; // Position at the bottom of the cell before rotation
-          const textX = cell.x + cell.width / 2; // Center horizontally before rotation
-
-          doc.text(lines, textX, textY, {
-            align: 'center',
-            baseline: 'bottom',
-            angle: -90
-          });
-          
-          doc.restoreGraphicsState();
-        }
-      },
       styles: {
         fontSize: 9,
         cellPadding: 2,
       },
       headStyles: {
-        minCellHeight: 40,
-        valign: 'bottom',
+        minCellHeight: 15,
       },
       footStyles: {
         fillColor: [230, 230, 230],
@@ -537,5 +505,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
+
+    
 
     

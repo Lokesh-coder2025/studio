@@ -150,8 +150,8 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
               <TableHead className="align-middle">Invigilator’s Name</TableHead>
               <TableHead className="align-middle">Designation</TableHead>
               {uniqueExams.map(exam => (
-                <TableHead key={getExamKey(exam)} className="text-center w-[90px]">
-                    <div>{format(parseISO(exam.date), 'dd/MM')}</div>
+                <TableHead key={getExamKey(exam)} className="text-center w-[60px] h-[180px] p-2 align-bottom [writing-mode:vertical-rl] rotate-180 whitespace-nowrap">
+                    <div className="font-bold">{format(parseISO(exam.date), 'dd/MM/yy')}</div>
                     <div className="font-normal">{exam.subject}</div>
                     <div className="text-xs font-light">{exam.time}</div>
                 </TableHead>

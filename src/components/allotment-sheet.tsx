@@ -187,11 +187,13 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                                 )}
                               >
                                 {isAssigned ? (
-                                  <div className={cn("flex items-center justify-center w-6 h-6 rounded-full font-semibold", colorClass)}>
+                                  <div className={cn("flex items-center justify-center w-6 h-6 rounded-md font-semibold", colorClass)}>
                                     1
                                   </div>
                                 ) : (
-                                  <span className="text-muted-foreground opacity-20">0</span>
+                                  <div className="flex items-center justify-center w-6 h-6 rounded-md text-muted-foreground opacity-30">
+                                    0
+                                  </div>
                                 )}
                               </button>
                             </TooltipTrigger>

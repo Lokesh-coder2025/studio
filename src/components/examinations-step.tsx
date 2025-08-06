@@ -357,6 +357,17 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
 
   const handleGenerate = async () => {
     setIsGenerating(true);
+
+    if (!collegeName.trim() || !examTitle.trim()) {
+        toast({
+            title: "Missing Information",
+            description: "Please provide the Name of the College and the Name of the Examination before proceeding.",
+            variant: "destructive",
+        });
+        setIsGenerating(false);
+        return;
+    }
+
     if (examinations.length === 0) {
       toast({
         title: "No Examinations Added",

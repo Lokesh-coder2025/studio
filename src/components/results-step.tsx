@@ -178,17 +178,25 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     const doc = new jsPDF({
       orientation: 'landscape',
     }) as jsPDFWithAutoTable;
+
+    const headStyles = {
+        fillColor: [31, 69, 110], // Dark blue
+        textColor: 255,
+        fontStyle: 'bold',
+        halign: 'center',
+        valign: 'middle',
+    };
   
     const head = [
       [
-        { content: 'Sl No', styles: { halign: 'center' } },
-        { content: 'Invigilator’s Name', styles: { halign: 'left' } },
-        { content: 'Designation', styles: { halign: 'left' } },
+        { content: 'Sl No', styles: headStyles },
+        { content: 'Invigilator’s Name', styles: { ...headStyles, halign: 'left' } },
+        { content: 'Designation', styles: { ...headStyles, halign: 'left' } },
         ...uniqueExamsForExport.map(exam => ({
           content: `${format(parseISO(exam.date), 'dd-MMM-yy')}\n${exam.subject}\n${exam.time}`,
-          styles: { halign: 'center', fontSize: 8 },
+          styles: { ...headStyles, fontSize: 8 },
         })),
-        { content: 'Total', styles: { halign: 'center', fontStyle: 'bold' } },
+        { content: 'Total', styles: headStyles },
       ],
     ];
 
@@ -227,21 +235,28 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     const relieverGrandTotal = relieverTotals.reduce((a, b) => a + b, 0);
     const allottedGrandTotal = allottedTotals.reduce((a, b) => a + b, 0);
 
+    const footStyles = {
+        fillColor: [230, 230, 230],
+        textColor: 0,
+        fontStyle: 'bold',
+        halign: 'center',
+    };
+
     const foot = [
         [
-            { content: 'No of Rooms', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
-            ...roomTotals.map(total => ({ content: total, styles: { halign: 'center', fontStyle: 'bold' }})),
-            { content: roomGrandTotal, styles: { halign: 'center', fontStyle: 'bold' } },
+            { content: 'No of Rooms', colSpan: 3, styles: { ...footStyles, halign: 'right' } },
+            ...roomTotals.map(total => ({ content: total, styles: footStyles })),
+            { content: roomGrandTotal, styles: footStyles },
         ],
         [
-            { content: 'No of Relievers', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
-            ...relieverTotals.map(total => ({ content: total, styles: { halign: 'center', fontStyle: 'bold' }})),
-            { content: relieverGrandTotal, styles: { halign: 'center', fontStyle: 'bold' } },
+            { content: 'No of Relievers', colSpan: 3, styles: { ...footStyles, halign: 'right' } },
+            ...relieverTotals.map(total => ({ content: total, styles: footStyles })),
+            { content: relieverGrandTotal, styles: footStyles },
         ],
         [
-            { content: 'Total Duties Allotted', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
-            ...allottedTotals.map(total => ({ content: total, styles: { halign: 'center', fontStyle: 'bold' }})),
-            { content: allottedGrandTotal, styles: { halign: 'center', fontStyle: 'bold' } },
+            { content: 'Total Duties Allotted', colSpan: 3, styles: { ...footStyles, halign: 'right' } },
+            ...allottedTotals.map(total => ({ content: total, styles: footStyles })),
+            { content: allottedGrandTotal, styles: footStyles },
         ]
     ];
   
@@ -287,14 +302,36 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             );
         }
       },
+      didDrawCell: function (data) {
+        if (data.section === 'head' && data.column.index > 2 && data.column.index < head[0].length-1) {
+            const cell = data.cell;
+            // Clear the cell content
+            doc.setFillColor(headStyles.fillColor[0], headStyles.fillColor[1], headStyles.fillColor[2]);
+            doc.rect(cell.x, cell.y, cell.width, cell.height, 'F');
+            
+            // Set text properties
+            doc.setTextColor(headStyles.textColor);
+            doc.setFont(doc.getFont().fontName, 'bold');
+            doc.setFontSize(8);
+
+            // Save context, rotate, draw text, and restore
+            doc.saveGraphicsState();
+            doc.text(cell.text, cell.x + cell.width / 2, cell.y + cell.height - 3, {
+              align: 'center',
+              baseline: 'bottom',
+              angle: -90
+            });
+            doc.restoreGraphicsState();
+        }
+      },
       styles: {
         fontSize: 9,
         cellPadding: 2,
       },
       headStyles: {
-        fillColor: [31, 69, 110],
-        textColor: 255,
-        fontStyle: 'bold',
+        // We set minCellHeight to accommodate the rotated text
+        minCellHeight: 40,
+        valign: 'bottom',
       },
       footStyles: {
         fillColor: [230, 230, 230],
@@ -389,7 +426,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     <div className="space-y-6">
       <Tabs defaultValue="allotment-sheet">
         <div className="flex justify-between items-center">
-            <TabsList className="flex w-full max-w-md gap-x-[1cm]">
+            <TabsList className="flex w-full max-w-md gap-x-[1cm] bg-[#FFF5EE]">
               <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
               <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
             </TabsList>

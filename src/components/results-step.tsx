@@ -424,14 +424,14 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </TabsContent>
       </Tabs>
       <div className="flex justify-between items-center pt-4 border-t mt-4">
-        <Button onClick={prevStep} disabled={isSendingAllEmails} variant="outline">
+        <Button onClick={prevStep} disabled={isSendingAllEmails} variant="outline" size="sm">
           <ArrowLeft /> Back
         </Button>
         <div className="flex flex-wrap gap-2 justify-end">
-           <Button onClick={handleSave} disabled={isSendingAllEmails}>
+           <Button onClick={handleSave} disabled={isSendingAllEmails} size="sm">
               <Save /> Save Allotment
             </Button>
-           <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAllEmails}>
+           <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAllEmails} size="sm">
               {isSendingAllEmails ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
@@ -442,15 +442,15 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 </>
               )}
             </Button>
-           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails}>
+           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails} size="sm">
               <Download /> Download as PDF
             </Button>
-            <Button onClick={handleExportExcel} disabled={isSendingAllEmails}>
+            <Button onClick={handleExportExcel} disabled={isSendingAllEmails} size="sm">
               <Download /> Download as Excel
             </Button>
         </div>
       </div>
-      <AlertDialog open={isEmailAllConfirmOpen} onOpenchange={setIsEmailAllConfirmOpen}>
+      <AlertDialog open={isEmailAllConfirmOpen} onOpenChange={setIsEmailAllConfirmOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Bulk Email</AlertDialogTitle>

@@ -162,7 +162,7 @@ const NavigationHeader = React.forwardRef<
   return (
     <div
       ref={ref}
-      className={cn("flex items-center justify-between h-[100px] w-full px-4 sm:px-6 md:px-8 border-b", className)}
+      className={cn("flex items-center justify-between h-[80px] w-full px-4 sm:px-6 md:px-8 border-b", className)}
       {...props}
     />
   )

@@ -277,7 +277,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
               />
             </div>
             <div className="flex flex-wrap items-center gap-4 pt-4">
-              <Button type="submit">
+              <Button type="submit" size="sm">
                 <UserPlus className="mr-2" /> Add Invigilator
               </Button>
               <div className="flex items-center gap-2">
@@ -289,7 +289,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                   accept=".xlsx, .xls"
                   onChange={handleFileUpload}
                 />
-                <Button type='button' asChild className="bg-[#6666cc] text-white hover:bg-[#6666cc]/90">
+                <Button type='button' size="sm" asChild className="bg-[#6666cc] text-white hover:bg-[#6666cc]/90">
                   <label htmlFor="excel-upload" className="cursor-pointer">
                     <Upload className="mr-2" /> Import from Excel
                   </label>
@@ -354,7 +354,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
         </div>
         
         <div className="flex justify-end">
-          <Button onClick={nextStep} disabled={invigilators.length === 0}>
+          <Button onClick={nextStep} size="sm" disabled={invigilators.length === 0}>
             Continue to Examination Details <ArrowRight className="ml-2" />
           </Button>
         </div>
@@ -372,3 +372,4 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
     
 
     
+

@@ -389,9 +389,9 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     <div className="space-y-6">
       <Tabs defaultValue="allotment-sheet">
         <div className="flex justify-between items-center">
-            <TabsList className="grid w-full max-w-md grid-cols-2">
-            <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
-            <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
+            <TabsList className="flex w-full max-w-md gap-x-[1cm]">
+              <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
+              <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
             </TabsList>
             <Tooltip>
                 <TooltipTrigger asChild>

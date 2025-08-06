@@ -289,7 +289,7 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                   accept=".xlsx, .xls"
                   onChange={handleFileUpload}
                 />
-                <Button type='button' asChild className="bg-[#000080] text-white hover:bg-[#000080]/90">
+                <Button type='button' asChild className="bg-[#6666cc] text-white hover:bg-[#6666cc]/90">
                   <label htmlFor="excel-upload" className="cursor-pointer">
                     <Upload className="mr-2" /> Import from Excel
                   </label>

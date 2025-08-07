@@ -1,3 +1,4 @@
+
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
@@ -307,7 +308,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             footStyles: {
                 fillColor: '#6082B6',
                 textColor: [255, 255, 255],
-                fontSize: 13,
+                fontSize: 12,
                 fontStyle: 'bold',
             },
             didParseCell: (data) => {

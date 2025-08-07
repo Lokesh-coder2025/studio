@@ -15,10 +15,11 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogC
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import type { Invigilator } from '@/types';
-import { UserPlus, Trash2, ArrowRight, Upload, CalendarDays, Pencil } from 'lucide-react';
+import { UserPlus, Trash2, ArrowRight, Upload, Pencil } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: 'Name must be at least 2 characters.' }),
@@ -330,10 +331,17 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                     <TableCell>{invigilator.email}</TableCell>
                     <TableCell className="text-right">
                        <div className="flex justify-end items-center">
-                        <Button variant="ghost" size="icon" className="group hover:bg-purple-100" onClick={() => handleEditClick(invigilator)}>
-                          <Pencil className={cn("h-4 w-4 group-hover:text-purple-600", invigilator.availableDays && invigilator.availableDays.length > 0 ? 'text-purple-600' : 'text-primary')} />
-                          <span className="sr-only">Edit Availability</span>
-                        </Button>
+                        <Tooltip>
+                            <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="group hover:bg-purple-100" onClick={() => handleEditClick(invigilator)}>
+                                    <Pencil className={cn("h-4 w-4 group-hover:text-purple-600", invigilator.availableDays && invigilator.availableDays.length > 0 ? 'text-purple-600' : 'text-primary')} />
+                                    <span className="sr-only">Edit Availability</span>
+                                </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                                <p>Set Availability</p>
+                            </TooltipContent>
+                        </Tooltip>
                         <Button variant="ghost" size="icon" className="group hover:bg-destructive" onClick={() => deleteInvigilator(invigilator.id)}>
                           <Trash2 className="h-4 w-4 text-destructive group-hover:text-destructive-foreground" />
                           <span className="sr-only">Delete</span>

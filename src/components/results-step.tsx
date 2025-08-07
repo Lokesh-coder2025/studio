@@ -260,14 +260,14 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       startY: 25,
       theme: 'grid',
       headStyles: {
-        fillColor: [31, 69, 110], // A dark blue color
+        fillColor: [31, 69, 110],
         textColor: 255,
         fontStyle: 'bold',
         halign: 'center',
         valign: 'middle',
         fontSize: 8,
         cellPadding: 1,
-        minCellHeight: 45 // Set a fixed height for header cells
+        minCellHeight: 45
       },
       footStyles: {
         fillColor: [230, 230, 230],
@@ -302,29 +302,24 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         );
       },
       didDrawCell: function(data) {
-        // Check if it's a header cell and one of the dynamic exam columns
         if (data.section === 'head' && data.column.index >= 3 && data.column.index < head[0].length - 1) {
-          // Prevent default text from being drawn
-          data.cell.text = ''; 
-
-          // Redraw the background color
-          doc.setFillColor(31, 69, 110);
+          data.cell.text = ''; // Clear the original text
+          
+          doc.setFillColor(data.cell.styles.fillColor as string);
           doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
           
           const textLines = (head[0][data.column.index] as string).split('\n');
           const cell = data.cell;
           
           doc.setFontSize(8);
-          doc.setTextColor(255);
+          doc.setTextColor(255, 255, 255);
           doc.setFont('helvetica', 'bold');
           
-          // The x position is the right edge of the cell, minus some padding
-          const x = cell.x + cell.width - 3;
-          // The y position is the bottom of the cell, minus some padding
-          const y = cell.y + cell.height - 3;
+          const x = cell.x + cell.width / 2 + 3; // Center vertically in cell
+          const y = cell.y + cell.height - 3; // Start from bottom of cell
 
           doc.text(textLines, x, y, {
-            angle: -90, // Rotate text to be bottom-to-top
+            angle: -90, // Rotate text
             align: 'right'
           });
         }
@@ -413,7 +408,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     <div className="space-y-6">
       <Tabs defaultValue="allotment-sheet">
         <div className="flex justify-between items-center">
-            <TabsList className="flex w-full max-w-md gap-x-[1cm] bg-[#FFF5EE]">
+            <TabsList className="flex w-full max-w-md gap-x-[1cm]" style={{backgroundColor: '#FFF5EE'}}>
               <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
               <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
             </TabsList>
@@ -515,5 +510,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
+
+    
 
     

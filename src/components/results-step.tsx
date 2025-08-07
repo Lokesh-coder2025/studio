@@ -186,7 +186,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 { content: 'Designation', styles: { minCellWidth: 35 } },
                 ...uniqueExamsForExport.map(exam => ({
                     content: `${format(parseISO(exam.date), 'dd-MMM-yy')}\n${exam.subject}\n${exam.time}`,
-                    styles: { halign: 'center' }
+                    styles: { halign: 'center', valign: 'middle' }
                 })),
                 { content: 'Total', styles: { halign: 'center' } },
             ],
@@ -251,8 +251,10 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(20);
         doc.text(collegeName, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+        doc.setFont('helvetica', 'bold');
         doc.setFontSize(18);
         doc.text(examTitle, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
+        doc.setFont('helvetica', 'bold');
         doc.setFontSize(16);
         doc.text('Invigilation Duty Allotment Sheet', doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
         doc.setFont('helvetica', 'normal');
@@ -276,8 +278,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 fontStyle: 'bold',
             },
             footStyles: {
-                fillColor: [240, 240, 240],
-                textColor: [0, 0, 128],
+                fillColor: [0, 71, 171], // Cobalt Blue
+                textColor: [255, 255, 255], // White
                 fontSize: 13,
                 fontStyle: 'bold',
             },

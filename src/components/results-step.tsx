@@ -181,11 +181,11 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   
     const head = [
       [
-        'Sl No',
-        'Invigilator’s Name',
-        'Designation',
+        { content: 'Sl No', styles: { halign: 'center' } },
+        { content: 'Invigilator’s Name', styles: { halign: 'left' } },
+        { content: 'Designation', styles: { halign: 'left' } },
         ...uniqueExamsForExport.map(exam => `${format(parseISO(exam.date), 'dd/MM/yy')}\n${exam.subject}\n${exam.time}`),
-        'Total',
+        { content: 'Total', styles: { halign: 'center' } },
       ],
     ];
 
@@ -311,7 +311,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           doc.setFillColor(31, 69, 110);
           doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
           
-          const textLines = head[0][data.column.index].split('\n');
+          const textLines = (head[0][data.column.index] as string).split('\n');
           const cell = data.cell;
           
           doc.setFontSize(8);
@@ -515,9 +515,5 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
-
-    
-
-    
 
     

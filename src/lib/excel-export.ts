@@ -9,11 +9,37 @@ export const exportToExcel = (data: any[], sheetName: string, fileName: string) 
   XLSX.writeFile(workbook, `${fileName}.xlsx`);
 };
 
-// New function to handle formulas
-export const exportToExcelWithFormulas = (headers: string[], dataRows: (string | number)[][], footerRows: (string | number)[][], sheetName: string, fileName: string) => {
-  const ws_data = [headers, ...dataRows, ...footerRows];
+type ExportWithFormulasParams = {
+  headers: string[];
+  dataRows: (string | number)[][];
+  footerRows: (string | number)[][];
+  collegeName: string;
+  examTitle: string;
+  sheetName: string;
+  fileName:string;
+};
+
+// New function to handle formulas and headers
+export const exportToExcelWithFormulas = ({ headers, dataRows, footerRows, collegeName, examTitle, sheetName, fileName }: ExportWithFormulasParams) => {
+  const titleRows = [
+    [collegeName],
+    [examTitle],
+    ["Invigilation Duty Allotment Sheet"],
+    [], // Empty row for spacing
+  ];
+  
+  const ws_data = [...titleRows, headers, ...dataRows, ...footerRows];
   const worksheet = XLSX.utils.aoa_to_sheet(ws_data);
 
+  // Merge cells for the main titles
+  const mergeOptions = { s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } };
+  worksheet['!merges'] = [
+    { s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }, // College Name
+    { s: { r: 1, c: 0 }, e: { r: 1, c: headers.length - 1 } }, // Exam Title
+    { s: { r: 2, c: 0 }, e: { r: 2, c: headers.length - 1 } }, // Allotment Sheet Title
+  ];
+  
+  const titleRowOffset = titleRows.length;
   const numDataRows = dataRows.length;
   const numCols = headers.length;
   const dutyColsStart = 3; 
@@ -21,23 +47,23 @@ export const exportToExcelWithFormulas = (headers: string[], dataRows: (string |
 
   // Add formulas for row totals (Total duties per invigilator)
   for (let i = 0; i < numDataRows; i++) {
-    const rowIndex = i + 2; // 1-based index, +1 for header row
+    const rowIndex = i + titleRowOffset + 1; // 1-based index, plus title rows, plus header
     const startCell = XLSX.utils.encode_cell({c: dutyColsStart, r: rowIndex - 1});
     const endCell = XLSX.utils.encode_cell({c: dutyColsEnd, r: rowIndex - 1});
     const formula = `SUM(${startCell}:${endCell})`;
     XLSX.utils.sheet_add_aoa(worksheet, [[{ f: formula }]], { origin: { c: numCols - 1, r: rowIndex - 1 } });
   }
   
-  // Add formulas for column totals in footer rows
-  // Footer starts at numDataRows + 2 (1-based, after headers and data)
-  const roomsRowIndex = numDataRows + 2;
-  const relieversRowIndex = numDataRows + 3;
-  const totalAllottedRowIndex = numDataRows + 4;
+  // Footer starts after titles, header, and data rows
+  const footerStartIndex = titleRowOffset + numDataRows + 1;
+  const roomsRowIndex = footerStartIndex;
+  const relieversRowIndex = footerStartIndex + 1;
+  const totalAllottedRowIndex = footerStartIndex + 2;
   
   for (let j = dutyColsStart; j <= dutyColsEnd; j++) {
     const colLetter = XLSX.utils.encode_col(j);
     // Formula for Total Duties Allotted column: SUM of duties assigned in that column
-    const allottedFormula = `SUM(${colLetter}2:${colLetter}${numDataRows + 1})`;
+    const allottedFormula = `SUM(${colLetter}${titleRowOffset + 2}:${colLetter}${titleRowOffset + numDataRows + 1})`;
     XLSX.utils.sheet_add_aoa(worksheet, [[{ f: allottedFormula }]], { origin: { c: j, r: totalAllottedRowIndex - 1 } });
   }
 
@@ -59,7 +85,6 @@ export const exportToExcelWithFormulas = (headers: string[], dataRows: (string |
   const allottedEndCell = XLSX.utils.encode_cell({c: dutyColsEnd, r: totalAllottedRowIndex - 1});
   const allottedGrandTotalFormula = `SUM(${allottedStartCell}:${allottedEndCell})`;
   XLSX.utils.sheet_add_aoa(worksheet, [[{ f: allottedGrandTotalFormula }]], { origin: { c: numCols - 1, r: totalAllottedRowIndex - 1 }});
-
 
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);

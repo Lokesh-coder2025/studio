@@ -174,7 +174,15 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         ['', '', 'Total Duties Allotted'], // Label for sum, formulas will be added
     ];
 
-    exportToExcelWithFormulas(headers, dataRows, footerRows, 'Duty Allotment', 'duty-allotment-sheet');
+    exportToExcelWithFormulas({
+        headers, 
+        dataRows, 
+        footerRows, 
+        collegeName,
+        examTitle,
+        sheetName: 'Duty Allotment', 
+        fileName: 'duty-allotment-sheet'
+    });
   };
 
   const handleDownloadPdf = () => {
@@ -193,7 +201,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 { content: 'Designation', styles: { minCellWidth: 35 } },
                 ...uniqueExamsForExport.map(exam => ({
                     content: `${format(parseISO(exam.date), 'dd-MMM-yy')}\n${exam.subject}\n${exam.time}`,
-                    styles: { halign: 'center' }
+                    styles: { halign: 'center', minCellHeight: 25 }
                 })),
                 { content: 'Total', styles: { halign: 'center' } },
             ],
@@ -280,7 +288,6 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 textColor: 0,
             },
             didParseCell: (data) => {
-                // For alternating row colors
                 if (data.row.section === 'body' && data.row.index % 2 === 0) {
                     data.cell.styles.fillColor = '#f9f9f9';
                 }

@@ -201,7 +201,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 { content: 'Designation', styles: { minCellWidth: 35 } },
                 ...uniqueExamsForExport.map(exam => ({
                     content: `${format(parseISO(exam.date), 'dd-MMM-yy')}\n${exam.subject}\n${exam.time}`,
-                    styles: { halign: 'center', minCellHeight: 25 }
+                    styles: { halign: 'center' }
                 })),
                 { content: 'Total', styles: { halign: 'center' } },
             ],
@@ -263,12 +263,14 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             ],
         ];
 
-        doc.setFontSize(16);
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(20);
         doc.text(collegeName, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
-        doc.setFontSize(14);
+        doc.setFontSize(18);
         doc.text(examTitle, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
-        doc.setFontSize(12);
+        doc.setFontSize(16);
         doc.text('Invigilation Duty Allotment Sheet', doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+        doc.setFont('helvetica', 'normal');
 
 
         doc.autoTable({
@@ -282,10 +284,16 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 textColor: 255,
                 fontStyle: 'bold',
                 valign: 'middle',
+                fontSize: 7,
+            },
+            bodyStyles: {
+                fontSize: 12,
+                fontStyle: 'bold',
             },
             footStyles: {
                 fillColor: [240, 240, 240],
                 textColor: 0,
+                fontSize: 7,
             },
             didParseCell: (data) => {
                 if (data.row.section === 'body' && data.row.index % 2 === 0) {

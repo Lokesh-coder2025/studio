@@ -8,7 +8,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { AllotmentSheet } from '@/components/allotment-sheet';
 import { InvigilatorDutySummary } from '@/components/invigilator-duty-summary';
-import { ArrowLeft, Save, Download, Send, Loader2, MessageSquare, Maximize } from 'lucide-react';
+import { ArrowLeft, Save, Download, Send, Loader2, MessageSquare, Maximize, RefreshCw } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { exportToExcelWithFormulas } from '@/lib/excel-export';
@@ -28,6 +28,7 @@ import {
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { generateInvigilatorPdf } from '@/lib/pdf-generation';
 import { sendBulkEmails } from '@/ai/flows/send-bulk-emails-flow';
+import { rebalanceDuties } from '@/ai/flows/rebalance-duties-flow';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
 // Extend the jsPDF type to include the autoTable method
@@ -54,6 +55,7 @@ type ResultsStepProps = {
 export function ResultsStep({ invigilators, examinations, initialAssignments, prevStep, collegeName, setCollegeName, examTitle, setExamTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
   const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
   const [isSendingAllEmails, setIsSendingAllEmails] = useState(false);
+  const [isRebalancing, setIsRebalancing] = useState(false);
   const [isEmailAllConfirmOpen, setIsEmailAllConfirmOpen] = useState(false);
   const [isFullScreen, setIsFullScreen] = useState(false);
   const allotmentSheetRef = useRef<HTMLDivElement>(null);
@@ -110,6 +112,32 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       description: "Your duty allotment has been successfully saved.",
       className: "bg-accent text-accent-foreground"
     });
+  };
+
+  const handleRebalance = async () => {
+    setIsRebalancing(true);
+    toast({
+        title: "Rebalancing Allotment",
+        description: "Applying fairness rules to optimize the schedule...",
+    });
+    try {
+        const result = await rebalanceDuties({ invigilators, assignments });
+        setAssignments(result);
+        toast({
+            title: "Success!",
+            description: "The allotment has been rebalanced for fairness.",
+            className: "bg-accent text-accent-foreground",
+        });
+    } catch (error) {
+        console.error("Rebalance Error:", error);
+        toast({
+            title: "Rebalance Failed",
+            description: "Could not rebalance the allotment. Please try again.",
+            variant: "destructive",
+        });
+    } finally {
+        setIsRebalancing(false);
+    }
   };
 
   const uniqueExamsForExport = useMemo(() => {
@@ -433,14 +461,25 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </TabsContent>
       </Tabs>
       <div className="flex justify-between items-center pt-4 border-t mt-4">
-        <Button onClick={prevStep} disabled={isSendingAllEmails} variant="outline" size="sm">
+        <Button onClick={prevStep} disabled={isSendingAllEmails || isRebalancing} variant="outline" size="sm">
           <ArrowLeft /> Back
         </Button>
         <div className="flex flex-wrap gap-2 justify-end">
-           <Button onClick={handleSave} disabled={isSendingAllEmails} size="sm">
+           <Button onClick={handleRebalance} disabled={isRebalancing || isSendingAllEmails} size="sm">
+              {isRebalancing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Optimizing...
+                </>
+              ) : (
+                <>
+                  <RefreshCw /> Optimize & Rebalance
+                </>
+              )}
+            </Button>
+           <Button onClick={handleSave} disabled={isSendingAllEmails || isRebalancing} size="sm">
               <Save /> Save Allotment
             </Button>
-           <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAllEmails} size="sm">
+           <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAllEmails || isRebalancing} size="sm">
               {isSendingAllEmails ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
@@ -451,10 +490,10 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 </>
               )}
             </Button>
-           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails} size="sm">
+           <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails || isRebalancing} size="sm">
               <Download /> Download as PDF
             </Button>
-            <Button onClick={handleExportExcel} disabled={isSendingAllEmails} size="sm">
+            <Button onClick={handleExportExcel} disabled={isSendingAllEmails || isRebalancing} size="sm">
               <Download /> Download as Excel
             </Button>
         </div>

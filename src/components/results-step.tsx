@@ -13,7 +13,8 @@ import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { exportToExcelWithFormulas } from '@/lib/excel-export';
 import jsPDF from 'jspdf';
-import html2canvas from 'html2canvas';
+import 'jspdf-autotable';
+import type { UserOptions } from 'jspdf-autotable';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -29,6 +30,12 @@ import { generateInvigilatorPdf } from '@/lib/pdf-generation';
 import { sendBulkEmails } from '@/ai/flows/send-bulk-emails-flow';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 
+// Extend the jsPDF type to include the autoTable method
+declare module 'jspdf' {
+  interface jsPDF {
+    autoTable: (options: UserOptions) => jsPDF;
+  }
+}
 
 type ResultsStepProps = {
   invigilators: Invigilator[];
@@ -133,7 +140,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       'Sl No',
       'Invigilator’s Name',
       'Designation',
-      ...uniqueExamsForExport.map(exam => `${format(parseISO(exam.date), "dd-MMM")}\n${exam.subject}`),
+      ...uniqueExamsForExport.map(exam => `${format(parseISO(exam.date), "dd-MMM-yy")}\n${exam.subject}\n${exam.time}`),
       'Total'
     ];
     const dataRows = dutyDataForExport.map((inv, index) => {
@@ -168,59 +175,137 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     exportToExcelWithFormulas(headers, dataRows, footerRows, 'Duty Allotment', 'duty-allotment-sheet');
   };
 
-  const handleDownloadPdf = async () => {
-    const sheetElement = allotmentSheetRef.current;
-    if (!sheetElement) {
-        toast({ title: 'Error', description: 'Could not find the allotment sheet to capture.', variant: 'destructive' });
-        return;
-    }
-
-    toast({ title: 'Generating PDF...', description: 'Please wait while we capture the allotment sheet.' });
-
+  const handleDownloadPdf = () => {
+    toast({ title: 'Generating PDF...', description: 'Please wait a moment.' });
     try {
-        const canvas = await html2canvas(sheetElement, {
-            scale: 2, // Increase scale for better resolution
-            useCORS: true,
-            backgroundColor: '#ffffff', // Ensure background is white
-        });
-        
-        const imgData = canvas.toDataURL('image/png');
-        
-        const pdf = new jsPDF({
+        const doc = new jsPDF({
             orientation: 'landscape',
             unit: 'mm',
-            format: 'a3', // Use a larger format to better fit the wide table
+            format: 'a3',
+        });
+
+        const head = [
+            [
+                'Sl.No',
+                'Invigilator’s Name',
+                'Designation',
+                ...uniqueExamsForExport.map(
+                    (exam) =>
+                        `${format(parseISO(exam.date), 'dd/MM/yy')}\n${exam.subject}\n${exam.time}`
+                ),
+                'Total',
+            ],
+        ];
+
+        const body = dutyDataForExport.map((inv, index) => {
+            const row = [
+                index + 1,
+                inv.name,
+                inv.designation,
+            ];
+            uniqueExamsForExport.forEach((exam) => {
+                const examKey = getExamKeyForExport(exam);
+                row.push(inv.duties[examKey] || 0);
+            });
+            row.push(inv.totalDuties);
+            return row;
         });
         
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const examDetailsMap = new Map<string, Examination>();
+        examinations.forEach((exam) => {
+            const examKey = getExamKeyForExport({
+                date: format(parseISO(exam.date), 'yyyy-MM-dd'),
+                subject: exam.subject,
+                time: `${exam.startTime} - ${exam.endTime}`,
+            });
+            examDetailsMap.set(examKey, exam);
+        });
         
-        const canvasWidth = canvas.width;
-        const canvasHeight = canvas.height;
-        const canvasAspectRatio = canvasWidth / canvasHeight;
+        const allottedTotals = uniqueExamsForExport.map(exam => 
+            dutyDataForExport.reduce((sum, inv) => sum + inv.duties[getExamKeyForExport(exam)], 0)
+        );
 
-        let finalWidth = pdfWidth - 20; // with margin
-        let finalHeight = finalWidth / canvasAspectRatio;
+        const roomTotals = uniqueExamsForExport.map(exam => {
+            const key = getExamKeyForExport(exam);
+            return examDetailsMap.get(key)?.roomsAllotted || 0;
+        });
 
-        if (finalHeight > pdfHeight - 20) {
-            finalHeight = pdfHeight - 20;
-            finalWidth = finalHeight * canvasAspectRatio;
-        }
-
-        const xOffset = (pdfWidth - finalWidth) / 2;
-        const yOffset = 20; // Top margin for title
-
-        // Add Titles
-        pdf.setFontSize(16);
-        pdf.text(collegeName || 'College Name', pdfWidth / 2, 10, { align: 'center' });
-        pdf.setFontSize(12);
-        pdf.text(examTitle || 'Duty Allotment Sheet', pdfWidth / 2, 16, { align: 'center' });
-
-        pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
+        const relieverTotals = uniqueExamsForExport.map(exam => {
+            const key = getExamKeyForExport(exam);
+            return examDetailsMap.get(key)?.relieversRequired || 0;
+        });
         
-        pdf.save('duty-allotment-sheet.pdf');
+        const foot = [
+            ['', '', 'No of Rooms', ...roomTotals, roomTotals.reduce((a, b) => a + b, 0)],
+            ['', '', 'No of Relievers', ...relieverTotals, relieverTotals.reduce((a, b) => a + b, 0)],
+            ['', '', 'Total Duties Allotted', ...allottedTotals, allottedTotals.reduce((a, b) => a + b, 0)],
+        ];
+
+        doc.setFontSize(14);
+        doc.text(collegeName, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
+        doc.setFontSize(12);
+        doc.text(examTitle, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
+
+        doc.autoTable({
+            startY: 30,
+            head: head,
+            body: body,
+            foot: foot,
+            theme: 'grid',
+            headStyles: {
+                fillColor: [22, 160, 133], // A shade of green
+                textColor: 255,
+                fontStyle: 'bold',
+                halign: 'center',
+                valign: 'middle',
+                minCellHeight: 35, // Set a fixed height for the header row
+            },
+            footStyles: {
+                fillColor: [240, 240, 240],
+                textColor: 0,
+                fontStyle: 'bold',
+                halign: 'right',
+            },
+            columnStyles: {
+                0: { cellWidth: 15, halign: 'center' }, // Sl.No
+                1: { cellWidth: 40 }, // Name
+                2: { cellWidth: 40 }, // Designation
+                [head[0].length - 1]: { cellWidth: 15, halign: 'center' }, // Total
+            },
+            didDrawCell: (data) => {
+                if (data.section === 'head' && data.column.index > 2 && data.column.index < head[0].length - 1) {
+                    // This is a dynamic exam column header
+                    const text = data.cell.text;
+                    const textLines = Array.isArray(text) ? text : [String(text)];
+
+                    // Clear the cell's default text
+                    data.cell.text = [];
+                    
+                    doc.setFont(data.cell.styles.font, 'bold');
+                    doc.setTextColor(data.cell.styles.textColor);
+                    
+                    const x = data.cell.x + data.cell.width / 2;
+                    let y = data.cell.y + 4; // Start y position from top
+
+                    // Draw text from top to bottom
+                    doc.saveGraphicsState();
+                    doc.setPage(data.pageNumber);
+                    
+                    doc.text(textLines.join('\n'), x, y, {
+                        baseline: 'top',
+                        angle: 90,
+                        align: 'left',
+                    });
+
+                    doc.restoreGraphicsState();
+                }
+            },
+        });
+
+        doc.save('duty-allotment-sheet.pdf');
+
     } catch (error) {
-        console.error("PDF Generation Error: ", error);
+        console.error("PDF Generation Error:", error);
         toast({ title: 'PDF Generation Failed', description: 'An unexpected error occurred.', variant: 'destructive' });
     }
   };
@@ -304,7 +389,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     <div className="space-y-6">
       <Tabs defaultValue="allotment-sheet">
         <div className="flex justify-between items-center">
-            <TabsList>
+            <TabsList style={{backgroundColor: '#FFF5EE'}}>
               <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
               <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
             </TabsList>
@@ -407,3 +492,5 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
+
+    

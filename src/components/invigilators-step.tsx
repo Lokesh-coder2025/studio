@@ -39,9 +39,9 @@ function AvailabilityDialog({ invigilator, onSave, onClose }: AvailabilityDialog
   const [selectedDays, setSelectedDays] = useState<string[]>([]);
 
   useEffect(() => {
-    // Reset state when the dialog is opened for a new invigilator, but not on re-renders
+    // When a new invigilator is selected, initialize the dialog with their current availability
     if (invigilator) {
-      setSelectedDays([]);
+      setSelectedDays(invigilator.availableDays || []);
     }
   }, [invigilator]);
 
@@ -330,8 +330,8 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
                     <TableCell>{invigilator.email}</TableCell>
                     <TableCell className="text-right">
                        <div className="flex justify-end items-center">
-                        <Button variant="ghost" size="icon" className="group hover:bg-primary" onClick={() => handleEditClick(invigilator)}>
-                          <Pencil className="h-4 w-4 text-primary group-hover:text-primary-foreground" />
+                        <Button variant="ghost" size="icon" className="group hover:bg-purple-100" onClick={() => handleEditClick(invigilator)}>
+                          <Pencil className={cn("h-4 w-4 group-hover:text-purple-600", invigilator.availableDays && invigilator.availableDays.length > 0 ? 'text-purple-600' : 'text-primary')} />
                           <span className="sr-only">Edit Availability</span>
                         </Button>
                         <Button variant="ghost" size="icon" className="group hover:bg-destructive" onClick={() => deleteInvigilator(invigilator.id)}>
@@ -373,3 +373,6 @@ export function InvigilatorsStep({ invigilators, setInvigilators, nextStep }: In
     
 
 
+
+
+    

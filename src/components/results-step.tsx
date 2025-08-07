@@ -188,28 +188,28 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
 
         const head = [
             [
-                'Sl.No',
-                'Invigilator’s Name',
-                'Designation',
-                ...uniqueExamsForExport.map(
-                    (exam) =>
-                        `${format(parseISO(exam.date), 'dd/MM/yy')}\n${exam.subject}\n${exam.time}`
-                ),
-                'Total',
+                { content: 'Sl.No', styles: { halign: 'center' } },
+                { content: 'Invigilator’s Name', styles: { minCellWidth: 35 } },
+                { content: 'Designation', styles: { minCellWidth: 35 } },
+                ...uniqueExamsForExport.map(exam => ({
+                    content: `${format(parseISO(exam.date), 'dd-MMM-yy')}\n${exam.subject}\n${exam.time}`,
+                    styles: { halign: 'center' }
+                })),
+                { content: 'Total', styles: { halign: 'center' } },
             ],
         ];
 
         const body = dutyDataForExport.map((inv, index) => {
             const row = [
-                index + 1,
+                { content: index + 1, styles: { halign: 'center' } },
                 inv.name,
                 inv.designation,
             ];
             uniqueExamsForExport.forEach((exam) => {
                 const examKey = getExamKeyForExport(exam);
-                row.push(inv.duties[examKey] || 0);
+                row.push({ content: inv.duties[examKey] || 0, styles: { halign: 'center' } });
             });
-            row.push(inv.totalDuties);
+            row.push({ content: inv.totalDuties, styles: { halign: 'center', fontStyle: 'bold' } });
             return row;
         });
         
@@ -224,7 +224,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         });
         
         const allottedTotals = uniqueExamsForExport.map(exam => 
-            dutyDataForExport.reduce((sum, inv) => sum + inv.duties[getExamKeyForExport(exam)], 0)
+            dutyDataForExport.reduce((sum, inv) => sum + (inv.duties[getExamKeyForExport(exam)] || 0), 0)
         );
 
         const roomTotals = uniqueExamsForExport.map(exam => {
@@ -238,16 +238,28 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         });
         
         const foot = [
-            ['', '', 'No of Rooms', ...roomTotals, roomTotals.reduce((a, b) => a + b, 0)],
-            ['', '', 'No of Relievers', ...relieverTotals, relieverTotals.reduce((a, b) => a + b, 0)],
-            ['', '', 'Total Duties Allotted', ...allottedTotals, allottedTotals.reduce((a, b) => a + b, 0)],
+             [
+                { content: 'No of Rooms', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
+                ...roomTotals.map(t => ({ content: t, styles: { halign: 'center' } })),
+                { content: roomTotals.reduce((a, b) => a + b, 0), styles: { halign: 'center', fontStyle: 'bold' } }
+            ],
+            [
+                { content: 'No of Relievers', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
+                ...relieverTotals.map(t => ({ content: t, styles: { halign: 'center' } })),
+                { content: relieverTotals.reduce((a, b) => a + b, 0), styles: { halign: 'center', fontStyle: 'bold' } }
+            ],
+            [
+                { content: 'Total Duties Allotted', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
+                ...allottedTotals.map(t => ({ content: t, styles: { halign: 'center' } })),
+                { content: allottedTotals.reduce((a, b) => a + b, 0), styles: { halign: 'center', fontStyle: 'bold' } }
+            ],
         ];
 
-        doc.setFontSize(14);
+        doc.setFontSize(16);
         doc.text(collegeName, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
-        doc.setFontSize(12);
+        doc.setFontSize(14);
         doc.text(examTitle, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
-        doc.setFontSize(10);
+        doc.setFontSize(12);
         doc.text('Invigilation Duty Allotment Sheet', doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
 
 
@@ -261,47 +273,18 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 fillColor: [31, 69, 110], 
                 textColor: 255,
                 fontStyle: 'bold',
-                halign: 'center',
                 valign: 'middle',
-                minCellHeight: 45, 
             },
             footStyles: {
                 fillColor: [240, 240, 240],
                 textColor: 0,
-                fontStyle: 'bold',
-                halign: 'right',
             },
-            columnStyles: {
-                0: { cellWidth: 15, halign: 'center' }, // Sl.No
-                1: { cellWidth: 40 }, // Name
-                2: { cellWidth: 40 }, // Designation
-                [head[0].length - 1]: { cellWidth: 15, halign: 'center' }, // Total
-            },
-            didDrawCell: (data) => {
-                if (data.section === 'head' && data.column.index > 2 && data.column.index < head[0].length - 1) {
-                    const text = data.cell.text;
-                    const textLines = Array.isArray(text) ? text : [String(text)];
-
-                    data.cell.text = [];
-                    
-                    doc.setFont(data.cell.styles.font, 'bold');
-                    doc.setTextColor(data.cell.styles.textColor);
-                    
-                    const x = data.cell.x + data.cell.width / 2;
-                    let y = data.cell.y + data.cell.height - 4;
-
-                    doc.saveGraphicsState();
-                    doc.setPage(data.pageNumber);
-                    
-                    doc.text(textLines.join('\n'), x, y, {
-                        baseline: 'bottom',
-                        angle: -90, 
-                        align: 'right',
-                    });
-
-                    doc.restoreGraphicsState();
+            didParseCell: (data) => {
+                // For alternating row colors
+                if (data.row.section === 'body' && data.row.index % 2 === 0) {
+                    data.cell.styles.fillColor = '#f9f9f9';
                 }
-            },
+            }
         });
 
         doc.save('duty-allotment-sheet.pdf');

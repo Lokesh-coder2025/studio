@@ -4,10 +4,13 @@
 import type { Dispatch, SetStateAction } from 'react';
 import type { Invigilator, Examination, Assignment } from '@/types';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
-import { useMemo, forwardRef } from 'react';
+import { useMemo, forwardRef, useState } from 'react';
 import { format, parseISO, getDay } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import { Check, Pencil, X } from 'lucide-react';
 
 
 type AllotmentSheetProps = {
@@ -15,11 +18,62 @@ type AllotmentSheetProps = {
   examinations: Examination[];
   assignments: Assignment[];
   setAssignments?: Dispatch<SetStateAction<Assignment[]>>;
+  collegeName?: string;
+  setCollegeName?: Dispatch<SetStateAction<string>>;
+  examTitle?: string;
+  setExamTitle?: Dispatch<SetStateAction<string>>;
 };
 
+const EditableHeader = ({ label, value, onSave, isEditing, setIsEditing }: { label: string, value: string, onSave: (newValue: string) => void, isEditing: boolean, setIsEditing: (isEditing: boolean) => void }) => {
+    const [localValue, setLocalValue] = useState(value);
+
+    const handleSave = () => {
+        onSave(localValue);
+        setIsEditing(false);
+    };
+    
+    const handleCancel = () => {
+        setLocalValue(value);
+        setIsEditing(false);
+    }
+
+    return (
+        <div className="flex items-center justify-center gap-2 group relative">
+            {isEditing ? (
+                <>
+                    <Input 
+                        type="text" 
+                        value={localValue} 
+                        onChange={(e) => setLocalValue(e.target.value)} 
+                        className="text-lg font-bold text-center h-9 max-w-lg"
+                        onKeyDown={(e) => e.key === 'Enter' && handleSave()}
+                    />
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-green-600 hover:bg-green-100 hover:text-green-700" onClick={handleSave}><Check className="h-5 w-5"/></Button>
+                    <Button size="icon" variant="ghost" className="h-8 w-8 text-red-600 hover:bg-red-100 hover:text-red-700" onClick={handleCancel}><X className="h-5 w-5"/></Button>
+                </>
+            ) : (
+                <>
+                    <h2 className="text-xl font-bold text-primary">{value}</h2>
+                    <Button 
+                        size="icon" 
+                        variant="ghost" 
+                        className="h-8 w-8 absolute -right-10 opacity-0 group-hover:opacity-100 transition-opacity"
+                        onClick={() => setIsEditing(true)}
+                    >
+                        <Pencil className="h-4 w-4" />
+                    </Button>
+                </>
+            )}
+        </div>
+    );
+};
+
+
 export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
-  ({ invigilators, examinations, assignments, setAssignments }, ref) => {
+  ({ invigilators, examinations, assignments, setAssignments, collegeName, setCollegeName, examTitle, setExamTitle }, ref) => {
     const isEditable = !!setAssignments;
+    const [isEditingCollege, setIsEditingCollege] = useState(false);
+    const [isEditingExamTitle, setIsEditingExamTitle] = useState(false);
 
     const uniqueExams = useMemo(() => {
       return [...assignments].sort((a,b) => {
@@ -142,141 +196,162 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
     };
 
     return (
-      <div ref={ref} className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[50px] align-middle">Sl.No</TableHead>
-              <TableHead className="align-middle">Invigilator’s Name</TableHead>
-              <TableHead className="align-middle">Designation</TableHead>
-              {uniqueExams.map(exam => (
-                <TableHead key={getExamKey(exam)} className="text-left w-[60px] h-[180px] p-2 align-bottom [writing-mode:vertical-rl] rotate-180 whitespace-nowrap">
-                    <div className="font-bold">{format(parseISO(exam.date), 'dd/MM/yy')}</div>
-                    <div className="font-normal">{exam.subject}</div>
-                    <div className="text-xs font-light">{exam.time}</div>
-                </TableHead>
-              ))}
-              <TableHead className="text-center align-middle">Total</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {dutyData.length > 0 ? (
-              dutyData.map((row, index) => (
-                <TableRow key={row.id}>
-                  <TableCell>{index + 1}</TableCell>
-                  <TableCell className="font-medium whitespace-nowrap">{row.name}</TableCell>
-                  <TableCell className="whitespace-nowrap">{row.designation}</TableCell>
-                  {uniqueExams.map(exam => {
-                    const examKey = getExamKey(exam);
-                    const isAssigned = row.duties[examKey] === 1;
-                    const colorClass = dayColors.get(exam.date) || 'bg-primary/20 text-primary';
-                    return (
-                        <TableCell 
-                          key={`${row.id}-${examKey}`} 
-                          className="text-center p-0"
-                        >
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <button
-                                onClick={() => handleToggleDuty(row.name, exam)}
-                                disabled={!isEditable}
+      <div ref={ref}>
+        {isEditable && setCollegeName && setExamTitle && collegeName && examTitle && (
+            <div className="mb-4 text-center space-y-2">
+                <EditableHeader 
+                    label="College Name" 
+                    value={collegeName} 
+                    onSave={setCollegeName}
+                    isEditing={isEditingCollege}
+                    setIsEditing={setIsEditingCollege}
+                />
+                 <EditableHeader 
+                    label="Exam Title" 
+                    value={examTitle} 
+                    onSave={setExamTitle}
+                    isEditing={isEditingExamTitle}
+                    setIsEditing={setIsEditingExamTitle}
+                />
+                <h3 className="text-lg font-semibold text-muted-foreground">Invigilation Duty Allotment Sheet</h3>
+            </div>
+        )}
+        <div className="rounded-md border">
+            <Table>
+            <TableHeader>
+                <TableRow>
+                <TableHead className="w-[50px] align-middle">Sl.No</TableHead>
+                <TableHead className="align-middle">Invigilator’s Name</TableHead>
+                <TableHead className="align-middle">Designation</TableHead>
+                {uniqueExams.map(exam => (
+                    <TableHead key={getExamKey(exam)} className="text-left w-[60px] h-[180px] p-2 align-bottom [writing-mode:vertical-rl] rotate-180 whitespace-nowrap">
+                        <div className="font-bold">{format(parseISO(exam.date), 'dd/MM/yy')}</div>
+                        <div className="font-normal">{exam.subject}</div>
+                        <div className="text-xs font-light">{exam.time}</div>
+                    </TableHead>
+                ))}
+                <TableHead className="text-center align-middle">Total</TableHead>
+                </TableRow>
+            </TableHeader>
+            <TableBody>
+                {dutyData.length > 0 ? (
+                dutyData.map((row, index) => (
+                    <TableRow key={row.id}>
+                    <TableCell>{index + 1}</TableCell>
+                    <TableCell className="font-medium whitespace-nowrap">{row.name}</TableCell>
+                    <TableCell className="whitespace-nowrap">{row.designation}</TableCell>
+                    {uniqueExams.map(exam => {
+                        const examKey = getExamKey(exam);
+                        const isAssigned = row.duties[examKey] === 1;
+                        const colorClass = dayColors.get(exam.date) || 'bg-primary/20 text-primary';
+                        return (
+                            <TableCell 
+                            key={`${row.id}-${examKey}`} 
+                            className="text-center p-0"
+                            >
+                            <Tooltip>
+                                <TooltipTrigger asChild>
+                                <button
+                                    onClick={() => handleToggleDuty(row.name, exam)}
+                                    disabled={!isEditable}
+                                    className={cn(
+                                    "w-full h-full p-2 flex items-center justify-center transition-colors",
+                                    isEditable && !isAssigned && "hover:bg-muted",
+                                    !isEditable && "cursor-default"
+                                    )}
+                                >
+                                    {isAssigned ? (
+                                    <div className={cn("flex items-center justify-center w-6 h-6 rounded-md font-semibold", colorClass)}>
+                                        1
+                                    </div>
+                                    ) : (
+                                    <div className="flex items-center justify-center w-6 h-6 rounded-md text-muted-foreground opacity-30">
+                                        0
+                                    </div>
+                                    )}
+                                </button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                    <p>{format(parseISO(exam.date), 'PPP')} ({format(parseISO(exam.date), 'EEEE')})</p>
+                                </TooltipContent>
+                            </Tooltip>
+                            </TableCell>
+                        )
+                    })}
+                    <TableCell className="font-bold text-center">
+                        <Tooltip>
+                        <TooltipTrigger asChild>
+                            <div className="flex items-center justify-center">
+                            <div className="flex items-center justify-center w-6 h-6 rounded-md" style={{backgroundColor: '#FFF5EE'}}>
+                                {row.totalDuties}
+                            </div>
+                            </div>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                            <p>{row.name}</p>
+                        </TooltipContent>
+                        </Tooltip>
+                    </TableCell>
+                    </TableRow>
+                ))
+                ) : (
+                <TableRow>
+                    <TableCell colSpan={uniqueExams.length + 4} className="h-24 text-center">
+                    No duty data available.
+                    </TableCell>
+                </TableRow>
+                )}
+            </TableBody>
+            {dutyData.length > 0 && isEditable && (
+                <TableFooter>
+                    <TableRow className="bg-muted/50 hover:bg-muted/50">
+                        <TableCell colSpan={3} className="text-right font-bold">No of Rooms </TableCell>
+                        {uniqueExams.map(exam => {
+                            const examKey = getExamKey(exam);
+                            return (
+                                <TableCell key={`rooms-${examKey}`} className="text-center font-bold">
+                                    {roomTotals[examKey]}
+                                </TableCell>
+                            )
+                        })}
+                        <TableCell className="text-center font-bold">{Object.values(roomTotals).reduce((a, b) => a + b, 0)}</TableCell>
+                    </TableRow>
+                    <TableRow className="bg-muted/50 hover:bg-muted/50">
+                        <TableCell colSpan={3} className="text-right font-bold">No of Relievers </TableCell>
+                        {uniqueExams.map(exam => {
+                            const examKey = getExamKey(exam);
+                            return (
+                                <TableCell key={`relievers-${examKey}`} className="text-center font-bold">
+                                    {relieverTotals[examKey]}
+                                </TableCell>
+                            )
+                        })}
+                        <TableCell className="text-center font-bold">{Object.values(relieverTotals).reduce((a, b) => a + b, 0)}</TableCell>
+                    </TableRow>
+                    <TableRow className="bg-muted/50 font-medium hover:bg-muted/50">
+                    <TableCell colSpan={3} className="text-right font-bold">Total Duties Allotted</TableCell>
+                    {uniqueExams.map(exam => {
+                        const examKey = getExamKey(exam);
+                        const required = (roomTotals[examKey] || 0) + (relieverTotals[examKey] || 0);
+                        const isMismatch = allottedTotals[examKey] !== required;
+                        return (
+                            <TableCell 
+                                key={`total-${examKey}`} 
                                 className={cn(
-                                  "w-full h-full p-2 flex items-center justify-center transition-colors",
-                                  isEditable && !isAssigned && "hover:bg-muted",
-                                  !isEditable && "cursor-default"
+                                    "text-center font-bold",
+                                    isMismatch && "text-destructive"
                                 )}
-                              >
-                                {isAssigned ? (
-                                  <div className={cn("flex items-center justify-center w-6 h-6 rounded-md font-semibold", colorClass)}>
-                                    1
-                                  </div>
-                                ) : (
-                                  <div className="flex items-center justify-center w-6 h-6 rounded-md text-muted-foreground opacity-30">
-                                    0
-                                  </div>
-                                )}
-                              </button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                                <p>{format(parseISO(exam.date), 'PPP')} ({format(parseISO(exam.date), 'EEEE')})</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TableCell>
-                    )
-                  })}
-                  <TableCell className="font-bold text-center">
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <div className="flex items-center justify-center">
-                          <div className="flex items-center justify-center w-6 h-6 rounded-md" style={{backgroundColor: '#FFF5EE'}}>
-                            {row.totalDuties}
-                          </div>
-                        </div>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{row.name}</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TableCell>
-                </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell colSpan={uniqueExams.length + 4} className="h-24 text-center">
-                  No duty data available.
-                </TableCell>
-              </TableRow>
+                            >
+                                {allottedTotals[examKey]}
+                            </TableCell>
+                        )
+                    })}
+                    <TableCell className={cn("text-center font-bold", allottedGrandTotal !== requiredGrandTotal && "text-destructive")}>{allottedGrandTotal}</TableCell>
+                    </TableRow>
+                </TableFooter>
             )}
-          </TableBody>
-          {dutyData.length > 0 && isEditable && (
-            <TableFooter>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableCell colSpan={3} className="text-right font-bold">No of Rooms </TableCell>
-                    {uniqueExams.map(exam => {
-                        const examKey = getExamKey(exam);
-                        return (
-                            <TableCell key={`rooms-${examKey}`} className="text-center font-bold">
-                                {roomTotals[examKey]}
-                            </TableCell>
-                        )
-                    })}
-                    <TableCell className="text-center font-bold">{Object.values(roomTotals).reduce((a, b) => a + b, 0)}</TableCell>
-                </TableRow>
-                <TableRow className="bg-muted/50 hover:bg-muted/50">
-                    <TableCell colSpan={3} className="text-right font-bold">No of Relievers </TableCell>
-                    {uniqueExams.map(exam => {
-                        const examKey = getExamKey(exam);
-                        return (
-                            <TableCell key={`relievers-${examKey}`} className="text-center font-bold">
-                                {relieverTotals[examKey]}
-                            </TableCell>
-                        )
-                    })}
-                    <TableCell className="text-center font-bold">{Object.values(relieverTotals).reduce((a, b) => a + b, 0)}</TableCell>
-                </TableRow>
-                <TableRow className="bg-muted/50 font-medium hover:bg-muted/50">
-                <TableCell colSpan={3} className="text-right font-bold">Total Duties Allotted</TableCell>
-                {uniqueExams.map(exam => {
-                    const examKey = getExamKey(exam);
-                    const required = (roomTotals[examKey] || 0) + (relieverTotals[examKey] || 0);
-                    const isMismatch = allottedTotals[examKey] !== required;
-                    return (
-                        <TableCell 
-                            key={`total-${examKey}`} 
-                            className={cn(
-                                "text-center font-bold",
-                                isMismatch && "text-destructive"
-                            )}
-                        >
-                            {allottedTotals[examKey]}
-                        </TableCell>
-                    )
-                })}
-                <TableCell className={cn("text-center font-bold", allottedGrandTotal !== requiredGrandTotal && "text-destructive")}>{allottedGrandTotal}</TableCell>
-                </TableRow>
-            </TableFooter>
-          )}
-        </Table>
+            </Table>
+        </div>
       </div>
     );
   }

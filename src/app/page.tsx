@@ -110,7 +110,9 @@ function HomeClient() {
                     resetApp={resetApp} 
                     prevStep={prevStep} 
                     collegeName={collegeName}
+                    setCollegeName={setCollegeName}
                     examTitle={examTitle}
+                    setExamTitle={setExamTitle}
                     allotmentId={allotmentId}
                     setAllotmentId={setAllotmentId}
                 />;
@@ -124,7 +126,7 @@ function HomeClient() {
       <div className="p-4 sm:p-6 md:p-8">
         <Card className={cn(
             "mx-auto shadow-lg",
-            currentStep === 3 ? 'w-full' : 'max-w-6xl'
+            currentStep === 3 ? 'w-full max-w-none' : 'max-w-6xl'
           )}>
           <CardHeader>
             <CardTitle className="text-2xl font-headline">{STEPS[currentStep - 1].title}</CardTitle>

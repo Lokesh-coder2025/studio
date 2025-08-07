@@ -44,12 +44,14 @@ type ResultsStepProps = {
   resetApp: () => void;
   prevStep: () => void;
   collegeName: string;
+  setCollegeName: Dispatch<SetStateAction<string>>;
   examTitle: string;
+  setExamTitle: Dispatch<SetStateAction<string>>;
   allotmentId: string | null;
   setAllotmentId: Dispatch<SetStateAction<string | null>>;
 };
 
-export function ResultsStep({ invigilators, examinations, initialAssignments, prevStep, collegeName, examTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
+export function ResultsStep({ invigilators, examinations, initialAssignments, prevStep, collegeName, setCollegeName, examTitle, setExamTitle, allotmentId, setAllotmentId }: ResultsStepProps) {
   const [assignments, setAssignments] = useState<Assignment[]>(initialAssignments);
   const [isSendingAllEmails, setIsSendingAllEmails] = useState(false);
   const [isEmailAllConfirmOpen, setIsEmailAllConfirmOpen] = useState(false);
@@ -245,20 +247,23 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         doc.text(collegeName, doc.internal.pageSize.getWidth() / 2, 15, { align: 'center' });
         doc.setFontSize(12);
         doc.text(examTitle, doc.internal.pageSize.getWidth() / 2, 22, { align: 'center' });
+        doc.setFontSize(10);
+        doc.text('Invigilation Duty Allotment Sheet', doc.internal.pageSize.getWidth() / 2, 28, { align: 'center' });
+
 
         doc.autoTable({
-            startY: 30,
+            startY: 32,
             head: head,
             body: body,
             foot: foot,
             theme: 'grid',
             headStyles: {
-                fillColor: [22, 160, 133], // A shade of green
+                fillColor: [31, 69, 110], 
                 textColor: 255,
                 fontStyle: 'bold',
                 halign: 'center',
                 valign: 'middle',
-                minCellHeight: 35, // Set a fixed height for the header row
+                minCellHeight: 45, 
             },
             footStyles: {
                 fillColor: [240, 240, 240],
@@ -274,27 +279,24 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             },
             didDrawCell: (data) => {
                 if (data.section === 'head' && data.column.index > 2 && data.column.index < head[0].length - 1) {
-                    // This is a dynamic exam column header
                     const text = data.cell.text;
                     const textLines = Array.isArray(text) ? text : [String(text)];
 
-                    // Clear the cell's default text
                     data.cell.text = [];
                     
                     doc.setFont(data.cell.styles.font, 'bold');
                     doc.setTextColor(data.cell.styles.textColor);
                     
                     const x = data.cell.x + data.cell.width / 2;
-                    let y = data.cell.y + 4; // Start y position from top
+                    let y = data.cell.y + data.cell.height - 4;
 
-                    // Draw text from top to bottom
                     doc.saveGraphicsState();
                     doc.setPage(data.pageNumber);
                     
                     doc.text(textLines.join('\n'), x, y, {
-                        baseline: 'top',
-                        angle: 90,
-                        align: 'left',
+                        baseline: 'bottom',
+                        angle: -90, 
+                        align: 'right',
                     });
 
                     doc.restoreGraphicsState();
@@ -412,6 +414,10 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 examinations={examinations}
                 assignments={assignments} 
                 setAssignments={setAssignments}
+                collegeName={collegeName}
+                setCollegeName={setCollegeName}
+                examTitle={examTitle}
+                setExamTitle={setExamTitle}
               />
             </div>
         </TabsContent>
@@ -476,7 +482,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             <DialogHeader>
                 <DialogTitle>{examTitle || "Duty Allotment Sheet"}</DialogTitle>
                 <DialogDescription>
-                    Full-screen view. You can edit the allotments here, but changes will only be reflected once you close this view.
+                    Full-screen view. You can edit the allotments here.
                 </DialogDescription>
             </DialogHeader>
             <div className="flex-grow overflow-auto py-4">
@@ -485,6 +491,10 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                     examinations={examinations}
                     assignments={assignments}
                     setAssignments={setAssignments}
+                    collegeName={collegeName}
+                    setCollegeName={setCollegeName}
+                    examTitle={examTitle}
+                    setExamTitle={setExamTitle}
                 />
             </div>
         </DialogContent>
@@ -492,5 +502,3 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
-
-    

@@ -267,8 +267,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             foot: foot,
             theme: 'grid',
             headStyles: {
-                fillColor: [31, 69, 110], 
-                textColor: 255,
+                fillColor: [0, 71, 171], 
+                textColor: [255, 255, 255],
                 fontStyle: 'bold',
                 valign: 'middle',
                 fontSize: 9,

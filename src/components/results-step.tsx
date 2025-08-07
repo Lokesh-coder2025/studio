@@ -295,7 +295,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             foot: foot,
             theme: 'grid',
             headStyles: {
-                fillColor: [0, 71, 171], 
+                fillColor: '#708090', 
                 textColor: [255, 255, 255],
                 fontStyle: 'bold',
                 valign: 'middle',
@@ -306,8 +306,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 fontStyle: 'bold',
             },
             footStyles: {
-                fillColor: [0, 71, 171], // Cobalt Blue
-                textColor: [255, 255, 255], // White
+                fillColor: '#708090',
+                textColor: [255, 255, 255],
                 fontSize: 13,
                 fontStyle: 'bold',
             },

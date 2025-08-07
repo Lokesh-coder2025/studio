@@ -211,7 +211,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         const examKey = getExamKeyForExport({
         date: format(parseISO(exam.date), 'yyyy-MM-dd'),
         subject: exam.subject,
-        time: `${exam.startTime} - ${e.endTime}`
+        time: `${exam.startTime} - ${exam.endTime}`
         });
         examDetailsMap.set(examKey, exam);
     });
@@ -316,9 +316,9 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           doc.setTextColor(255, 255, 255);
           doc.setFont('helvetica', 'bold');
           
-          // Calculate position for rotated text
-          const x = cell.x + cell.width / 2 - 3; 
-          const y = cell.y + 5;
+          // Calculate position for rotated text (top-to-bottom)
+          const x = cell.x + cell.width / 2 + 3; 
+          const y = cell.y + 5; 
 
           doc.text(textLines, x, y, {
             angle: 90,

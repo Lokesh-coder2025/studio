@@ -13,7 +13,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format, parseISO } from 'date-fns';
 import { exportToExcelWithFormulas } from '@/lib/excel-export';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import html2canvas from 'html2canvas';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,12 +28,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { generateInvigilatorPdf } from '@/lib/pdf-generation';
 import { sendBulkEmails } from '@/ai/flows/send-bulk-emails-flow';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-
-
-// Extend jsPDF with the autoTable method
-interface jsPDFWithAutoTable extends jsPDF {
-  autoTable: (options: any) => jsPDF;
-}
 
 
 type ResultsStepProps = {
@@ -174,161 +168,61 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     exportToExcelWithFormulas(headers, dataRows, footerRows, 'Duty Allotment', 'duty-allotment-sheet');
   };
 
-  const handleDownloadPdf = () => {
-    const doc = new jsPDF({
-      orientation: 'landscape',
-    }) as jsPDFWithAutoTable;
-  
-    const head = [
-      [
-        { content: 'Sl No', styles: { halign: 'center' } },
-        { content: 'Invigilator’s Name', styles: { halign: 'left' } },
-        { content: 'Designation', styles: { halign: 'left' } },
-        ...uniqueExamsForExport.map(exam => `${format(parseISO(exam.date), 'dd/MM/yy')}\n${exam.subject}\n${exam.time}`),
-        { content: 'Total', styles: { halign: 'center' } },
-      ],
-    ];
+  const handleDownloadPdf = async () => {
+    const sheetElement = allotmentSheetRef.current;
+    if (!sheetElement) {
+        toast({ title: 'Error', description: 'Could not find the allotment sheet to capture.', variant: 'destructive' });
+        return;
+    }
 
-    const body = dutyDataForExport.map((inv, index) => {
-      const row: any[] = [
-        { content: index + 1, styles: { halign: 'center' } },
-        inv.name,
-        inv.designation,
-      ];
-      uniqueExamsForExport.forEach(exam => {
-        const examKey = getExamKeyForExport(exam);
-        row.push({
-          content: inv.duties[examKey] || '0',
-          styles: { halign: 'center' },
+    toast({ title: 'Generating PDF...', description: 'Please wait while we capture the allotment sheet.' });
+
+    try {
+        const canvas = await html2canvas(sheetElement, {
+            scale: 2, // Increase scale for better resolution
+            useCORS: true,
+            backgroundColor: '#ffffff', // Ensure background is white
         });
-      });
-      row.push({ content: inv.totalDuties, styles: { halign: 'center', fontStyle: 'bold' } });
-      return row;
-    });
-
-    const examDetailsMap = new Map<string, Examination>();
-    examinations.forEach(exam => {
-        const examKey = getExamKeyForExport({
-        date: format(parseISO(exam.date), 'yyyy-MM-dd'),
-        subject: exam.subject,
-        time: `${exam.startTime} - ${exam.endTime}`
+        
+        const imgData = canvas.toDataURL('image/png');
+        
+        const pdf = new jsPDF({
+            orientation: 'landscape',
+            unit: 'mm',
+            format: 'a3', // Use a larger format to better fit the wide table
         });
-        examDetailsMap.set(examKey, exam);
-    });
-    
-    const roomTotals = uniqueExamsForExport.map(exam => examDetailsMap.get(getExamKeyForExport(exam))?.roomsAllotted || 0);
-    const relieverTotals = uniqueExamsForExport.map(exam => examDetailsMap.get(getExamKeyForExport(exam))?.relieversRequired || 0);
-    const allottedTotals = uniqueExamsForExport.map(exam => dutyDataForExport.reduce((sum, inv) => sum + (inv.duties[getExamKeyForExport(exam)] || 0), 0));
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const canvasAspectRatio = canvasWidth / canvasHeight;
 
-    const roomGrandTotal = roomTotals.reduce((a, b) => a + b, 0);
-    const relieverGrandTotal = relieverTotals.reduce((a, b) => a + b, 0);
-    const allottedGrandTotal = allottedTotals.reduce((a, b) => a + b, 0);
+        let finalWidth = pdfWidth - 20; // with margin
+        let finalHeight = finalWidth / canvasAspectRatio;
 
-    const footStyles = {
-        fillColor: [230, 230, 230],
-        textColor: 0,
-        fontStyle: 'bold',
-        halign: 'center',
-    };
-
-    const foot = [
-        [
-            { content: 'No of Rooms', colSpan: 3, styles: { ...footStyles, halign: 'right' } },
-            ...roomTotals.map(total => ({ content: total, styles: footStyles })),
-            { content: roomGrandTotal, styles: footStyles },
-        ],
-        [
-            { content: 'No of Relievers', colSpan: 3, styles: { ...footStyles, halign: 'right' } },
-            ...relieverTotals.map(total => ({ content: total, styles: footStyles })),
-            { content: relieverGrandTotal, styles: footStyles },
-        ],
-        [
-            { content: 'Total Duties Allotted', colSpan: 3, styles: { ...footStyles, halign: 'right' } },
-            ...allottedTotals.map(total => ({ content: total, styles: footStyles })),
-            { content: allottedGrandTotal, styles: footStyles },
-        ]
-    ];
-  
-    const finalExamTitle = examTitle || 'Duty Allotment Sheet';
-    const pageWidth = doc.internal.pageSize.getWidth();
-    const pageHeight = doc.internal.pageSize.getHeight();
-    
-    doc.autoTable({
-      head: head,
-      body: body,
-      foot: foot,
-      startY: 25,
-      theme: 'grid',
-      headStyles: {
-        fillColor: [31, 69, 110],
-        textColor: 255,
-        fontStyle: 'bold',
-        halign: 'center',
-        valign: 'middle',
-        fontSize: 8,
-        cellPadding: 1,
-        minCellHeight: 45
-      },
-      footStyles: {
-        fillColor: [230, 230, 230],
-        textColor: 0,
-        fontStyle: 'bold',
-      },
-      alternateRowStyles: {
-        fillColor: [240, 240, 240],
-      },
-      styles: {
-        fontSize: 9,
-        cellPadding: 2,
-        valign: 'middle',
-      },
-      didDrawPage: function (data) {
-        // Page Header
-        doc.setTextColor(0, 0, 0);
-        doc.setFontSize(16);
-        doc.text(collegeName || 'College Name', pageWidth / 2, 10, { align: 'center' });
-        doc.setFontSize(12);
-        doc.text(finalExamTitle, pageWidth / 2, 18, { align: 'center' });
-
-        // Page Footer
-        const pageCount = (doc as any).internal.getNumberOfPages();
-        doc.setFontSize(10);
-        doc.setTextColor(100);
-        doc.text(
-            `Page ${data.pageNumber} of ${pageCount}`,
-            pageWidth - data.settings.margin.right,
-            pageHeight - 10,
-            { align: 'right' }
-        );
-      },
-      didDrawCell: function(data) {
-        if (data.section === 'head' && data.column.index >= 3 && data.column.index < head[0].length - 1) {
-          data.cell.text = ''; // Clear the original text
-          
-          const [r, g, b] = data.cell.styles.fillColor as [number, number, number];
-          doc.setFillColor(r, g, b);
-          doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
-          
-          const textLines = (head[0][data.column.index] as string).split('\n');
-          const cell = data.cell;
-          
-          doc.setFontSize(8);
-          doc.setTextColor(255, 255, 255);
-          doc.setFont('helvetica', 'bold');
-          
-          // Calculate position for rotated text (top-to-bottom)
-          const x = cell.x + cell.width / 2 + 3; 
-          const y = cell.y + 5; 
-
-          doc.text(textLines, x, y, {
-            angle: 90,
-            align: 'left'
-          });
+        if (finalHeight > pdfHeight - 20) {
+            finalHeight = pdfHeight - 20;
+            finalWidth = finalHeight * canvasAspectRatio;
         }
-      }
-    });
-  
-    doc.save('duty-allotment-sheet.pdf');
+
+        const xOffset = (pdfWidth - finalWidth) / 2;
+        const yOffset = 20; // Top margin for title
+
+        // Add Titles
+        pdf.setFontSize(16);
+        pdf.text(collegeName || 'College Name', pdfWidth / 2, 10, { align: 'center' });
+        pdf.setFontSize(12);
+        pdf.text(examTitle || 'Duty Allotment Sheet', pdfWidth / 2, 16, { align: 'center' });
+
+        pdf.addImage(imgData, 'PNG', xOffset, yOffset, finalWidth, finalHeight);
+        
+        pdf.save('duty-allotment-sheet.pdf');
+    } catch (error) {
+        console.error("PDF Generation Error: ", error);
+        toast({ title: 'PDF Generation Failed', description: 'An unexpected error occurred.', variant: 'destructive' });
+    }
   };
 
   const handleEmailAll = async () => {
@@ -410,7 +304,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     <div className="space-y-6">
       <Tabs defaultValue="allotment-sheet">
         <div className="flex justify-between items-center">
-            <TabsList className="flex w-full max-w-md gap-x-[1cm]" style={{backgroundColor: '#FFF5EE'}}>
+            <TabsList>
               <TabsTrigger value="allotment-sheet">Duty Allotment Sheet</TabsTrigger>
               <TabsTrigger value="individual-dashboard">Individual Dashboard</TabsTrigger>
             </TabsList>
@@ -427,13 +321,14 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             </Tooltip>
         </div>
         <TabsContent value="allotment-sheet" className="mt-4">
-            <AllotmentSheet 
-              ref={allotmentSheetRef}
-              invigilators={invigilators} 
-              examinations={examinations}
-              assignments={assignments} 
-              setAssignments={setAssignments}
-            />
+            <div ref={allotmentSheetRef} className="bg-white p-4">
+              <AllotmentSheet 
+                invigilators={invigilators} 
+                examinations={examinations}
+                assignments={assignments} 
+                setAssignments={setAssignments}
+              />
+            </div>
         </TabsContent>
         <TabsContent value="individual-dashboard" className="mt-4">
             <InvigilatorDutySummary 
@@ -512,9 +407,3 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
-
-    
-
-    
-
-    

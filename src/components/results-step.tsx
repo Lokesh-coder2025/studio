@@ -305,7 +305,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         if (data.section === 'head' && data.column.index >= 3 && data.column.index < head[0].length - 1) {
           data.cell.text = ''; // Clear the original text
           
-          doc.setFillColor(data.cell.styles.fillColor as string);
+          const [r, g, b] = data.cell.styles.fillColor as [number, number, number];
+          doc.setFillColor(r, g, b);
           doc.rect(data.cell.x, data.cell.y, data.cell.width, data.cell.height, 'F');
           
           const textLines = (head[0][data.column.index] as string).split('\n');
@@ -315,11 +316,12 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           doc.setTextColor(255, 255, 255);
           doc.setFont('helvetica', 'bold');
           
-          const x = cell.x + cell.width / 2 + 3; // Center vertically in cell
-          const y = cell.y + cell.height - 3; // Start from bottom of cell
+          // Calculate position for rotated text
+          const x = cell.x + cell.width / 2 + 3; 
+          const y = cell.y + cell.height - 5; 
 
           doc.text(textLines, x, y, {
-            angle: -90, // Rotate text
+            angle: -90,
             align: 'right'
           });
         }

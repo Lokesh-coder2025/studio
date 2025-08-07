@@ -289,6 +289,22 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 }
             }
         });
+        
+        const totalPages = doc.internal.getNumberOfPages();
+        const pageWidth = doc.internal.pageSize.getWidth();
+        const pageHeight = doc.internal.pageSize.getHeight();
+
+        for (let i = 1; i <= totalPages; i++) {
+            doc.setPage(i);
+            doc.setFont('helvetica', 'normal');
+            doc.setFontSize(10);
+            doc.text(
+              `Page ${i} of ${totalPages}`,
+              pageWidth - 25, 
+              pageHeight - 10,
+              { align: 'right' }
+            );
+        }
 
         doc.save('duty-allotment-sheet.pdf');
 

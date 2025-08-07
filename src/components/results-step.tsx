@@ -211,7 +211,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         const examKey = getExamKeyForExport({
         date: format(parseISO(exam.date), 'yyyy-MM-dd'),
         subject: exam.subject,
-        time: `${exam.startTime} - ${exam.endTime}`
+        time: `${exam.startTime} - ${e.endTime}`
         });
         examDetailsMap.set(examKey, exam);
     });
@@ -317,12 +317,12 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           doc.setFont('helvetica', 'bold');
           
           // Calculate position for rotated text
-          const x = cell.x + cell.width / 2 + 3; 
-          const y = cell.y + cell.height - 5; 
+          const x = cell.x + cell.width / 2 - 3; 
+          const y = cell.y + 5;
 
           doc.text(textLines, x, y, {
-            angle: -90,
-            align: 'right'
+            angle: 90,
+            align: 'left'
           });
         }
       }
@@ -512,6 +512,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
     </div>
   );
 }
+
+    
 
     
 

@@ -284,7 +284,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 textColor: 255,
                 fontStyle: 'bold',
                 valign: 'middle',
-                fontSize: 7,
+                fontSize: 9,
             },
             bodyStyles: {
                 fontSize: 12,
@@ -292,8 +292,9 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             },
             footStyles: {
                 fillColor: [240, 240, 240],
-                textColor: 0,
-                fontSize: 7,
+                textColor: [255, 0, 0],
+                fontSize: 14,
+                fontStyle: 'bold',
             },
             didParseCell: (data) => {
                 if (data.row.section === 'body' && data.row.index % 2 === 0) {

@@ -138,49 +138,34 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
   }, [invigilators, uniqueExamsForExport]);
 
   const handleExportExcel = () => {
-    const headers = [
-      'Sl No',
-      'Invigilator’s Name',
-      'Designation',
-      ...uniqueExamsForExport.map(exam => `${format(parseISO(exam.date), "dd-MMM-yy")}\n${exam.subject}\n${exam.time}`),
-      'Total'
-    ];
-    const dataRows = dutyDataForExport.map((inv, index) => {
-      const row: (string | number)[] = [
-        index + 1,
-        inv.name,
-        inv.designation,
-      ];
-      uniqueExamsForExport.forEach(exam => {
-        const examKey = getExamKeyForExport(exam);
-        row.push(inv.duties[examKey] || 0);
-      });
-      return row;
-    });
-    
-    const roomTotals = uniqueExamsForExport.map(exam => {
-        const fullExam = examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time);
-        return fullExam?.roomsAllotted || 0;
-    });
-
-    const relieverTotals = uniqueExamsForExport.map(exam => {
-        const fullExam = examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time);
-        return fullExam?.relieversRequired || 0;
-    });
-
-    const footerRows = [
-        ['', '', 'No of Rooms', ...roomTotals],
-        ['', '', 'No of Relievers', ...relieverTotals],
-        ['', '', 'Total Duties Allotted'], // Label for sum, formulas will be added
-    ];
-
     exportToExcelWithFormulas({
-        headers, 
-        dataRows, 
-        footerRows, 
-        collegeName,
-        examTitle,
-        sheetName: 'Duty Allotment', 
+        headers: [
+          'Sl No',
+          'Invigilator’s Name',
+          'Designation',
+          ...uniqueExamsForExport.map(exam => `${format(parseISO(exam.date), "dd-MMM-yy")}\n${exam.subject}\n${exam.time}`),
+          'Total'
+        ],
+        dataRows: dutyDataForExport.map((inv, index) => {
+          const row: (string | number)[] = [
+            index + 1,
+            inv.name,
+            inv.designation,
+          ];
+          uniqueExamsForExport.forEach(exam => {
+            const examKey = getExamKeyForExport(exam);
+            row.push(inv.duties[examKey] || 0);
+          });
+          return row;
+        }),
+        footerRows: [
+          ['', '', 'No of Rooms', ...uniqueExamsForExport.map(exam => examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time)?.roomsAllotted || 0)],
+          ['', '', 'No of Relievers', ...uniqueExamsForExport.map(exam => examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time)?.relieversRequired || 0)],
+          ['', '', 'Total Duties Allotted'],
+        ],
+        collegeName: collegeName,
+        examTitle: examTitle,
+        sheetName: 'Duty Allotment',
         fileName: 'duty-allotment-sheet'
     });
   };
@@ -292,8 +277,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             },
             footStyles: {
                 fillColor: [240, 240, 240],
-                textColor: [255, 0, 0],
-                fontSize: 14,
+                textColor: [0, 0, 128],
+                fontSize: 13,
                 fontStyle: 'bold',
             },
             didParseCell: (data) => {

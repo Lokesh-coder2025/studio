@@ -1,4 +1,3 @@
-
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
@@ -295,7 +294,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             foot: foot,
             theme: 'grid',
             headStyles: {
-                fillColor: '#708090', 
+                fillColor: '#6082B6', 
                 textColor: [255, 255, 255],
                 fontStyle: 'bold',
                 valign: 'middle',
@@ -306,7 +305,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 fontStyle: 'bold',
             },
             footStyles: {
-                fillColor: '#708090',
+                fillColor: '#6082B6',
                 textColor: [255, 255, 255],
                 fontSize: 13,
                 fontStyle: 'bold',

@@ -41,31 +41,33 @@ export function ThemePicker() {
   };
 
   return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="icon">
-          <Palette className="h-[1.2rem] w-[1.2rem]" />
-          <span className="sr-only">Select Theme</span>
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        {themes.map((theme) => (
-          <DropdownMenuItem
-            key={theme.name}
-            onClick={() => handleThemeChange(theme.hsl)}
-            className="flex items-center justify-between"
-          >
-            <div className="flex items-center gap-2">
-              <div
-                className="h-4 w-4 rounded-full border"
-                style={{ backgroundColor: `hsl(${theme.hsl})` }}
-              />
-              <span>{theme.name}</span>
-            </div>
-            {currentTheme === theme.hsl && <Check className="h-4 w-4" />}
-          </DropdownMenuItem>
-        ))}
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="fixed bottom-4 right-4 z-50">
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline" size="icon" className="shadow-lg">
+            <Palette className="h-[1.2rem] w-[1.2rem]" />
+            <span className="sr-only">Select Theme</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" side="top">
+          {themes.map((theme) => (
+            <DropdownMenuItem
+              key={theme.name}
+              onClick={() => handleThemeChange(theme.hsl)}
+              className="flex items-center justify-between"
+            >
+              <div className="flex items-center gap-2">
+                <div
+                  className="h-4 w-4 rounded-full border"
+                  style={{ backgroundColor: `hsl(${theme.hsl})` }}
+                />
+                <span>{theme.name}</span>
+              </div>
+              {currentTheme === theme.hsl && <Check className="h-4 w-4" />}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
   );
 }

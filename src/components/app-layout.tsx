@@ -80,7 +80,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </NavigationMenu>
               </div>
               <div className="w-[180px] flex justify-end">
-                <ThemePicker />
+                {/* ThemePicker removed from here */}
               </div>
             </NavigationHeader>
           </Navigation>
@@ -92,6 +92,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   &copy; 2025 DutyFlow
               </footer>
           </NavigationInset>
+          <ThemePicker />
         </div>
       </NavigationProvider>
   );

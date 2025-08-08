@@ -14,6 +14,7 @@ import { usePathname, useRouter } from 'next/navigation';
 import { FileSpreadsheet, History, Save, Info, UsersRound } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { ThemePicker } from '@/components/theme-picker';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -78,7 +79,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </NavigationMenuItem>
                 </NavigationMenu>
               </div>
-              <div className="w-[180px]"></div>
+              <div className="w-[180px] flex justify-end">
+                <ThemePicker />
+              </div>
             </NavigationHeader>
           </Navigation>
           <NavigationInset>

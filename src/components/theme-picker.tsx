@@ -15,12 +15,12 @@ import {
 } from '@/components/ui/dropdown-menu';
 
 const themes = [
-  { name: 'Default', hsl: '197 71% 53%' },
-  { name: 'Green', hsl: '142.1 76.2% 36.3%' },
-  { name: 'Violet', hsl: '262.1 83.3% 57.8%' },
-  { name: 'Orange', hsl: '24.6 95% 53.1%' },
-  { name: 'Red', hsl: '0 72.2% 50.6%' },
-  { name: 'Slate', hsl: '215.2 27.9% 46.9%' },
+  { name: 'Sky', hsl: '197 71% 53%' },
+  { name: 'Mint', hsl: '158 64% 52%' },
+  { name: 'Lavender', hsl: '250 65% 78%' },
+  { name: 'Periwinkle', hsl: '221 83% 70%' },
+  { name: 'Aqua', hsl: '180 70% 45%' },
+  { name: 'Rose', hsl: '346 89% 70%' },
 ];
 
 export function ThemePicker() {
@@ -31,6 +31,9 @@ export function ThemePicker() {
     if (savedTheme) {
       setCurrentTheme(savedTheme);
       document.body.style.setProperty('--primary', savedTheme);
+    } else {
+       // Set default theme if nothing is saved
+      document.body.style.setProperty('--primary', '197 71% 53%');
     }
   }, []);
 

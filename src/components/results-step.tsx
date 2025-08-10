@@ -438,7 +438,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             </Tooltip>
         </div>
         <TabsContent value="allotment-sheet" className="mt-4">
-            <div ref={allotmentSheetRef} className="bg-white p-4">
+            <div ref={allotmentSheetRef} className="bg-card p-4">
               <AllotmentSheet 
                 invigilators={invigilators} 
                 examinations={examinations}

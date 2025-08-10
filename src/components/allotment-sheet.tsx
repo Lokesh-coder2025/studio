@@ -124,13 +124,13 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
 
     const dayColors = useMemo(() => {
         const colors = [
-            'bg-pink-100 text-pink-800',       // Sunday
-            'bg-yellow-100 text-yellow-800',  // Monday
-            'bg-purple-100 text-purple-800',  // Tuesday
-            'bg-green-100 text-green-800',    // Wednesday
-            'bg-blue-100 text-blue-800',      // Thursday
-            'bg-orange-100 text-orange-800',  // Friday
-            'bg-red-100 text-red-800'         // Saturday
+            'bg-pink-100 text-pink-800 dark:bg-pink-900/50 dark:text-pink-200',       // Sunday
+            'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-200',  // Monday
+            'bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-200',  // Tuesday
+            'bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-200',    // Wednesday
+            'bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-200',      // Thursday
+            'bg-orange-100 text-orange-800 dark:bg-orange-900/50 dark:text-orange-200',  // Friday
+            'bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-200'         // Saturday
         ];
         const dateColorMap = new Map<string, string>();
         const uniqueDates = [...new Set(uniqueExams.map(exam => exam.date))];
@@ -282,7 +282,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                         <Tooltip>
                         <TooltipTrigger asChild>
                             <div className="flex items-center justify-center">
-                            <div className="flex items-center justify-center w-6 h-6 rounded-md" style={{backgroundColor: '#FFF5EE'}}>
+                            <div className="flex items-center justify-center w-6 h-6 rounded-md bg-amber-100 text-amber-900 dark:bg-amber-900/50 dark:text-amber-200">
                                 {row.totalDuties}
                             </div>
                             </div>

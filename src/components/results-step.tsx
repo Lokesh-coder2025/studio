@@ -189,6 +189,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         footerRows: [
           ['', '', 'No of Rooms', ...uniqueExamsForExport.map(exam => examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time)?.roomsAllotted || 0)],
           ['', '', 'No of Relievers', ...uniqueExamsForExport.map(exam => examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time)?.relieversRequired || 0)],
+          ['', '', 'Total Invigilators'],
           ['', '', 'Total Duties Allotted'],
         ],
         collegeName: collegeName,
@@ -258,6 +259,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             return examDetailsMap.get(key)?.relieversRequired || 0;
         });
         
+        const totalInvigilatorsTotals = roomTotals.map((num, i) => num + relieverTotals[i]);
+
         const foot = [
              [
                 { content: 'No of Rooms', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
@@ -268,6 +271,11 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 { content: 'No of Relievers', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
                 ...relieverTotals.map(t => ({ content: t, styles: { halign: 'center' } })),
                 { content: relieverTotals.reduce((a, b) => a + b, 0), styles: { halign: 'center', fontStyle: 'bold' } }
+            ],
+            [
+                { content: 'Total Invigilators', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },
+                ...totalInvigilatorsTotals.map(t => ({ content: t, styles: { halign: 'center' } })),
+                { content: totalInvigilatorsTotals.reduce((a, b) => a + b, 0), styles: { halign: 'center', fontStyle: 'bold' } }
             ],
             [
                 { content: 'Total Duties Allotted', colSpan: 3, styles: { halign: 'right', fontStyle: 'bold' } },

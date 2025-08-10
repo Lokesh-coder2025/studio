@@ -143,21 +143,21 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
         return dateColorMap;
     }, [uniqueExams]);
 
-    const { allottedTotals, allottedGrandTotal, roomTotals, relieverTotals, requiredGrandTotal } = useMemo(() => {
+    const { allottedTotals, allottedGrandTotal, roomTotals, relieverTotals, totalInvigilatorsTotals, requiredGrandTotal } = useMemo(() => {
         const allotted: { [key: string]: number } = {};
         const rooms: { [key: string]: number } = {};
         const relievers: { [key: string]: number } = {};
+        const totalInvigilators: { [key: string]: number } = {};
 
         uniqueExams.forEach(exam => {
             const examKey = getExamKey(exam);
             
-            // Calculate allotted duties
             allotted[examKey] = dutyData.reduce((sum, inv) => sum + (inv.duties[examKey] || 0), 0);
             
-            // Get required duties from original examination data
             const details = examDetailsMap.get(examKey);
             rooms[examKey] = details?.roomsAllotted || 0;
             relievers[examKey] = details?.relieversRequired || 0;
+            totalInvigilators[examKey] = (details?.roomsAllotted || 0) + (details?.relieversRequired || 0);
         });
 
         const allottedGrand = dutyData.reduce((sum, inv) => sum + inv.totalDuties, 0);
@@ -168,6 +168,7 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
             allottedGrandTotal: allottedGrand, 
             roomTotals: rooms, 
             relieverTotals: relievers, 
+            totalInvigilatorsTotals: totalInvigilators,
             requiredGrandTotal: requiredGrand 
         };
     }, [dutyData, uniqueExams, examDetailsMap]);
@@ -327,6 +328,18 @@ export const AllotmentSheet = forwardRef<HTMLDivElement, AllotmentSheetProps>(
                             )
                         })}
                         <TableCell className="text-center font-bold">{Object.values(relieverTotals).reduce((a, b) => a + b, 0)}</TableCell>
+                    </TableRow>
+                    <TableRow className="bg-muted/50 font-medium hover:bg-muted/50">
+                        <TableCell colSpan={3} className="text-right font-bold">Total Invigilators</TableCell>
+                        {uniqueExams.map(exam => {
+                            const examKey = getExamKey(exam);
+                            return (
+                                <TableCell key={`total-inv-${examKey}`} className="text-center font-bold">
+                                    {totalInvigilatorsTotals[examKey]}
+                                </TableCell>
+                            )
+                        })}
+                        <TableCell className="text-center font-bold">{Object.values(totalInvigilatorsTotals).reduce((a, b) => a + b, 0)}</TableCell>
                     </TableRow>
                     <TableRow className="bg-muted/50 font-medium hover:bg-muted/50">
                     <TableCell colSpan={3} className="text-right font-bold">Total Duties Allotted</TableCell>

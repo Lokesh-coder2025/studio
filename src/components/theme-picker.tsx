@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Palette, Check } from 'lucide-react';
+import { Palette, Check, Sun, Moon } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
@@ -24,6 +24,7 @@ const themes = [
 ];
 
 export function ThemePicker() {
+  const { setTheme, resolvedTheme } = useTheme();
   const [currentTheme, setCurrentTheme] = React.useState('197 71% 53%');
 
   React.useEffect(() => {
@@ -42,9 +43,29 @@ export function ThemePicker() {
     document.body.style.setProperty('--primary', hsl);
     localStorage.setItem('dutyflow-theme-hsl', hsl);
   };
+  
+  // Wait for the component to be mounted before rendering the theme toggle
+  const [mounted, setMounted] = React.useState(false)
+  React.useEffect(() => setMounted(true), [])
+
 
   return (
-    <div className="fixed bottom-4 right-4 z-50">
+    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
+       {mounted && (
+         <Button
+            variant="outline"
+            size="icon"
+            className="shadow-lg"
+            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
+          >
+            {resolvedTheme === 'dark' ? (
+                <Sun className="h-[1.2rem] w-[1.2rem]" />
+            ) : (
+                <Moon className="h-[1.2rem] w-[1.2rem]" />
+            )}
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+       )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
           <Button variant="outline" size="icon" className="shadow-lg">

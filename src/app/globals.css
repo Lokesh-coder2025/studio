@@ -5,6 +5,11 @@
 
 body {
   font-family: 'Inter', sans-serif;
+  background-image: url('https://placehold.co/1920x1080/E0E7FF/E0E7FF');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
 }
 
 @layer base {

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info, UsersRound } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemePicker } from '@/components/theme-picker';
@@ -80,7 +80,12 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </NavigationMenu>
               </div>
               <div className="w-[180px] flex justify-end">
-                {/* ThemePicker removed from here */}
+                 <Button asChild variant="outline" size="sm">
+                    <Link href="/login">
+                        <LogIn />
+                        <span>Sign Up / Log In</span>
+                    </Link>
+                 </Button>
               </div>
             </NavigationHeader>
           </Navigation>

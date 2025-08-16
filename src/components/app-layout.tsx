@@ -11,14 +11,16 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemePicker } from '@/components/theme-picker';
+import { useAuth } from '@/hooks/use-auth';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
+  const { user } = useAuth();
 
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -77,6 +79,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         </Link>
                         </Button>
                     </NavigationMenuItem>
+                    {user && (
+                         <NavigationMenuItem>
+                            <Button asChild variant="default" size="sm" className={cn(pathname === '/admin' ? 'shadow-lg' : '')}>
+                            <Link href="/admin">
+                                <ShieldCheck />
+                                <span>Admin</span>
+                            </Link>
+                            </Button>
+                        </NavigationMenuItem>
+                    )}
                 </NavigationMenu>
               </div>
               <div className="w-[180px] flex justify-end">

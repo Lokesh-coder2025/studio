@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck, LogOut, UserPlus } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck, LogOut, UserPlus, Settings, Palette, Sun, Moon } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemePicker } from '@/components/theme-picker';
@@ -91,7 +91,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     )}
                 </NavigationMenu>
               </div>
-              <div className="w-auto flex justify-end gap-2">
+              <div className="w-auto flex justify-end items-center gap-2">
                 {user ? (
                    <Button onClick={logout} variant="outline" size="sm">
                         <LogOut />
@@ -113,6 +113,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         </Button>
                     </>
                 )}
+                <ThemePicker />
               </div>
             </NavigationHeader>
           </Navigation>
@@ -124,7 +125,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   &copy; 2025 DutyFlow
               </footer>
           </NavigationInset>
-          <ThemePicker />
         </div>
       </NavigationProvider>
   );

@@ -2,7 +2,7 @@
 'use client';
 
 import * as React from 'react';
-import { Palette, Check, Sun, Moon } from 'lucide-react';
+import { Palette, Check, Sun, Moon, Settings } from 'lucide-react';
 import { useTheme } from 'next-themes';
 
 import { cn } from '@/lib/utils';
@@ -12,6 +12,10 @@ import {
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubTrigger,
+  DropdownMenuSubContent
 } from '@/components/ui/dropdown-menu';
 
 const themes = [
@@ -26,14 +30,15 @@ const themes = [
 export function ThemePicker() {
   const { setTheme, resolvedTheme } = useTheme();
   const [currentTheme, setCurrentTheme] = React.useState('197 71% 53%');
+  const [mounted, setMounted] = React.useState(false);
 
   React.useEffect(() => {
+    setMounted(true);
     const savedTheme = localStorage.getItem('dutyflow-theme-hsl');
     if (savedTheme) {
       setCurrentTheme(savedTheme);
       document.body.style.setProperty('--primary', savedTheme);
     } else {
-       // Set default theme if nothing is saved
       document.body.style.setProperty('--primary', '197 71% 53%');
     }
   }, []);
@@ -44,54 +49,61 @@ export function ThemePicker() {
     localStorage.setItem('dutyflow-theme-hsl', hsl);
   };
   
-  // Wait for the component to be mounted before rendering the theme toggle
-  const [mounted, setMounted] = React.useState(false)
-  React.useEffect(() => setMounted(true), [])
-
+  if (!mounted) {
+    return (
+        <Button variant="outline" size="icon" disabled>
+            <Settings className="h-[1.2rem] w-[1.2rem]" />
+        </Button>
+    )
+  }
 
   return (
-    <div className="fixed bottom-4 right-4 z-50 flex items-center gap-2">
-       {mounted && (
-         <Button
-            variant="outline"
-            size="icon"
-            className="shadow-lg"
-            onClick={() => setTheme(resolvedTheme === 'dark' ? 'light' : 'dark')}
-          >
-            {resolvedTheme === 'dark' ? (
-                <Sun className="h-[1.2rem] w-[1.2rem]" />
-            ) : (
-                <Moon className="h-[1.2rem] w-[1.2rem]" />
-            )}
-            <span className="sr-only">Toggle theme</span>
-          </Button>
-       )}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" size="icon" className="shadow-lg">
-            <Palette className="h-[1.2rem] w-[1.2rem]" />
-            <span className="sr-only">Select Theme</span>
+          <Button variant="outline" size="icon">
+            <Settings className="h-[1.2rem] w-[1.2rem]" />
+            <span className="sr-only">Settings</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" side="top">
-          {themes.map((theme) => (
-            <DropdownMenuItem
-              key={theme.name}
-              onClick={() => handleThemeChange(theme.hsl)}
-              className="flex items-center justify-between"
-            >
-              <div className="flex items-center gap-2">
-                <div
-                  className="h-4 w-4 rounded-full border"
-                  style={{ backgroundColor: `hsl(${theme.hsl})` }}
-                />
-                <span>{theme.name}</span>
-              </div>
-              {currentTheme === theme.hsl && <Check className="h-4 w-4" />}
-            </DropdownMenuItem>
-          ))}
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem onClick={() => setTheme('light')}>
+            <Sun className="mr-2 h-4 w-4" />
+            <span>Light</span>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => setTheme('dark')}>
+            <Moon className="mr-2 h-4 w-4" />
+            <span>Dark</span>
+          </DropdownMenuItem>
+           <DropdownMenuItem onClick={() => setTheme('system')}>
+            <Settings className="mr-2 h-4 w-4" />
+            <span>System</span>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Palette className="mr-2 h-4 w-4" />
+              <span>Color Theme</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent>
+              {themes.map((theme) => (
+                <DropdownMenuItem
+                  key={theme.name}
+                  onClick={() => handleThemeChange(theme.hsl)}
+                  className="flex items-center justify-between"
+                >
+                  <div className="flex items-center gap-2">
+                    <div
+                      className="h-4 w-4 rounded-full border"
+                      style={{ backgroundColor: `hsl(${theme.hsl})` }}
+                    />
+                    <span>{theme.name}</span>
+                  </div>
+                  {currentTheme === theme.hsl && <Check className="h-4 w-4" />}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
         </DropdownMenuContent>
       </DropdownMenu>
-    </div>
   );
 }

@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck, LogOut, UserPlus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemePicker } from '@/components/theme-picker';
@@ -20,7 +20,7 @@ import { useAuth } from '@/hooks/use-auth';
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -91,13 +91,28 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     )}
                 </NavigationMenu>
               </div>
-              <div className="w-[180px] flex justify-end">
-                 <Button asChild variant="outline" size="sm">
-                    <Link href="/login">
-                        <LogIn />
-                        <span>Sign Up / Log In</span>
-                    </Link>
-                 </Button>
+              <div className="w-auto flex justify-end gap-2">
+                {user ? (
+                   <Button onClick={logout} variant="outline" size="sm">
+                        <LogOut />
+                        <span>Log Out</span>
+                   </Button>
+                ) : (
+                    <>
+                        <Button asChild variant="outline" size="sm">
+                            <Link href="/login">
+                                <LogIn />
+                                <span>Log In</span>
+                            </Link>
+                        </Button>
+                        <Button asChild variant="outline" size="sm">
+                            <Link href="/signup">
+                                <UserPlus />
+                                <span>Sign Up</span>
+                            </Link>
+                        </Button>
+                    </>
+                )}
               </div>
             </NavigationHeader>
           </Navigation>

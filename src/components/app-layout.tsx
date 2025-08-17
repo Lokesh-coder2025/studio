@@ -79,16 +79,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         </Link>
                         </Button>
                     </NavigationMenuItem>
-                    {user && (
-                         <NavigationMenuItem>
-                            <Button asChild variant="default" size="sm" className={cn(pathname === '/admin' ? 'shadow-lg' : '')}>
-                            <Link href="/admin">
-                                <ShieldCheck />
-                                <span>Admin</span>
-                            </Link>
-                            </Button>
-                        </NavigationMenuItem>
-                    )}
                 </NavigationMenu>
               </div>
               <div className="w-auto flex justify-end items-center gap-2">

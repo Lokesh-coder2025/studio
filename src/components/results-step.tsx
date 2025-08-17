@@ -473,17 +473,6 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
           <ArrowLeft /> Back
         </Button>
         <div className="flex flex-wrap gap-2 justify-end">
-           <Button onClick={handleRebalance} disabled={isRebalancing || isSendingAllEmails} size="sm">
-              {isRebalancing ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Optimizing...
-                </>
-              ) : (
-                <>
-                  <RefreshCw /> Optimize & Rebalance
-                </>
-              )}
-            </Button>
            <Button onClick={handleSave} disabled={isSendingAllEmails || isRebalancing} size="sm">
               <Save /> Save Allotment
             </Button>
@@ -503,6 +492,17 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             </Button>
             <Button onClick={handleExportExcel} disabled={isSendingAllEmails || isRebalancing} size="sm">
               <Download /> Download as Excel
+            </Button>
+            <Button onClick={handleRebalance} disabled={isRebalancing || isSendingAllEmails} size="sm">
+              {isRebalancing ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Optimizing...
+                </>
+              ) : (
+                <>
+                  <RefreshCw /> Optimize & Rebalance
+                </>
+              )}
             </Button>
         </div>
       </div>

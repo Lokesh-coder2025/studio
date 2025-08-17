@@ -30,6 +30,7 @@ import { generateInvigilatorPdf } from '@/lib/pdf-generation';
 import { sendBulkEmails } from '@/ai/flows/send-bulk-emails-flow';
 import { rebalanceDuties } from '@/ai/flows/rebalance-duties-flow';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 // Extend the jsPDF type to include the autoTable method
 declare module 'jspdf' {
@@ -493,7 +494,12 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
             <Button onClick={handleExportExcel} disabled={isSendingAllEmails || isRebalancing} size="sm">
               <Download /> Download as Excel
             </Button>
-            <Button onClick={handleRebalance} disabled={isRebalancing || isSendingAllEmails} size="sm">
+            <Button
+              onClick={handleRebalance}
+              disabled={isRebalancing || isSendingAllEmails}
+              size="sm"
+              className="text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700"
+            >
               {isRebalancing ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Optimizing...

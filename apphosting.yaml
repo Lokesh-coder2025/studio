@@ -8,5 +8,4 @@ runConfig:
 
 # Explicitly define the entrypoint to start the Next.js application.
 # This resolves build issues where the buildpack fails to detect the project type.
-entrypoint: next start
-
+entrypoint: npm run start

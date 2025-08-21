@@ -20,7 +20,7 @@ const createPdfHtml = (
   `).join('');
 
   return `
-    <div style="font-family: Arial, sans-serif; color: #333; margin: 20px; border: 1px solid #eee; box-shadow: 0 0 10px rgba(0,0,0,0.1); font-size: 12px;">
+    <div style="font-family: Arial, sans-serif; color: #333; margin: 20px; border: 2px solid #1F456E; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); font-size: 12px; overflow: hidden;">
       <div style="padding: 10px; text-align: center; background-color: #1F456E; color: white;">
         <h1 style="margin: 0; font-size: 20px;">${collegeName || 'College Name'}</h1>
         <p style="margin: 3px 0 0; font-size: 16px;">${examTitle || 'Examination Name'}</p>

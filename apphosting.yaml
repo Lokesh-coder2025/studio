@@ -1,11 +1,15 @@
 # Settings to manage and configure a Firebase App Hosting backend.
 # https://firebase.google.com/docs/app-hosting/configure
 
+# Explicitly define the entrypoint to start the Next.js application.
+# This resolves build issues where the buildpack fails to detect the project type.
+entrypoint: npm run start
+
+# Set the build context to the root directory
+buildConfig:
+  context: .
+
 runConfig:
   # Increase this value if you'd like to automatically spin up
   # more instances in response to increased traffic.
   maxInstances: 1
-
-# Explicitly define the entrypoint to start the Next.js application.
-# This resolves build issues where the buildpack fails to detect the project type.
-entrypoint: npm run start

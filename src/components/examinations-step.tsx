@@ -475,40 +475,57 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 border p-4 rounded-md">
-          <FormField
-            control={form.control}
-            name="date"
-            render={({ field }) => (
-              <FormItem className='max-w-xs'>
-                <FormLabel>Date for Sessions</FormLabel>
-                <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
-                  <PopoverTrigger asChild>
-                    <FormControl>
-                      <Button
-                        variant="outline"
-                        className={cn("w-full justify-start text-left font-normal bg-background border-2 border-border", !field.value && "text-muted-foreground")}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {field.value ? format(field.value, "PPP") : <span>Select a date</span>}
-                      </Button>
-                    </FormControl>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
-                    <Calendar
-                      mode="single"
-                      selected={field.value}
-                      onSelect={(date) => {
-                        field.onChange(date);
-                        setIsCalendarOpen(false);
-                      }}
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          <div className="flex items-end gap-4">
+            <FormField
+              control={form.control}
+              name="date"
+              render={({ field }) => (
+                <FormItem className='max-w-xs'>
+                  <FormLabel>Date for Sessions</FormLabel>
+                  <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant="outline"
+                          className={cn("w-full justify-start text-left font-normal bg-background border-2 border-border", !field.value && "text-muted-foreground")}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {field.value ? format(field.value, "PPP") : <span>Select a date</span>}
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" onOpenAutoFocus={(e) => e.preventDefault()}>
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={(date) => {
+                          field.onChange(date);
+                          setIsCalendarOpen(false);
+                        }}
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <div className="flex items-center gap-2">
+                <span className="text-sm text-muted-foreground">or</span>
+                <Input
+                  id="excel-exam-upload"
+                  type="file"
+                  className="hidden"
+                  accept=".xlsx, .xls, .csv"
+                  onChange={handleExamFileUpload}
+                />
+                <Button asChild size="sm" className="text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700">
+                  <label htmlFor="excel-exam-upload" className="cursor-pointer flex items-center gap-2">
+                    <Upload /> Import from Excel
+                  </label>
+                </Button>
+              </div>
+          </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
               {/* Session 1 */}
@@ -674,21 +691,6 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
             <Button type="submit" size="sm">
                +Add Examination(s)
             </Button>
-            <div className="flex items-center gap-2">
-              <span className="text-sm text-muted-foreground">or</span>
-              <Input
-                id="excel-exam-upload"
-                type="file"
-                className="hidden"
-                accept=".xlsx, .xls, .csv"
-                onChange={handleExamFileUpload}
-              />
-              <Button asChild size="sm" className="text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700">
-                <label htmlFor="excel-exam-upload" className="cursor-pointer flex items-center gap-2">
-                  <Upload /> Import from Excel
-                </label>
-              </Button>
-            </div>
           </div>
         </form>
       </Form>

@@ -64,7 +64,7 @@ function deterministicDutyAllocation(input: OptimizeDutyAssignmentsInput): Optim
       ...inv,
       isPartTime: !!(inv.availableDays && inv.availableDays.length > 0),
       dutiesAssigned: 0,
-      assignedSlots: new Set<string>(), // Tracks "date|time" to prevent double booking on the same day for seniors.
+      assignedSlots: new Set<string>(), // Tracks "date|time" to prevent double booking on the same day.
     }));
 
     // 2. Create a flat list of all individual duty slots required for all exams.

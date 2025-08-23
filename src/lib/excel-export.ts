@@ -32,7 +32,6 @@ export const exportToExcelWithFormulas = ({ headers, dataRows, footerRows, colle
   const worksheet = XLSX.utils.aoa_to_sheet(ws_data);
 
   // Merge cells for the main titles
-  const mergeOptions = { s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } };
   worksheet['!merges'] = [
     { s: { r: 0, c: 0 }, e: { r: 0, c: headers.length - 1 } }, // College Name
     { s: { r: 1, c: 0 }, e: { r: 1, c: headers.length - 1 } }, // Exam Title
@@ -54,37 +53,56 @@ export const exportToExcelWithFormulas = ({ headers, dataRows, footerRows, colle
     XLSX.utils.sheet_add_aoa(worksheet, [[{ f: formula }]], { origin: { c: numCols - 1, r: rowIndex - 1 } });
   }
   
-  // Footer starts after titles, header, and data rows
-  const footerStartIndex = titleRowOffset + numDataRows + 1;
-  const roomsRowIndex = footerStartIndex;
-  const relieversRowIndex = footerStartIndex + 1;
-  const totalAllottedRowIndex = footerStartIndex + 2;
+  // --- FOOTER FORMULAS ---
+  const footerStartRow = titleRowOffset + numDataRows + 1;
+  const roomsRow = footerStartRow;
+  const relieversRow = footerStartRow + 1;
+  const totalInvigilatorsRow = footerStartRow + 2;
+  const totalAllottedRow = footerStartRow + 3;
   
   for (let j = dutyColsStart; j <= dutyColsEnd; j++) {
     const colLetter = XLSX.utils.encode_col(j);
-    // Formula for Total Duties Allotted column: SUM of duties assigned in that column
-    const allottedFormula = `SUM(${colLetter}${titleRowOffset + 2}:${colLetter}${titleRowOffset + numDataRows + 1})`;
-    XLSX.utils.sheet_add_aoa(worksheet, [[{ f: allottedFormula }]], { origin: { c: j, r: totalAllottedRowIndex - 1 } });
+    
+    // Formula for "Total Invigilators" (Rooms + Relievers)
+    const roomsCell = `${colLetter}${roomsRow}`;
+    const relieversCell = `${colLetter}${relieversRow}`;
+    const totalInvigilatorsFormula = `${roomsCell}+${relieversCell}`;
+    XLSX.utils.sheet_add_aoa(worksheet, [[{ f: totalInvigilatorsFormula }]], { origin: { c: j, r: totalInvigilatorsRow - 1 } });
+
+    // Formula for "Total Duties Allotted" (SUM of assigned duties in that column)
+    const dataStartRow = titleRowOffset + 2;
+    const dataEndRow = titleRowOffset + numDataRows + 1;
+    const allottedFormula = `SUM(${colLetter}${dataStartRow}:${colLetter}${dataEndRow})`;
+    XLSX.utils.sheet_add_aoa(worksheet, [[{ f: allottedFormula }]], { origin: { c: j, r: totalAllottedRow - 1 } });
   }
 
-  // Add formulas for grand totals in the last column
+  // --- GRAND TOTALS (LAST COLUMN) ---
+  const grandTotalCol = numCols - 1;
+
   // Grand total for No of Rooms
-  const roomsStartCell = XLSX.utils.encode_cell({c: dutyColsStart, r: roomsRowIndex - 1});
-  const roomsEndCell = XLSX.utils.encode_cell({c: dutyColsEnd, r: roomsRowIndex - 1});
+  const roomsStartCell = XLSX.utils.encode_cell({c: dutyColsStart, r: roomsRow - 1});
+  const roomsEndCell = XLSX.utils.encode_cell({c: dutyColsEnd, r: roomsRow - 1});
   const roomsGrandTotalFormula = `SUM(${roomsStartCell}:${roomsEndCell})`;
-  XLSX.utils.sheet_add_aoa(worksheet, [[{ f: roomsGrandTotalFormula }]], { origin: { c: numCols - 1, r: roomsRowIndex - 1 }});
+  XLSX.utils.sheet_add_aoa(worksheet, [[{ f: roomsGrandTotalFormula }]], { origin: { c: grandTotalCol, r: roomsRow - 1 }});
 
   // Grand total for No of Relievers
-  const relieversStartCell = XLSX.utils.encode_cell({c: dutyColsStart, r: relieversRowIndex - 1});
-  const relieversEndCell = XLSX.utils.encode_cell({c: dutyColsEnd, r: relieversRowIndex - 1});
+  const relieversStartCell = XLSX.utils.encode_cell({c: dutyColsStart, r: relieversRow - 1});
+  const relieversEndCell = XLSX.utils.encode_cell({c: dutyColsEnd, r: relieversRow - 1});
   const relieversGrandTotalFormula = `SUM(${relieversStartCell}:${relieversEndCell})`;
-  XLSX.utils.sheet_add_aoa(worksheet, [[{ f: relieversGrandTotalFormula }]], { origin: { c: numCols - 1, r: relieversRowIndex - 1 }});
+  XLSX.utils.sheet_add_aoa(worksheet, [[{ f: relieversGrandTotalFormula }]], { origin: { c: grandTotalCol, r: relieversRow - 1 }});
 
+  // Grand total for Total Invigilators
+  const totalInvStartCell = XLSX.utils.encode_cell({c: dutyColsStart, r: totalInvigilatorsRow - 1});
+  const totalInvEndCell = XLSX.utils.encode_cell({c: dutyColsEnd, r: totalInvigilatorsRow - 1});
+  const totalInvGrandTotalFormula = `SUM(${totalInvStartCell}:${totalInvEndCell})`;
+  XLSX.utils.sheet_add_aoa(worksheet, [[{ f: totalInvGrandTotalFormula }]], { origin: { c: grandTotalCol, r: totalInvigilatorsRow - 1 }});
+  
   // Grand total for Total Duties Allotted
-  const allottedStartCell = XLSX.utils.encode_cell({c: dutyColsStart, r: totalAllottedRowIndex - 1});
-  const allottedEndCell = XLSX.utils.encode_cell({c: dutyColsEnd, r: totalAllottedRowIndex - 1});
+  const allottedStartCell = XLSX.utils.encode_cell({c: dutyColsStart, r: totalAllottedRow - 1});
+  const allottedEndCell = XLSX.utils.encode_cell({c: dutyColsEnd, r: totalAllottedRow - 1});
   const allottedGrandTotalFormula = `SUM(${allottedStartCell}:${allottedEndCell})`;
-  XLSX.utils.sheet_add_aoa(worksheet, [[{ f: allottedGrandTotalFormula }]], { origin: { c: numCols - 1, r: totalAllottedRowIndex - 1 }});
+  XLSX.utils.sheet_add_aoa(worksheet, [[{ f: allottedGrandTotalFormula }]], { origin: { c: grandTotalCol, r: totalAllottedRow - 1 }});
+
 
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);

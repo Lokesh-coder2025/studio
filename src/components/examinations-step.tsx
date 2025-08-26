@@ -2,7 +2,7 @@
 'use client';
 
 import type { Dispatch, SetStateAction } from 'react';
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -10,7 +10,7 @@ import { format, parseISO, parse as parseDate } from 'date-fns';
 import * as XLSX from 'xlsx';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow, TableFooter } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -447,6 +447,17 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
       setIsGenerating(false);
     }
   };
+  
+  const { totalRooms, totalRelievers } = useMemo(() => {
+    return examinations.reduce(
+      (totals, exam) => {
+        totals.totalRooms += exam.roomsAllotted;
+        totals.totalRelievers += exam.relieversRequired;
+        return totals;
+      },
+      { totalRooms: 0, totalRelievers: 0 }
+    );
+  }, [examinations]);
 
   return (
     <div className="space-y-8">
@@ -736,6 +747,18 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
               </TableRow>
             )}
           </TableBody>
+           {examinations.length > 0 && (
+            <TableFooter>
+              <TableRow className="bg-muted/50 font-bold hover:bg-muted/50">
+                <TableCell colSpan={5} className="text-right">
+                  Totals
+                </TableCell>
+                <TableCell className="text-center">{totalRooms}</TableCell>
+                <TableCell className="text-center">{totalRelievers}</TableCell>
+                <TableCell />
+              </TableRow>
+            </TableFooter>
+          )}
         </Table>
       </div>
 

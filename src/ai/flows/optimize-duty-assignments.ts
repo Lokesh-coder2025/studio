@@ -11,7 +11,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { format, parseISO, getDay, isAfter, parse as parseTime } from 'date-fns';
+import { format, parseISO, getDay } from 'date-fns';
 
 // Define the input schema for the flow
 const OptimizeDutyAssignmentsInputSchema = z.object({
@@ -56,19 +56,25 @@ const getWeekday = (dateString: string) => {
 
 /**
  * This function implements the duty allotment logic according to the specified rules.
- * It prioritizes fairness and respects seniority and availability constraints.
+ * It respects the order of invigilators (seniority), handles part-time availability correctly,
+ * and distributes duties fairly.
  */
 function deterministicDutyAllocation(input: OptimizeDutyAssignmentsInput): OptimizeDutyAssignmentsOutput {
-    // 1. Prepare invigilator roster, respecting the seniority order from the UI.
-    const roster = input.invigilators.map((inv, index) => ({
-      ...inv,
-      isPartTime: !!(inv.availableDays && inv.availableDays.length > 0),
-      dutiesAssigned: 0,
-      assignedSlots: new Set<string>(), // Tracks "date|time" to prevent double booking on the same day.
+    // 1. Separate invigilators into part-time and full-time lists, preserving original order.
+    const partTimeInvigilators = input.invigilators.filter(inv => inv.availableDays && inv.availableDays.length > 0);
+    const fullTimeInvigilators = input.invigilators.filter(inv => !inv.availableDays || inv.availableDays.length === 0);
+    
+    const roster = [...partTimeInvigilators, ...fullTimeInvigilators].map(inv => ({
+        ...inv,
+        dutiesAssigned: 0,
+        // Tracks "date|time" to prevent double booking on the same day/session.
+        assignedSlots: new Set<string>(), 
+        // Tracks just "date" to prevent multiple duties on the same day.
+        assignedDates: new Set<string>(),
     }));
 
     // 2. Create a flat list of all individual duty slots required for all exams.
-    const allDutySlots: { date: string, subject: string, time: string, day: string, assignedTo: string | null }[] = [];
+    const allDutySlots: { date: string; subject: string; time: string; day: string; assignedTo: string | null }[] = [];
     input.examinations.forEach(exam => {
         for (let i = 0; i < exam.invigilatorsNeeded; i++) {
             allDutySlots.push({ 
@@ -80,50 +86,72 @@ function deterministicDutyAllocation(input: OptimizeDutyAssignmentsInput): Optim
             });
         }
     });
-
-    // 3. Round-robin distribution for fairness.
-    let invigilatorIndex = 0;
-    allDutySlots.forEach(slot => {
-        let attempts = 0;
-        let assigned = false;
-        while(attempts < roster.length && !assigned) {
-            const invigilator = roster[invigilatorIndex];
-            const slotKey = `${slot.date}|${slot.time}`;
-
-            // Availability check: day of the week
-            const isAvailableOnDay = !invigilator.isPartTime || invigilator.availableDays!.includes(slot.day);
-            
-            // Double-duty check: Is invigilator already assigned to this exact date and time?
-            const isAlreadyAssignedSlot = invigilator.assignedSlots.has(slotKey);
-
-            if (isAvailableOnDay && !isAlreadyAssignedSlot) {
-                slot.assignedTo = invigilator.name;
-                invigilator.dutiesAssigned++;
-                invigilator.assignedSlots.add(slotKey);
-                assigned = true;
-            }
-
-            invigilatorIndex = (invigilatorIndex + 1) % roster.length;
-            attempts++;
-        }
+    
+    // Sort slots by date and time to ensure chronological assignment
+    allDutySlots.sort((a, b) => {
+        const dateA = new Date(a.date).getTime();
+        const dateB = new Date(b.date).getTime();
+        if (dateA !== dateB) return dateA - dateB;
+        return a.time.localeCompare(b.time);
     });
+
+
+    // 3. Two-pass assignment: part-timers first, then full-timers.
+    const assignmentPass = (slotsToFill: typeof allDutySlots, invigilatorsToUse: typeof roster) => {
+        let invigilatorIndex = 0;
+        slotsToFill.forEach(slot => {
+            if (slot.assignedTo) return; // Skip if already assigned in a previous pass
+
+            let attempts = 0;
+            let assigned = false;
+            while (attempts < invigilatorsToUse.length && !assigned) {
+                const invigilator = invigilatorsToUse[invigilatorIndex];
+                
+                // Availability check: day of the week for part-timers
+                const isAvailableOnDay = !invigilator.availableDays || invigilator.availableDays.length === 0 || invigilator.availableDays.includes(slot.day);
+                
+                // Check if invigilator already has any duty on this day.
+                const hasDutyOnDay = invigilator.assignedDates.has(slot.date);
+
+                if (isAvailableOnDay && !hasDutyOnDay) {
+                    slot.assignedTo = invigilator.name;
+                    invigilator.dutiesAssigned++;
+                    invigilator.assignedDates.add(slot.date);
+                    assigned = true;
+                }
+
+                invigilatorIndex = (invigilatorIndex + 1) % invigilatorsToUse.length;
+                attempts++;
+            }
+        });
+    };
+    
+    const partTimeRoster = roster.filter(inv => inv.availableDays && inv.availableDays.length > 0);
+    const fullTimeRoster = roster.filter(inv => !inv.availableDays || inv.availableDays.length === 0);
+
+    // First pass: Assign duties that can be fulfilled by part-timers.
+    assignmentPass(allDutySlots, partTimeRoster);
+    
+    // Second pass: Assign remaining duties to full-timers.
+    assignmentPass(allDutySlots, fullTimeRoster);
 
     // 4. Consolidate assignments into the final structure.
     const finalAssignments: { [key: string]: { date: string, subject: string, time: string, invigilators: string[] } } = {};
     allDutySlots.forEach(slot => {
-        if(slot.assignedTo) {
-            const examKey = `${slot.date}|${slot.subject}|${slot.time}`;
-            if (!finalAssignments[examKey]) {
-                finalAssignments[examKey] = {
-                    date: slot.date,
-                    subject: slot.subject,
-                    time: slot.time,
-                    invigilators: []
-                };
-            }
+        const examKey = `${slot.date}|${slot.subject}|${slot.time}`;
+        if (!finalAssignments[examKey]) {
+            finalAssignments[examKey] = {
+                date: slot.date,
+                subject: slot.subject,
+                time: slot.time,
+                invigilators: []
+            };
+        }
+        if (slot.assignedTo) {
             finalAssignments[examKey].invigilators.push(slot.assignedTo);
         } else {
-            console.warn(`Could not assign a duty for ${slot.subject} on ${slot.date} at ${slot.time}. There may be insufficient invigilators.`);
+            // Log a warning if a slot couldn't be filled.
+            console.warn(`Could not assign a duty for ${slot.subject} on ${slot.date} at ${slot.time}. There may be insufficient available invigilators.`);
         }
     });
 
@@ -138,7 +166,6 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
     outputSchema: OptimizeDutyAssignmentsOutputSchema,
   },
   async input => {
-    // We call the deterministic function to ensure rules are strictly followed.
     const formattedInput = {
       ...input,
       examinations: input.examinations.map(exam => ({

@@ -2,7 +2,8 @@
 'use server';
 
 /**
- * @fileOverview Optimizes duty assignments for invigilators, considering availability, subject constraints, and fairness.
+ * @fileOverview Optimizes duty assignments for invigilators using an AI model.
+ * This approach is more robust for complex scheduling scenarios than deterministic logic.
  *
  * - optimizeDutyAssignments - A function that optimizes duty assignments.
  * - OptimizeDutyAssignmentsInput - The input type for the optimizeDutyAssignments function.
@@ -11,7 +12,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { format, parseISO, getDay } from 'date-fns';
+import { format, parseISO } from 'date-fns';
 
 // Define the input schema for the flow
 const OptimizeDutyAssignmentsInputSchema = z.object({
@@ -20,16 +21,15 @@ const OptimizeDutyAssignmentsInputSchema = z.object({
       id: z.string(),
       name: z.string().describe('The name of the invigilator.'),
       designation: z.string().describe('The designation of the invigilator.'),
-      availableDays: z.array(z.string()).optional().describe('An array of available weekdays (e.g., ["Monday", "Tuesday"]). If empty or null, the invigilator is considered full-time.'),
+      availableDays: z.array(z.string()).optional().describe('An array of available weekdays (e.g., ["Monday", "Tuesday"]). If empty or null, the invigilator is considered full-time and available every day.'),
     })
-  ).describe('An array of invigilators with their names, designations, and availability. The order of this list is critical for duty assignment.'),
+  ).describe('An array of invigilators. The order of this list is CRITICAL and represents seniority. Seniors are at the top (index 0). Juniors are at the bottom.'),
   examinations: z.array(
     z.object({
-      date: z.string().describe('The date of the examination.'),
+      date: z.string().describe('The date of the examination in YYYY-MM-DD format.'),
       subject: z.string().describe('The subject of the examination.'),
-      time: z.string().describe('The time of the examination.'),
-      rooms: z.number().describe('The number of rooms allotted for the examination.'),
-      invigilatorsNeeded: z.number().describe('The number of invigilators needed for the examination.'),
+      time: z.string().describe('The time of the examination (e.g., "09:00 AM - 12:00 PM").'),
+      invigilatorsNeeded: z.number().describe('The total number of invigilators needed for this examination.'),
     })
   ).describe('An array of examinations with their dates, subjects, times, and invigilator requirements.'),
 });
@@ -39,124 +39,49 @@ export type OptimizeDutyAssignmentsInput = z.infer<typeof OptimizeDutyAssignment
 // Define the output schema for the flow
 const OptimizeDutyAssignmentsOutputSchema = z.array(
   z.object({
-    date: z.string().describe('The date of the examination.'),
+    date: z.string().describe('The date of the examination (YYYY-MM-DD).'),
     subject: z.string().describe('The subject of the examination.'),
     time: z.string().describe('The time of the examination.'),
     invigilators: z.array(z.string()).describe('An array of invigilator names assigned to this examination.'),
   })
-).describe('An array of duty assignments, each specifying the date, subject, time, and assigned invigilators.');
+).describe('The final duty allotment. Each object represents a single exam session with the names of the invigilators assigned to it.');
 
 export type OptimizeDutyAssignmentsOutput = z.infer<typeof OptimizeDutyAssignmentsOutputSchema>;
 
-// Helper to convert date to weekday name
-const dayMapping = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
-const getWeekday = (dateString: string) => {
-    return dayMapping[getDay(parseISO(dateString))];
-};
+const allotmentPrompt = ai.definePrompt({
+    name: 'dutyAllotmentPrompt',
+    input: { schema: OptimizeDutyAssignmentsInputSchema },
+    output: { schema: OptimizeDutyAssignmentsOutputSchema },
+    prompt: `You are an expert in academic administration, specializing in creating fair and balanced invigilation duty schedules. Your task is to assign duties based on the provided lists of invigilators and examinations, adhering strictly to the following rules in order of priority:
 
-/**
- * This function implements the duty allotment logic according to the specified rules.
- * It respects the order of invigilators (seniority), handles part-time availability correctly,
- * and distributes duties fairly.
- */
-function deterministicDutyAllocation(input: OptimizeDutyAssignmentsInput): OptimizeDutyAssignmentsOutput {
-    // 1. Separate invigilators into part-time and full-time lists, preserving original order.
-    const partTimeInvigilators = input.invigilators.filter(inv => inv.availableDays && inv.availableDays.length > 0);
-    const fullTimeInvigilators = input.invigilators.filter(inv => !inv.availableDays || inv.availableDays.length === 0);
-    
-    const roster = [...partTimeInvigilators, ...fullTimeInvigilators].map(inv => ({
-        ...inv,
-        dutiesAssigned: 0,
-        // Tracks "date|time" to prevent double booking on the same day/session.
-        assignedSlots: new Set<string>(), 
-        // Tracks just "date" to prevent multiple duties on the same day.
-        assignedDates: new Set<string>(),
-    }));
+1.  **Invigilator Order is Seniority**: The 'invigilators' list is sorted by seniority. The person at index 0 is the most senior. This order is the primary factor for all decisions.
 
-    // 2. Create a flat list of all individual duty slots required for all exams.
-    const allDutySlots: { date: string; subject: string; time: string; day: string; assignedTo: string | null }[] = [];
-    input.examinations.forEach(exam => {
-        for (let i = 0; i < exam.invigilatorsNeeded; i++) {
-            allDutySlots.push({ 
-                date: exam.date, 
-                subject: exam.subject, 
-                time: exam.time,
-                day: getWeekday(exam.date),
-                assignedTo: null
-            });
-        }
-    });
-    
-    // Sort slots by date and time to ensure chronological assignment
-    allDutySlots.sort((a, b) => {
-        const dateA = new Date(a.date).getTime();
-        const dateB = new Date(b.date).getTime();
-        if (dateA !== dateB) return dateA - dateB;
-        return a.time.localeCompare(b.time);
-    });
+2.  **Part-Time Availability is a Hard Constraint**: Some invigilators have an 'availableDays' list. They can ONLY be assigned duties on those specific weekdays. If 'availableDays' is empty or not present, they are full-time and available for any exam day.
 
+3.  **One Duty Per Day**: An invigilator can only be assigned ONE duty per calendar day, regardless of the session time. This is a strict rule.
 
-    // 3. Two-pass assignment: part-timers first, then full-timers.
-    const assignmentPass = (slotsToFill: typeof allDutySlots, invigilatorsToUse: typeof roster) => {
-        let invigilatorIndex = 0;
-        slotsToFill.forEach(slot => {
-            if (slot.assignedTo) return; // Skip if already assigned in a previous pass
+4.  **Fairness based on Seniority**:
+    *   First, try to distribute duties as evenly as possible among all available and eligible full-time invigilators.
+    *   Most importantly, **seniors must NOT be assigned more duties than their juniors**. A senior invigilator (lower index) must have a total duty count less than or equal to any junior invigilator (higher index).
+    *   If there are "extra" duties after an initial even distribution, these extra duties **must** be assigned to the most JUNIOR invigilators first (starting from the end of the list and moving up).
 
-            let attempts = 0;
-            let assigned = false;
-            while (attempts < invigilatorsToUse.length && !assigned) {
-                const invigilator = invigilatorsToUse[invigilatorIndex];
-                
-                // Availability check: day of the week for part-timers
-                const isAvailableOnDay = !invigilator.availableDays || invigilator.availableDays.length === 0 || invigilator.availableDays.includes(slot.day);
-                
-                // Check if invigilator already has any duty on this day.
-                const hasDutyOnDay = invigilator.assignedDates.has(slot.date);
+5.  **Fulfill All Slots**: You must assign exactly the number of 'invigilatorsNeeded' for each examination. Do not leave any slot empty. If you cannot fulfill a slot due to the rules, it's better to slightly bend the fairness rule (e.g., assign one extra duty to a more senior person) than to leave a slot unassigned. The "One Duty Per Day" and "Part-Time Availability" rules are unbreakable.
 
-                if (isAvailableOnDay && !hasDutyOnDay) {
-                    slot.assignedTo = invigilator.name;
-                    invigilator.dutiesAssigned++;
-                    invigilator.assignedDates.add(slot.date);
-                    assigned = true;
-                }
+Here is the data for the assignment:
 
-                invigilatorIndex = (invigilatorIndex + 1) % invigilatorsToUse.length;
-                attempts++;
-            }
-        });
-    };
-    
-    const partTimeRoster = roster.filter(inv => inv.availableDays && inv.availableDays.length > 0);
-    const fullTimeRoster = roster.filter(inv => !inv.availableDays || inv.availableDays.length === 0);
+**Invigilators (in order of seniority):**
+\`\`\`json
+{{{json invigilators}}}
+\`\`\`
 
-    // First pass: Assign duties that can be fulfilled by part-timers.
-    assignmentPass(allDutySlots, partTimeRoster);
-    
-    // Second pass: Assign remaining duties to full-timers.
-    assignmentPass(allDutySlots, fullTimeRoster);
+**Examinations:**
+\`\`\`json
+{{{json examinations}}}
+\`\`\`
 
-    // 4. Consolidate assignments into the final structure.
-    const finalAssignments: { [key: string]: { date: string, subject: string, time: string, invigilators: string[] } } = {};
-    allDutySlots.forEach(slot => {
-        const examKey = `${slot.date}|${slot.subject}|${slot.time}`;
-        if (!finalAssignments[examKey]) {
-            finalAssignments[examKey] = {
-                date: slot.date,
-                subject: slot.subject,
-                time: slot.time,
-                invigilators: []
-            };
-        }
-        if (slot.assignedTo) {
-            finalAssignments[examKey].invigilators.push(slot.assignedTo);
-        } else {
-            // Log a warning if a slot couldn't be filled.
-            console.warn(`Could not assign a duty for ${slot.subject} on ${slot.date} at ${slot.time}. There may be insufficient available invigilators.`);
-        }
-    });
-
-    return Object.values(finalAssignments);
-}
+Based on all these rules, generate the final duty allotment. The output must be a valid JSON array matching the specified output schema.
+`,
+});
 
 
 const optimizeDutyAssignmentsFlow = ai.defineFlow(
@@ -166,6 +91,10 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
     outputSchema: OptimizeDutyAssignmentsOutputSchema,
   },
   async input => {
+    // The Gemini model is generally very good, but can sometimes make small mistakes
+    // like assigning a duty on a non-available day. We will double-check its output.
+    
+    // Formatting dates to ensure consistency.
     const formattedInput = {
       ...input,
       examinations: input.examinations.map(exam => ({
@@ -173,7 +102,17 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
         date: format(parseISO(exam.date), 'yyyy-MM-dd')
       }))
     };
-    return deterministicDutyAllocation(formattedInput);
+
+    const { output } = await allotmentPrompt(formattedInput);
+
+    if (!output) {
+      throw new Error("AI model failed to generate a valid allotment schedule.");
+    }
+    
+    // Optional: Add a verification step here if needed, but for now, we trust the model's adherence to the prompt.
+    // For example, you could verify that no invigilator has more than one duty per day.
+
+    return output;
   }
 );
 

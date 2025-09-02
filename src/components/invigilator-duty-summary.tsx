@@ -94,10 +94,19 @@ export function InvigilatorDutySummary({ invigilators, assignments, collegeName,
       });
 
       if (result.success) {
+        const previewUrl = result.message.split(' ').pop();
         toast({
-          title: 'Email Sent!',
-          description: `An email has been sent to ${selectedInvigilator.email}. Preview: ${result.message.split(' ').pop()}`,
-          className: 'bg-accent text-accent-foreground',
+            title: 'Email Sent!',
+            description: (
+            <span>
+                An email has been sent to {selectedInvigilator.email}. Preview:{' '}
+                <a href={previewUrl} target="_blank" rel="noopener noreferrer" className="underline font-bold">
+                {previewUrl}
+                </a>
+            </span>
+            ),
+            className: 'bg-accent text-accent-foreground',
+            duration: 10000,
         });
       } else {
         throw new Error(result.message);

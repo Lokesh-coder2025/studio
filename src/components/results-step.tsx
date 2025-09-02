@@ -407,14 +407,16 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       if (result.failedEmails > 0) {
         toast({
           title: "Partial Success",
-          description: `Sent ${result.successfulEmails} emails. ${result.failedEmails} failed.`,
-          variant: "destructive"
+          description: `Sent ${result.successfulEmails} emails. ${result.failedEmails} failed. Check server logs for details.`,
+          variant: "destructive",
+          duration: 10000,
         });
       } else {
         toast({
           title: "All Emails Sent!",
           description: `Successfully sent duty summaries to ${result.successfulEmails} invigilators.`,
-          className: "bg-accent text-accent-foreground"
+          className: "bg-accent text-accent-foreground",
+          duration: 10000,
         });
       }
 

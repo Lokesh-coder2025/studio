@@ -62,13 +62,11 @@ const isAvailable = (invigilator: Invigilator, assignment: Assignment, allAssign
         }
     }
     // Check if invigilator already has any other duty on that day.
-    // This is a key rule for seniors but we apply it here for checking availability generally.
-    const hasAnotherDutyOnDay = allAssignments.some(a => 
+    const hasDutyOnDay = allAssignments.some(a => 
         a.date === assignment.date &&
-        a.time !== assignment.time &&
         a.invigilators.includes(invigilator.name)
     );
-    if(hasAnotherDutyOnDay) return false;
+    if(hasDutyOnDay) return false;
 
     return true;
 };
@@ -131,7 +129,7 @@ const rebalanceDutiesFlow = ai.defineFlow(
             }
           }
           // If a swap was made, re-check counts for the current senior against subsequent juniors
-          if (swapsMade > 0 && seniorDutiesCount > countDuties(rebalancedAssignments, junior.name)) {
+          if (swapsMade > 0 && countDuties(rebalancedAssignments, senior.name) > countDuties(rebalancedAssignments, junior.name)) {
              continue;
           }
         }

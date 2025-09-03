@@ -60,12 +60,12 @@ const allotmentPrompt = ai.definePrompt({
 
 3.  **One Duty Per Day**: An invigilator can only be assigned ONE duty per calendar day, regardless of the session time. This is a strict rule.
 
-4.  **Fairness based on Seniority**:
-    *   First, try to distribute duties as evenly as possible among all available and eligible full-time invigilators.
-    *   Most importantly, **seniors must NOT be assigned more duties than their juniors**. A senior invigilator (lower index) must have a total duty count less than or equal to any junior invigilator (higher index).
-    *   If there are "extra" duties after an initial even distribution, these extra duties **must** be assigned to the most JUNIOR invigilators first (starting from the end of the list and moving up).
+4.  **Fairness based on Seniority and Equal Distribution**:
+    *   First, your primary goal is to distribute duties as evenly as possible among all available and eligible invigilators.
+    *   **Crucially, if there are "extra" duties after an initial even distribution, these extra duties MUST be assigned to the most JUNIOR invigilators first.** Start assigning extra duties from the very last person on the list and move upwards.
+    *   As a result of the above rule, a senior invigilator (lower index) must NEVER have a total duty count that is greater than any junior invigilator (higher index). A senior's duty count must be less than or equal to a junior's count.
 
-5.  **Fulfill All Slots**: You must assign exactly the number of 'invigilatorsNeeded' for each examination. Do not leave any slot empty. If you cannot fulfill a slot due to the rules, it's better to slightly bend the fairness rule (e.g., assign one extra duty to a more senior person) than to leave a slot unassigned. The "One Duty Per Day" and "Part-Time Availability" rules are unbreakable.
+5.  **Fulfill All Slots**: You must assign exactly the number of 'invigilatorsNeeded' for each examination. Do not leave any slot empty. If you cannot fulfill a slot due to the rules, it's better to slightly bend the fairness rule (e.g., assign one extra duty to a more senior person if no juniors are available) than to leave a slot unassigned. The "One Duty Per Day" and "Part-Time Availability" rules are unbreakable.
 
 Here is the data for the assignment:
 
@@ -120,3 +120,4 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
 export async function optimizeDutyAssignments(input: OptimizeDutyAssignmentsInput): Promise<OptimizeDutyAssignmentsOutput> {
   return optimizeDutyAssignmentsFlow(input);
 }
+

@@ -89,6 +89,7 @@ const rebalanceDutiesFlow = ai.defineFlow(
 
     do {
       swapsMade = 0;
+      passCount++;
       // Iterate through seniors (i)
       for (let i = 0; i < fullTimeInvigilators.length; i++) {
         const senior = fullTimeInvigilators[i];
@@ -129,12 +130,10 @@ const rebalanceDutiesFlow = ai.defineFlow(
             }
           }
           // If a swap was made, re-check counts for the current senior against subsequent juniors
-          if (swapsMade > 0 && countDuties(rebalancedAssignments, senior.name) > countDuties(rebalancedAssignments, junior.name)) {
-             continue;
-          }
+           if (swapsMade > 0) break; // Break from junior loop
         }
+         if (swapsMade > 0) break; // Break from senior loop to restart the whole pass
       }
-      passCount++;
     } while (swapsMade > 0 && passCount < maxPasses);
 
     return rebalancedAssignments;

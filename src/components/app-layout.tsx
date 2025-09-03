@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck, LogOut, UserPlus, Settings, Palette, Sun, Moon } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck, LogOut, UserPlus, Settings, Palette, Sun, Moon, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemePicker } from '@/components/theme-picker';
@@ -62,6 +62,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             <span>Saved Allotments</span>
                         </Link>
                         </Button>
+                    </NavigationMenuItem>
+                    <NavigationMenuItem>
+                      <Button asChild variant="default" size="sm" className={cn(pathname === '/day-wise-schedule' ? 'shadow-lg' : '')}>
+                        <Link href="/day-wise-schedule">
+                            <CalendarDays />
+                            <span>Day-wise Schedule</span>
+                        </Link>
+                      </Button>
                     </NavigationMenuItem>
                     <NavigationMenuItem>
                         <Button asChild variant="default" size="sm" className={cn(pathname === '/history' ? 'shadow-lg' : '')}>

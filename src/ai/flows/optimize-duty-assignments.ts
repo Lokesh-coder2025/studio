@@ -12,7 +12,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
-import { format, parseISO } from 'date-fns';
+import { format, parseISO, subDays } from 'date-fns';
 
 // Define the input schema for the flow
 const OptimizeDutyAssignmentsInputSchema = z.object({
@@ -62,47 +62,45 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
     const partTimeInvigilators = invigilators.filter(inv => inv.availableDays && inv.availableDays.length > 0);
     
     const Nf = fullTimeInvigilators.length;
-    const Np = partTimeInvigilators.length;
-
-    // === Step 2: Calculate Base Shares (considering PTs get 50%) ===
-    // We model this as T = (Nf * X) + (Np * 0.5 * X), where X is the full-time share.
-    // T = X * (Nf + 0.5 * Np) => X = T / (Nf + 0.5 * Np)
-    const effectiveTotalInvigilators = Nf + (0.5 * Np);
-    const base_share_float = effectiveTotalInvigilators > 0 ? T / effectiveTotalInvigilators : 0;
-    const ft_base_share = Math.floor(base_share_float);
-    const pt_base_share = Math.floor(0.5 * ft_base_share);
+    
+    const base_share = Nf > 0 ? Math.floor(T / Nf) : 0;
     
     const invigilatorDutyCounts = new Map<string, number>();
     let total_allocated = 0;
+    let ft_allocated = 0;
 
-    invigilators.forEach(inv => {
-      const isPartTime = inv.availableDays && inv.availableDays.length > 0;
-      let allocatedCount = isPartTime ? pt_base_share : ft_base_share;
-
-      if(isPartTime){
-        const presenceDaysCount = inv.availableDays?.length || 0;
-        allocatedCount = Math.min(allocatedCount, presenceDaysCount);
-      }
-      
-      invigilatorDutyCounts.set(inv.name, allocatedCount);
-      total_allocated += allocatedCount;
+    fullTimeInvigilators.forEach(inv => {
+      invigilatorDutyCounts.set(inv.name, base_share);
+      ft_allocated += base_share;
     });
+
+    partTimeInvigilators.forEach(inv => {
+        const pt_base_share = Math.floor(0.5 * base_share);
+        const presenceDaysCount = inv.availableDays?.length || 0;
+        const dutiesForPartTimer = Math.min(pt_base_share, presenceDaysCount);
+        invigilatorDutyCounts.set(inv.name, dutiesForPartTimer);
+    });
+
+    total_allocated = Array.from(invigilatorDutyCounts.values()).reduce((sum, count) => sum + count, 0);
 
     // === Step 3: Distribute the Excess (Remainder) to Juniors ===
     let R = T - total_allocated;
     if (R > 0) {
-      let ftIndex = fullTimeInvigilators.length - 1;
-      while (R > 0 && ftIndex >= 0) {
-        const inv = fullTimeInvigilators[ftIndex];
-        const currentData = invigilatorDutyCounts.get(inv.name);
-        if (currentData !== undefined) {
-            invigilatorDutyCounts.set(inv.name, currentData + 1);
+      const juniorFtInvigilators = [...fullTimeInvigilators].reverse();
+      let cycles = 0;
+      const maxCycles = T; // safety break
+
+      while(R > 0 && cycles < maxCycles) {
+        for(const inv of juniorFtInvigilators) {
+          if (R > 0) {
+            const currentCount = invigilatorDutyCounts.get(inv.name) || 0;
+            invigilatorDutyCounts.set(inv.name, currentCount + 1);
             R--;
+          } else {
+            break;
+          }
         }
-        ftIndex--;
-        if(ftIndex < 0 && R > 0) {
-            ftIndex = fullTimeInvigilators.length - 1;
-        }
+        cycles++;
       }
     }
     
@@ -114,14 +112,16 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
       const needed = exam.invigilatorsNeeded;
       const examDate = exam.date;
       const dayOfWeek = format(parseISO(examDate), 'EEEE');
+      const previousDay = format(subDays(parseISO(examDate), 1), 'yyyy-MM-dd');
       let assignedCount = 0;
 
-      // Create a list of eligible candidates for this exam, sorted by seniority
+      // Create a list of eligible candidates for this exam, sorted by multiple criteria
       const candidates = invigilators
-        .map(inv => {
+        .map((inv, index) => {
             const dutiesAssignedSoFar = assignments.reduce((count, asgn) => 
                 asgn.invigilators.includes(inv.name) ? count + 1 : count, 0);
-            return { inv, dutiesAssignedSoFar };
+            const workedYesterday = invigilatorDayTracker.get(inv.name)?.has(previousDay) || false;
+            return { inv, dutiesAssignedSoFar, workedYesterday, seniority: index };
         })
         .filter(({ inv, dutiesAssignedSoFar }) => {
             const invTotalDuties = invigilatorDutyCounts.get(inv.name) || 0;
@@ -130,6 +130,14 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
             const hasAvailability = !isPartTime || inv.availableDays?.includes(dayOfWeek);
 
             return dutiesAssignedSoFar < invTotalDuties && !hasDutyOnDay && hasAvailability;
+        })
+        .sort((a, b) => {
+            // Primary sort: Prioritize those who did NOT work yesterday
+            if (a.workedYesterday !== b.workedYesterday) {
+                return a.workedYesterday ? 1 : -1;
+            }
+            // Secondary sort: Seniority (lower index is more senior)
+            return a.seniority - b.seniority;
         });
 
       // Assign duties from the candidate list

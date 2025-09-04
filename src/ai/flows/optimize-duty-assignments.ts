@@ -65,13 +65,15 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
 
     invigilators.forEach(inv => {
       const isPartTime = inv.availableDays && inv.availableDays.length > 0;
-      let allocatedCount = base_share;
+      let allocatedCount;
       
       if (isPartTime) {
         const pt_base = Math.floor(0.5 * base_share);
         const presenceDaysCount = inv.availableDays?.length || 0;
         // Cap duty at the number of available days if it's less than their 50% share
         allocatedCount = Math.min(pt_base, presenceDaysCount);
+      } else {
+        allocatedCount = base_share;
       }
       invigilatorDutyCounts.set(inv.name, allocatedCount);
       total_allocated += allocatedCount;
@@ -80,35 +82,25 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
     // === Step 4: Distribute the Excess (Remainder) ===
     let R = T - total_allocated;
     if (R > 0) {
-      // Distribute remainder starting from the most junior invigilators
-      for (let i = invigilators.length - 1; i >= 0; i--) {
-        if (R <= 0) break;
-        const inv = invigilators[i];
-        const isPartTime = inv.availableDays && inv.availableDays.length > 0;
+      // Distribute remainder starting from the most junior invigilators (who are full-time)
+      const fullTimeInvigilators = invigilators.filter(inv => !inv.availableDays || inv.availableDays.length === 0);
+      let ftIndex = fullTimeInvigilators.length - 1;
+      
+      while (R > 0 && ftIndex >= 0) {
+        const inv = fullTimeInvigilators[ftIndex];
         const currentData = invigilatorDutyCounts.get(inv.name);
         
-        // Generally, give excess to full-timers. A part-timer could get one if logic allows.
-        // For simplicity and fairness, we prioritize FT for excess duties.
-        if (currentData !== undefined && !isPartTime) {
+        if (currentData !== undefined) {
             invigilatorDutyCounts.set(inv.name, currentData + 1);
             R--;
         }
+        
+        ftIndex--;
+        // Cycle through again if necessary
+        if(ftIndex < 0) {
+            ftIndex = fullTimeInvigilators.length - 1;
+        }
       }
-      
-      // If remainder still exists (e.g. all remaining are PT), cycle through again if needed.
-      // This is a failsafe for edge cases.
-      if (R > 0) {
-          for (let i = invigilators.length - 1; i >= 0; i--) {
-              if (R <= 0) break;
-              const inv = invigilators[i];
-              const currentData = invigilatorDutyCounts.get(inv.name);
-              if(currentData !== undefined) {
-                  invigilatorDutyCounts.set(inv.name, currentData + 1);
-                  R--;
-              }
-          }
-      }
-
     }
     
     // === Step 5: Day-by-day Assignment ===
@@ -118,36 +110,38 @@ const optimizeDutyAssignmentsFlow = ai.defineFlow(
     for (const exam of assignments.sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime())) {
       const needed = exam.invigilatorsNeeded;
       const examDate = exam.date;
-      // The day name needs to match the format stored in `availableDays` (e.g., 'Monday')
       const dayOfWeek = format(parseISO(examDate), 'EEEE');
       let assignedCount = 0;
 
-      // Assign duties for this exam, prioritizing seniors
-      for (let i = 0; i < invigilators.length && assignedCount < needed; i++) {
-        const inv = invigilators[i];
-        const invTotalDuties = invigilatorDutyCounts.get(inv.name) || 0;
+      // Create a list of eligible candidates for this exam, sorted by seniority
+      const candidates = invigilators
+        .map(inv => {
+            const dutiesAssignedSoFar = assignments.reduce((count, asgn) => 
+                asgn.invigilators.includes(inv.name) ? count + 1 : count, 0);
+            return { inv, dutiesAssignedSoFar };
+        })
+        .filter(({ inv, dutiesAssignedSoFar }) => {
+            const invTotalDuties = invigilatorDutyCounts.get(inv.name) || 0;
+            const hasDutyOnDay = invigilatorDayTracker.get(inv.name)?.has(examDate);
+            const isPartTime = inv.availableDays && inv.availableDays.length > 0;
+            const hasAvailability = !isPartTime || inv.availableDays?.includes(dayOfWeek);
+
+            return dutiesAssignedSoFar < invTotalDuties && !hasDutyOnDay && hasAvailability;
+        });
+
+      // Assign duties from the candidate list
+      for (let i = 0; i < candidates.length && assignedCount < needed; i++) {
+        const { inv } = candidates[i];
+        exam.invigilators.push(inv.name);
+        assignedCount++;
         
-        // Calculate duties already assigned to this invigilator
-        const dutiesAssignedSoFar = assignments.reduce((count, asgn) => 
-            asgn.invigilators.includes(inv.name) ? count + 1 : count, 0);
-
-        const hasDutyOnDay = invigilatorDayTracker.get(inv.name)?.has(examDate);
-        const isPartTime = inv.availableDays && inv.availableDays.length > 0;
-        const hasAvailability = !isPartTime || inv.availableDays?.includes(dayOfWeek);
-
-        if (dutiesAssignedSoFar < invTotalDuties && !hasDutyOnDay && hasAvailability) {
-          exam.invigilators.push(inv.name);
-          assignedCount++;
-          
-          if (!invigilatorDayTracker.has(inv.name)) {
-              invigilatorDayTracker.set(inv.name, new Set());
-          }
-          invigilatorDayTracker.get(inv.name)!.add(examDate);
+        if (!invigilatorDayTracker.has(inv.name)) {
+            invigilatorDayTracker.set(inv.name, new Set());
         }
+        invigilatorDayTracker.get(inv.name)!.add(examDate);
       }
       
-      // If slots are still empty, it's a critical issue. Fill them with any available invigilator
-      // who doesn't have a duty on that day, even if it exceeds their quota.
+      // If slots are still empty (critical issue), fill them with any available invigilator
       // This prioritizes filling slots over perfect quota adherence.
       if (assignedCount < needed) {
          for (let i = 0; i < invigilators.length && assignedCount < needed; i++) {

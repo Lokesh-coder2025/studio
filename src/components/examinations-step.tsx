@@ -25,7 +25,7 @@ import { useAuth } from '@/hooks/use-auth';
 import { useRouter } from 'next/navigation';
 
 const sessionSchema = z.object({
-    subject: z.string(),
+    subject: z.string().min(1, "Subject is required.").refine(val => val !== 'none', { message: "Subject is required." }),
     startHour: z.string(),
     startMinute: z.string(),
     startPeriod: z.enum(['AM', 'PM']),
@@ -34,21 +34,11 @@ const sessionSchema = z.object({
     endPeriod: z.enum(['AM', 'PM']),
     roomsAllotted: z.string(),
     relieversRequired: z.string(),
-  }).partial({ subject: true, roomsAllotted: true, relieversRequired: true });
+  });
 
 const formSchema = z.object({
   date: z.date({ required_error: 'Date is required.' }),
-  session1: sessionSchema,
-  session2: sessionSchema,
-}).refine(data => {
-    // This allows the form to be valid if at least one subject is selected,
-    // and that subject is not the placeholder 'none' value.
-    const s1Subject = data.session1.subject && data.session1.subject !== 'none';
-    const s2Subject = data.session2.subject && data.session2.subject !== 'none';
-    return s1Subject || s2Subject;
-}, {
-  message: "At least one session's subject must be filled out.",
-  path: ["session1.subject"],
+  session: sessionSchema,
 });
 
 
@@ -81,7 +71,7 @@ type ExaminationsStepProps = {
   setIsGenerating: Dispatch<SetStateAction<boolean>>;
 };
 
-const renderTimeFields = (form: any, sessionName: 'session1' | 'session2', label: string) => (
+const renderTimeFields = (form: any, sessionName: 'session', label: string) => (
     <FormItem>
         <FormLabel>{label}</FormLabel>
         <div className="flex gap-2">
@@ -150,23 +140,12 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
     mode: 'onTouched',
     defaultValues: {
       date: undefined,
-      session1: {
+      session: {
         subject: 'none',
         startHour: '09',
         startMinute: '00',
         startPeriod: 'AM',
         endHour: '12',
-        endMinute: '00',
-        endPeriod: 'PM',
-        roomsAllotted: '1',
-        relieversRequired: '0',
-      },
-      session2: {
-        subject: 'none',
-        startHour: '02',
-        startMinute: '00',
-        startPeriod: 'PM',
-        endHour: '05',
         endMinute: '00',
         endPeriod: 'PM',
         roomsAllotted: '1',
@@ -197,30 +176,23 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
       return null;
     }
 
-    const exam1 = processSession(values.session1);
-    if (exam1) newExams.push(exam1);
-
-    const exam2 = processSession(values.session2);
-    if (exam2) newExams.push(exam2);
+    const exam = processSession(values.session);
+    if (exam) newExams.push(exam);
 
     if (newExams.length > 0) {
         setExaminations((prev) => [...prev, ...newExams].sort((a,b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
         form.reset({
             date: undefined,
-            session1: {
-                ...(form.getValues('session1')),
+            session: {
+                ...(form.getValues('session')),
                 subject: 'none',
             },
-            session2: {
-                ...(form.getValues('session2')),
-                subject: 'none',
-            }
         });
         form.clearErrors();
     } else {
         toast({
             title: "No subject selected",
-            description: "Please select a subject for at least one session.",
+            description: "Please select a subject for the session.",
             variant: "destructive"
         })
     }
@@ -492,7 +464,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
               name="date"
               render={({ field }) => (
                 <FormItem className='max-w-xs'>
-                  <FormLabel>Date for Sessions</FormLabel>
+                  <FormLabel>Date for Session</FormLabel>
                   <Popover open={isCalendarOpen} onOpenChange={setIsCalendarOpen}>
                     <PopoverTrigger asChild>
                       <FormControl>
@@ -539,12 +511,11 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              {/* Session 1 */}
               <div className='space-y-4 p-4 border rounded-md'>
-                  <h3 className="font-semibold text-lg text-primary">Session 1 (e.g. Morning)</h3>
+                  <h3 className="font-semibold text-lg text-primary">Session Details</h3>
                    <FormField
                       control={form.control}
-                      name="session1.subject"
+                      name="session.subject"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Subject</FormLabel>
@@ -567,10 +538,10 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                         </FormItem>
                       )}
                     />
-                    {renderTimeFields(form, 'session1', 'Time')}
+                    {renderTimeFields(form, 'session', 'Time')}
                     <FormField
                       control={form.control}
-                      name="session1.roomsAllotted"
+                      name="session.roomsAllotted"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>No of Rooms</FormLabel>
@@ -594,7 +565,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                     />
                      <FormField
                       control={form.control}
-                      name="session1.relieversRequired"
+                      name="session.relieversRequired"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>No of Relievers</FormLabel>
@@ -617,90 +588,11 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                       )}
                     />
               </div>
-
-              {/* Session 2 */}
-              <div className='space-y-4 p-4 border rounded-md'>
-                  <h3 className="font-semibold text-lg text-primary">Session 2 (e.g. Afternoon)</h3>
-                  <FormField
-                      control={form.control}
-                      name="session2.subject"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Subject</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select a subject" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="none">None</SelectItem>
-                              {subjects.map((subject) => (
-                                <SelectItem key={`s2-${subject}`} value={subject}>
-                                  {subject}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    {renderTimeFields(form, 'session2', 'Time')}
-                     <FormField
-                      control={form.control}
-                      name="session2.roomsAllotted"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>No of Rooms</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select rooms" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {roomNumbers.map((num) => (
-                                <SelectItem key={`s2-room-${num}`} value={num}>
-                                  {num}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="session2.relieversRequired"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>No of Relievers</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select relievers" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              {relieverNumbers.map((num) => (
-                                <SelectItem key={`s2-reliever-${num}`} value={num}>
-                                  {num}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-              </div>
           </div>
           
           <div className="flex justify-end flex-wrap items-center gap-4">
             <Button type="submit" size="sm">
-               +Add Examination(s)
+               +Add Examination
             </Button>
           </div>
         </form>

@@ -5,11 +5,8 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background: #2A7B9B;
-  background: -webkit-linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 60%, rgba(237, 221, 83, 1) 100%);
-  background: -moz-linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 60%, rgba(237, 221, 83, 1) 100%);
-  background: linear-gradient(90deg, rgba(42, 123, 155, 1) 0%, rgba(87, 199, 133, 1) 60%, rgba(237, 221, 83, 1) 100%);
-  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr="#2A7B9B", endColorstr="#EDDD53", GradientType=1);
+  background: #EEAECA;
+  background: radial-gradient(circle, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

@@ -510,9 +510,9 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
               </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-              <div className='space-y-4 p-4 border rounded-md'>
-                  <h3 className="font-semibold text-lg text-primary">Session Details</h3>
+            <div className='space-y-4 p-4 border rounded-md'>
+                <h3 className="font-semibold text-lg text-primary">Session Details</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                    <FormField
                       control={form.control}
                       name="session.subject"
@@ -587,8 +587,8 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
                         </FormItem>
                       )}
                     />
-              </div>
-          </div>
+                </div>
+            </div>
           
           <div className="flex justify-end flex-wrap items-center gap-4">
             <Button type="submit" size="sm">

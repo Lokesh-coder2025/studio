@@ -277,8 +277,8 @@ export default function DayWiseSchedulePage() {
                   <thead>
                     <tr className="border-b">
                       <th className="p-2 text-center w-[10%]">Sl No</th>
-                      <th className="p-2 text-center w-[35%]">Name of the Invigilators</th>
-                      <th className="p-2 text-center w-[30%]">Designation</th>
+                      <th className="p-2 text-left w-[35%]">Name of the Invigilators</th>
+                      <th className="p-2 text-left w-[30%]">Designation</th>
                       <th className="p-2 text-center w-[25%]">Examination Timings</th>
                     </tr>
                   </thead>
@@ -286,8 +286,8 @@ export default function DayWiseSchedulePage() {
                     {session.invigilators.map((invigilator, invIndex) => (
                       <tr key={invigilator.id} className="border-b">
                         <td className="p-2 text-center">{invIndex + 1}</td>
-                        <td className="p-2 text-center">{invigilator.name}</td>
-                        <td className="p-2 text-center">{invigilator.designation}</td>
+                        <td className="p-2 text-left">{invigilator.name}</td>
+                        <td className="p-2 text-left">{invigilator.designation}</td>
                         <td className="p-2 text-center">{session.time}</td>
                       </tr>
                     ))}

@@ -99,7 +99,7 @@ const Navigation = React.forwardRef<
       <div
         ref={ref}
         className={cn(
-          "sticky top-0 z-50 bg-background/95 shadow-sm backdrop-blur-sm",
+          "sticky top-0 z-50 bg-white/95 shadow-sm backdrop-blur-sm",
           className
         )}
         {...props}

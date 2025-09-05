@@ -5,8 +5,8 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background: #EEAECA;
-  background: radial-gradient(circle, rgba(238, 174, 202, 1) 0%, rgba(148, 187, 233, 1) 100%);
+  background: #020024;
+  background: radial-gradient(circle, rgba(2, 0, 36, 1) 0%, rgba(21, 21, 89, 1) 0%, rgba(0, 212, 255, 1) 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

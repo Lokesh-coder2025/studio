@@ -109,8 +109,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
 
 
     toast({
-      title: "Allotment Saved",
-      description: "Your duty allotment has been successfully saved.",
+      title: "Changes Saved",
+      description: "Your duty allotment has been successfully updated.",
       className: "bg-accent text-accent-foreground"
     });
   };
@@ -165,40 +165,6 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
       return { ...inv, duties: dutiesByExam, totalDuties };
     });
   }, [invigilators, uniqueExamsForExport]);
-
-  const handleExportExcel = () => {
-    exportToExcelWithFormulas({
-        headers: [
-          'Sl No',
-          'Invigilator’s Name',
-          'Designation',
-          ...uniqueExamsForExport.map(exam => `${format(parseISO(exam.date), "dd-MMM-yy")}\n${exam.subject}\n${exam.time}`),
-          'Total'
-        ],
-        dataRows: dutyDataForExport.map((inv, index) => {
-          const row: (string | number)[] = [
-            index + 1,
-            inv.name,
-            inv.designation,
-          ];
-          uniqueExamsForExport.forEach(exam => {
-            const examKey = getExamKeyForExport(exam);
-            row.push(inv.duties[examKey] || 0);
-          });
-          return row;
-        }),
-        footerRows: [
-          ['', '', 'No of Rooms', ...uniqueExamsForExport.map(exam => examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time)?.roomsAllotted || 0)],
-          ['', '', 'No of Relievers', ...uniqueExamsForExport.map(exam => examinations.find(e => e.subject === exam.subject && format(parseISO(e.date), 'yyyy-MM-dd') === exam.date && `${e.startTime} - ${e.endTime}` === exam.time)?.relieversRequired || 0)],
-          ['', '', 'Total Invigilators'],
-          ['', '', 'Total Duties Allotted'],
-        ],
-        collegeName: collegeName,
-        examTitle: examTitle,
-        sheetName: 'Duty Allotment',
-        fileName: 'duty-allotment-sheet'
-    });
-  };
 
   const handleDownloadPdf = () => {
     toast({ title: 'Generating PDF...', description: 'Please wait a moment.' });
@@ -477,7 +443,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </Button>
         <div className="flex flex-wrap gap-2 justify-end">
            <Button onClick={handleSave} disabled={isSendingAllEmails || isRebalancing} size="sm">
-              <Save /> Save Allotment
+              <Save /> Update Changes
             </Button>
            <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAllEmails || isRebalancing} size="sm">
               {isSendingAllEmails ? (

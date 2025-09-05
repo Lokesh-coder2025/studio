@@ -34,7 +34,7 @@ interface DaySchedule {
 }
 
 export default function DayWiseSchedulePage() {
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
+  const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [schedule, setSchedule] = useState<DaySchedule | null>(null);
   const [history, setHistory] = useState<SavedAllotment[]>([]);
   const [isEmailing, setIsEmailing] = useState(false);
@@ -43,6 +43,8 @@ export default function DayWiseSchedulePage() {
   const { toast } = useToast();
 
   useEffect(() => {
+    // Set the initial date on the client to avoid hydration mismatch
+    setSelectedDate(new Date());
     const savedHistory = JSON.parse(localStorage.getItem('dutyHistory') || '[]');
     setHistory(savedHistory);
   }, []);

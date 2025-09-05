@@ -11,7 +11,6 @@ import { useToast } from '@/hooks/use-toast';
 import { format, parseISO, isSameDay } from 'date-fns';
 import jsPDF from 'jspdf';
 import 'jspdf-autotable';
-import { exportToExcel } from '@/lib/excel-export';
 import { sendEmail } from '@/ai/flows/send-email-flow';
 import { sendBulkEmails } from '@/ai/flows/send-bulk-emails-flow';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
@@ -144,23 +143,6 @@ export default function DayWiseSchedulePage() {
     });
 
     doc.save(`Duty_Allotment_${format(schedule.date, 'yyyy-MM-dd')}.pdf`);
-  };
-  
-  const handleDownloadExcel = () => {
-      if (!schedule) return;
-
-      const dataToExport = schedule.sessions.flatMap(session => 
-        session.invigilators.map((inv, index) => ({
-            "Session": `${session.subject} (${session.time})`,
-            "Sl No": index + 1,
-            "Name of Invigilator": inv.name,
-            "Designation": inv.designation,
-            "Mobile No": inv.mobileNo,
-            "Email": inv.email
-        }))
-      );
-      
-      exportToExcel(dataToExport, "Day-wise Allotment", `Duty_Allotment_${format(schedule.date, 'yyyy-MM-dd')}`);
   };
   
   const handleSendEmail = async () => {
@@ -315,7 +297,6 @@ export default function DayWiseSchedulePage() {
 
           <div className="flex justify-end gap-2 mt-6">
             <Button onClick={handleDownloadPdf} size="sm" disabled={isEmailing}><Download /> Download PDF</Button>
-            <Button onClick={handleDownloadExcel} size="sm" disabled={isEmailing}><Download /> Download Excel</Button>
             <Button onClick={() => setIsEmailAllConfirmOpen(true)} size="sm" disabled={isEmailing}>
                 {isEmailing ? <Loader2 className="animate-spin" /> : <Send />}
                 Email to All

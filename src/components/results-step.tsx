@@ -493,9 +493,6 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
            <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails || isRebalancing} size="sm">
               <Download /> Download as PDF
             </Button>
-            <Button onClick={handleExportExcel} disabled={isSendingAllEmails || isRebalancing} size="sm">
-              <Download /> Download as Excel
-            </Button>
             <Button
               onClick={handleRebalance}
               disabled={isRebalancing || isSendingAllEmails}

@@ -38,9 +38,11 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <NavigationHeader>
               <div className="flex justify-start items-center">
                 <Link href="/" onClick={handleNewAllotmentClick} className="flex items-center gap-3 text-left cursor-pointer">
-                  <UsersRound className="w-10 h-10 text-primary" />
+                  <div className="text-transparent bg-clip-text bg-gradient-to-r from-purple-500 to-blue-500">
+                    <UsersRound className="w-10 h-10 text-purple-500" />
+                  </div>
                   <div>
-                    <h1 className="text-[1.72rem] font-bold text-primary font-headline">DutyFlow</h1>
+                    <h1 className="text-[1.72rem] font-bold font-headline bg-gradient-to-r from-purple-500 to-blue-500 text-transparent bg-clip-text">DutyFlow</h1>
                     <p className="text-[0.55rem] font-bold text-muted-foreground w-full -mt-1 tracking-widest">AI-Powered Allotments</p>
                   </div>
                 </Link>

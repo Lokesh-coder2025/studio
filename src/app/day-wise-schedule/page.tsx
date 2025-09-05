@@ -128,8 +128,8 @@ export default function DayWiseSchedulePage() {
         doc.text(`Subject: ${session.subject}`, 14, y);
         y += 8;
 
-        const head = [['Sl No', 'Name of the Invigilators', 'Examination Timings']];
-        const body = session.invigilators.map((inv, i) => [i + 1, inv.name, session.time]);
+        const head = [['Sl No', 'Name of the Invigilators', 'Designation', 'Examination Timings']];
+        const body = session.invigilators.map((inv, i) => [i + 1, inv.name, inv.designation, session.time]);
 
         doc.autoTable({
             head,
@@ -269,23 +269,25 @@ export default function DayWiseSchedulePage() {
             <p className="font-bold pt-2">{format(schedule.date, 'PPP (EEEE)')}</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+          <div className="space-y-8">
             {schedule.sessions.map((session, sessionIndex) => (
               <div key={sessionIndex} className="border p-4 rounded-lg">
                 <h4 className="font-bold text-center mb-4">{session.subject}</h4>
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b">
-                      <th className="p-2 text-left w-1/12">Sl No</th>
-                      <th className="p-2 text-left w-7/12">Name of the Invigilators</th>
-                      <th className="p-2 text-center w-4/12">Examination Timings</th>
+                      <th className="p-2 text-center w-[10%]">Sl No</th>
+                      <th className="p-2 text-center w-[35%]">Name of the Invigilators</th>
+                      <th className="p-2 text-center w-[30%]">Designation</th>
+                      <th className="p-2 text-center w-[25%]">Examination Timings</th>
                     </tr>
                   </thead>
                   <tbody>
                     {session.invigilators.map((invigilator, invIndex) => (
                       <tr key={invigilator.id} className="border-b">
                         <td className="p-2 text-center">{invIndex + 1}</td>
-                        <td className="p-2">{invigilator.name}</td>
+                        <td className="p-2 text-center">{invigilator.name}</td>
+                        <td className="p-2 text-center">{invigilator.designation}</td>
                         <td className="p-2 text-center">{session.time}</td>
                       </tr>
                     ))}

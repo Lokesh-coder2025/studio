@@ -443,7 +443,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         </Button>
         <div className="flex flex-wrap gap-2 justify-end">
            <Button onClick={handleSave} disabled={isSendingAllEmails || isRebalancing} size="sm">
-              <Save /> Update Changes
+              <Save /> Save/Update
             </Button>
            <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAllEmails || isRebalancing} size="sm">
               {isSendingAllEmails ? (

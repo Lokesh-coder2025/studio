@@ -41,7 +41,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <UsersRound className="w-10 h-10 text-purple-500" />
                   <div>
                     <h1 className="text-[1.72rem] font-bold font-headline bg-gradient-to-r from-purple-500 to-blue-500 text-transparent bg-clip-text">DutyFlow</h1>
-                    <p className="text-[0.65rem] font-bold w-full -mt-1 tracking-widest bg-gradient-to-r from-purple-500 to-blue-500 text-transparent bg-clip-text">AI-Powered Allotments</p>
                   </div>
                 </Link>
               </div>

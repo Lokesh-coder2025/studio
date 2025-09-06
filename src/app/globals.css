@@ -5,9 +5,7 @@
 
 body {
   font-family: 'Inter', sans-serif;
-  background: #3C3B3F;  /* fallback for old browsers */
-  background: -webkit-linear-gradient(to right, #605C3C, #3C3B3F);  /* Chrome 10-25, Safari 5.1-6 */
-  background: linear-gradient(to right, #605C3C, #3C3B3F); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background-image: linear-gradient(to top, #30cfd0 0%, #330867 100%);
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;

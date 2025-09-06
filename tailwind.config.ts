@@ -19,7 +19,7 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['"Cal Sans"', 'sans-serif'],
+        headline: ['"DM Serif Text"', 'serif'],
         code: ['"Source Code Pro"', 'monospace'],
         'sans-alt': ['"Cal Sans"', 'sans-serif'],
       },

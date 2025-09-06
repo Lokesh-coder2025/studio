@@ -19,9 +19,9 @@ export default {
     extend: {
       fontFamily: {
         body: ['Inter', 'sans-serif'],
-        headline: ['Inter', 'sans-serif'],
+        headline: ['"Cal Sans"', 'sans-serif'],
         code: ['"Source Code Pro"', 'monospace'],
-        'sans-alt': ['"Helvetica Neue"', 'sans-serif'],
+        'sans-alt': ['"Cal Sans"', 'sans-serif'],
       },
       colors: {
         background: 'hsl(var(--background))',

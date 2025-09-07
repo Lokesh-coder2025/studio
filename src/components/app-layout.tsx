@@ -24,11 +24,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
 
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    if (pathname === '/') {
-        window.location.reload();
-    } else {
-        router.push('/');
-    }
+    router.push('/');
   };
   
   return (

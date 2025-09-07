@@ -41,7 +41,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                   <UsersRound className="w-10 h-10 text-primary" />
                   <div>
                     <h1 className="text-[28px] font-headline font-extrabold text-primary">DutyFlow</h1>
-                    <p className="text-xs text-muted-foreground -mt-1">AI-Powered Allotments</p>
+                    <p className="text-xs text-muted-foreground -mt-1">The AI-Powered Allotments</p>
                   </div>
                 </Link>
               </div>

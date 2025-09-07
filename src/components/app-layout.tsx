@@ -46,48 +46,50 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
               <div className="flex-grow flex justify-center">
-                <NavigationMenu>
-                    <NavigationMenuItem>
-                      <Button asChild variant="default" size="sm" className='shadow-lg'>
-                        <Link href="/" onClick={handleNewAllotmentClick}>
-                            <FileSpreadsheet />
-                            <span>New Allotment</span>
-                        </Link>
-                      </Button>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                        <Button asChild variant="default" size="sm" className={cn(pathname === '/saved-allotments' ? 'shadow-lg' : '')}>
-                        <Link href="/saved-allotments">
-                            <Save />
-                            <span>Saved Allotments</span>
-                        </Link>
-                        </Button>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                      <Button asChild variant="default" size="sm" className={cn(pathname === '/day-wise-schedule' ? 'shadow-lg' : '')}>
-                        <Link href="/day-wise-schedule">
-                            <CalendarDays />
-                            <span>Day-wise Schedule</span>
-                        </Link>
-                      </Button>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                        <Button asChild variant="default" size="sm" className={cn(pathname === '/history' ? 'shadow-lg' : '')}>
-                          <Link href="/history">
-                              <History />
-                              <span>History</span>
-                          </Link>
-                        </Button>
-                    </NavigationMenuItem>
-                    <NavigationMenuItem>
-                        <Button asChild variant="default" size="sm" className={cn(pathname === '/about' ? 'shadow-lg' : '')}>
-                        <Link href="/about">
-                            <Info />
-                            <span>About DutyFlow</span>
-                        </Link>
-                        </Button>
-                    </NavigationMenuItem>
-                </NavigationMenu>
+                {user && (
+                    <NavigationMenu>
+                        <NavigationMenuItem>
+                          <Button asChild variant="default" size="sm" className='shadow-lg'>
+                            <Link href="/" onClick={handleNewAllotmentClick}>
+                                <FileSpreadsheet />
+                                <span>New Allotment</span>
+                            </Link>
+                          </Button>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                            <Button asChild variant="default" size="sm" className={cn(pathname === '/saved-allotments' ? 'shadow-lg' : '')}>
+                            <Link href="/saved-allotments">
+                                <Save />
+                                <span>Saved Allotments</span>
+                            </Link>
+                            </Button>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                          <Button asChild variant="default" size="sm" className={cn(pathname === '/day-wise-schedule' ? 'shadow-lg' : '')}>
+                            <Link href="/day-wise-schedule">
+                                <CalendarDays />
+                                <span>Day-wise Schedule</span>
+                            </Link>
+                          </Button>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                            <Button asChild variant="default" size="sm" className={cn(pathname === '/history' ? 'shadow-lg' : '')}>
+                              <Link href="/history">
+                                  <History />
+                                  <span>History</span>
+                              </Link>
+                            </Button>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                            <Button asChild variant="default" size="sm" className={cn(pathname === '/about' ? 'shadow-lg' : '')}>
+                            <Link href="/about">
+                                <Info />
+                                <span>About DutyFlow</span>
+                            </Link>
+                            </Button>
+                        </NavigationMenuItem>
+                    </NavigationMenu>
+                )}
               </div>
               <div className="w-auto flex justify-end items-center gap-2">
                 {user ? (
@@ -96,20 +98,20 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                         <span>Log Out</span>
                    </Button>
                 ) : (
-                    <>
-                        <Button asChild variant="outline" size="sm">
-                            <Link href="/login">
-                                <LogIn />
-                                <span>Log In</span>
-                            </Link>
-                        </Button>
-                        <Button asChild variant="outline" size="sm">
-                            <Link href="/signup">
-                                <UserPlus />
-                                <span>Sign Up</span>
-                            </Link>
-                        </Button>
-                    </>
+                    <div className="flex items-center gap-2">
+                      <Button asChild variant="outline" size="sm">
+                          <Link href="/login">
+                              <LogIn />
+                              <span>Log In</span>
+                          </Link>
+                      </Button>
+                      <Button asChild variant="outline" size="sm">
+                          <Link href="/signup">
+                              <UserPlus />
+                              <span>Sign Up</span>
+                          </Link>
+                      </Button>
+                    </div>
                 )}
                 <ThemePicker />
               </div>

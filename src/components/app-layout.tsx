@@ -40,7 +40,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 <Link href="/" onClick={handleNewAllotmentClick} className="flex items-center gap-1 text-left cursor-pointer">
                   <UsersRound className="w-10 h-10 text-primary" />
                   <div>
-                    <h1 className="text-[32px] font-headline text-primary">DutyFlow</h1>
+                    <h1 className="text-[32px] font-headline font-extrabold text-primary">DutyFlow</h1>
                     <p className="text-xs text-muted-foreground -mt-1">AI-Powered Allotments</p>
                   </div>
                 </Link>

@@ -4,7 +4,7 @@ import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AppLayout } from '@/components/app-layout';
 import { ThemeProvider } from 'next-themes';
-import { AuthProvider } from '@/hooks/use-auth';
+// import { AuthProvider } from '@/hooks/use-auth';
 
 export const metadata: Metadata = {
   title: 'DutyFlow',
@@ -25,11 +25,11 @@ export default function RootLayout({
       </head>
       <body className="font-body antialiased h-full">
           <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
-            <AuthProvider>
+            {/* <AuthProvider> */}
               <AppLayout>
                 {children}
               </AppLayout>
-            </AuthProvider>
+            {/* </AuthProvider> */}
           </ThemeProvider>
         <Toaster />
       </body>

@@ -15,12 +15,12 @@ import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck, L
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemePicker } from '@/components/theme-picker';
-import { useAuth } from '@/hooks/use-auth';
+// import { useAuth } from '@/hooks/use-auth';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  // const { user, logout } = useAuth();
 
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -46,7 +46,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
               <div className="flex-grow flex justify-center">
-                {user && (
+                {/* {user && ( */}
                     <NavigationMenu>
                         <NavigationMenuItem>
                           <Button asChild variant="default" size="sm" className='shadow-lg'>
@@ -89,10 +89,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             </Button>
                         </NavigationMenuItem>
                     </NavigationMenu>
-                )}
+                {/* )} */}
               </div>
               <div className="w-auto flex justify-end items-center gap-2">
-                {user ? (
+                {/* {user ? (
                    <Button onClick={logout} variant="outline" size="sm">
                         <LogOut />
                         <span>Log Out</span>
@@ -112,7 +112,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           </Link>
                       </Button>
                     </div>
-                )}
+                )} */}
                 <ThemePicker />
               </div>
             </NavigationHeader>

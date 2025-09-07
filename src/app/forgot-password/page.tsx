@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Loader2 } from 'lucide-react';
-import { useAuth } from '@/hooks/use-auth';
+// import { useAuth } from '@/hooks/use-auth';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -25,7 +25,7 @@ const formSchema = z.object({
 
 export default function ForgotPasswordPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { sendPasswordReset } = useAuth();
+  // const { sendPasswordReset } = useAuth();
   const [isSubmitted, setIsSubmitted] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -35,7 +35,8 @@ export default function ForgotPasswordPage() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
-    await sendPasswordReset(values.email);
+    console.log('Password reset submitted (auth disabled):', values);
+    // await sendPasswordReset(values.email);
     setIsSubmitting(false);
     setIsSubmitted(true);
     form.reset();

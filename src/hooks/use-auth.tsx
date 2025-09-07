@@ -37,6 +37,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
+    // This is now a mock setup since auth is disabled.
+    // It just stops showing the loader.
+    const timer = setTimeout(() => {
+        setUser(null); // Or a mock user if you want to test logged-in state
+        setLoading(false);
+    }, 200)
+
+    return () => clearTimeout(timer);
+
+    /*
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
@@ -51,8 +61,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     return () => unsubscribe();
+    */
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname, router]);
+  }, []);
 
   const signup = async (email: string, password: string) => {
     try {
@@ -115,7 +126,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    throw new Error('useAuth must be used within an AuthProvider');
+    // Return a mock context if the provider is not in the tree
+    return {
+        user: null,
+        loading: false,
+        signup: async () => console.warn('Auth disabled'),
+        login: async () => console.warn('Auth disabled'),
+        logout: async () => console.warn('Auth disabled'),
+        sendPasswordReset: async () => console.warn('Auth disabled'),
+    }
   }
   return context;
 }

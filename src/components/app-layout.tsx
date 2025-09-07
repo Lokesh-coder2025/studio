@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck, LogOut, UserPlus, Settings, Palette, Sun, Moon, CalendarDays, Bot } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck, LogOut, UserPlus, Settings, Palette, Sun, Moon, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemePicker } from '@/components/theme-picker';
@@ -38,9 +38,9 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
             <NavigationHeader>
               <div className="flex justify-start items-center">
                 <Link href="/" onClick={handleNewAllotmentClick} className="flex items-center gap-1 text-left cursor-pointer">
-                  <Bot className="w-10 h-10 text-purple-500" />
+                  <UsersRound className="w-10 h-10 text-primary" />
                   <div>
-                    <h1 className="text-[32px] font-headline bg-gradient-to-r from-purple-500 to-blue-500 text-transparent bg-clip-text">DutyFlow</h1>
+                    <h1 className="text-[32px] font-headline text-primary">DutyFlow</h1>
                     <p className="text-xs text-muted-foreground -mt-1">AI-Powered Allotments</p>
                   </div>
                 </Link>

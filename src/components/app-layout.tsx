@@ -15,12 +15,12 @@ import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck, L
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { ThemePicker } from '@/components/theme-picker';
-// import { useAuth } from '@/hooks/use-auth';
+import { useAuth } from '@/hooks/use-auth';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  // const { user, logout } = useAuth();
+  const { user, logout } = useAuth();
 
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
@@ -42,10 +42,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
               <div className="flex-grow flex justify-center">
-                {/* {user && ( */}
+                {user && (
                     <NavigationMenu>
                         <NavigationMenuItem>
-                          <Button asChild variant="default" size="sm" className='shadow-lg'>
+                          <Button asChild size="sm" className='shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700'>
                             <Link href="/" onClick={handleNewAllotmentClick}>
                                 <FileSpreadsheet />
                                 <span>New Allotment</span>
@@ -53,7 +53,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           </Button>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                            <Button asChild variant="default" size="sm" className={cn(pathname === '/saved-allotments' ? 'shadow-lg' : '')}>
+                            <Button asChild size="sm" className={cn('shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700', pathname === '/saved-allotments' ? '' : 'opacity-80')}>
                             <Link href="/saved-allotments">
                                 <Save />
                                 <span>Saved Allotments</span>
@@ -61,7 +61,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             </Button>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                          <Button asChild variant="default" size="sm" className={cn(pathname === '/day-wise-schedule' ? 'shadow-lg' : '')}>
+                          <Button asChild size="sm" className={cn('shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700', pathname === '/day-wise-schedule' ? '' : 'opacity-80')}>
                             <Link href="/day-wise-schedule">
                                 <CalendarDays />
                                 <span>Day-wise Schedule</span>
@@ -69,7 +69,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           </Button>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                            <Button asChild variant="default" size="sm" className={cn(pathname === '/history' ? 'shadow-lg' : '')}>
+                            <Button asChild size="sm" className={cn('shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700', pathname === '/history' ? '' : 'opacity-80')}>
                               <Link href="/history">
                                   <History />
                                   <span>History</span>
@@ -77,7 +77,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             </Button>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                            <Button asChild variant="default" size="sm" className={cn(pathname === '/about' ? 'shadow-lg' : '')}>
+                            <Button asChild size="sm" className={cn('shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700', pathname === '/about' ? '' : 'opacity-80')}>
                             <Link href="/about">
                                 <Info />
                                 <span>About DutyFlow</span>
@@ -85,10 +85,10 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             </Button>
                         </NavigationMenuItem>
                     </NavigationMenu>
-                {/* )} */}
+                )}
               </div>
               <div className="w-auto flex justify-end items-center gap-2">
-                {/* {user ? (
+                {user ? (
                    <Button onClick={logout} variant="outline" size="sm">
                         <LogOut />
                         <span>Log Out</span>
@@ -108,7 +108,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           </Link>
                       </Button>
                     </div>
-                )} */}
+                )}
                 <ThemePicker />
               </div>
             </NavigationHeader>

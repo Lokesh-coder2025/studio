@@ -44,7 +44,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               <div className="flex-grow flex justify-center">
                     <NavigationMenu>
                         <NavigationMenuItem>
-                          <Button asChild size="sm" className='shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700'>
+                          <Button asChild size="sm" className='shadow-lg'>
                             <Link href="/" onClick={handleNewAllotmentClick}>
                                 <FileSpreadsheet />
                                 <span>New Allotment</span>
@@ -52,7 +52,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           </Button>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                            <Button asChild size="sm" className={cn('shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700', pathname === '/saved-allotments' ? '' : 'opacity-80')}>
+                            <Button asChild size="sm" className={cn('shadow-lg', pathname === '/saved-allotments' ? '' : 'opacity-80')}>
                             <Link href="/saved-allotments">
                                 <Save />
                                 <span>Saved Allotments</span>
@@ -60,7 +60,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             </Button>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                          <Button asChild size="sm" className={cn('shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700', pathname === '/day-wise-schedule' ? '' : 'opacity-80')}>
+                          <Button asChild size="sm" className={cn('shadow-lg', pathname === '/day-wise-schedule' ? '' : 'opacity-80')}>
                             <Link href="/day-wise-schedule">
                                 <CalendarDays />
                                 <span>Day-wise Schedule</span>
@@ -68,7 +68,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                           </Button>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                            <Button asChild size="sm" className={cn('shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700', pathname === '/history' ? '' : 'opacity-80')}>
+                            <Button asChild size="sm" className={cn('shadow-lg', pathname === '/history' ? '' : 'opacity-80')}>
                               <Link href="/history">
                                   <History />
                                   <span>History</span>
@@ -76,7 +76,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             </Button>
                         </NavigationMenuItem>
                         <NavigationMenuItem>
-                            <Button asChild size="sm" className={cn('shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700', pathname === '/about' ? '' : 'opacity-80')}>
+                            <Button asChild size="sm" className={cn('shadow-lg', pathname === '/about' ? '' : 'opacity-80')}>
                             <Link href="/about">
                                 <Info />
                                 <span>About DutyFlow</span>

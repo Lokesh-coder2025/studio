@@ -42,7 +42,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 </Link>
               </div>
               <div className="flex-grow flex justify-center">
-                {user && (
                     <NavigationMenu>
                         <NavigationMenuItem>
                           <Button asChild size="sm" className='shadow-lg text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700'>
@@ -85,30 +84,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             </Button>
                         </NavigationMenuItem>
                     </NavigationMenu>
-                )}
               </div>
               <div className="w-auto flex justify-end items-center gap-2">
-                {user ? (
-                   <Button onClick={logout} variant="outline" size="sm">
-                        <LogOut />
-                        <span>Log Out</span>
-                   </Button>
-                ) : (
-                    <div className="flex items-center gap-2">
-                      <Button asChild variant="outline" size="sm">
-                          <Link href="/login">
-                              <LogIn />
-                              <span>Log In</span>
-                          </Link>
-                      </Button>
-                      <Button asChild variant="outline" size="sm">
-                          <Link href="/signup">
-                              <UserPlus />
-                              <span>Sign Up</span>
-                          </Link>
-                      </Button>
-                    </div>
-                )}
+                  <div className="flex items-center gap-2">
+                    <Button asChild variant="outline" size="sm">
+                        <Link href="/signup">
+                            <UserPlus />
+                            <span>Sign Up</span>
+                        </Link>
+                    </Button>
+                  </div>
                 <ThemePicker />
               </div>
             </NavigationHeader>

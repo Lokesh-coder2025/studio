@@ -86,14 +86,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </NavigationMenu>
               </div>
               <div className="w-auto flex justify-end items-center gap-2">
-                  <div className="flex items-center gap-2">
-                    <Button asChild variant="outline" size="sm">
-                        <Link href="/signup">
-                            <UserPlus />
-                            <span>Sign Up</span>
-                        </Link>
-                    </Button>
-                  </div>
                 <ThemePicker />
               </div>
             </NavigationHeader>

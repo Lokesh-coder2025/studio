@@ -10,16 +10,16 @@ import {
     signOut,
     sendPasswordResetEmail,
     type User,
-    type Auth
 } from 'firebase/auth';
-import { auth } from '@/firebase/client';
+import { doc, setDoc } from 'firebase/firestore';
+import { auth, db } from '@/firebase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signup: (email: string, password: string) => Promise<void>;
+  signup: (institutionName: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
@@ -57,9 +57,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [pathname]);
 
-  const signup = async (email: string, password: string) => {
+  const signup = async (institutionName: string, email: string, password: string) => {
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+      const user = userCredential.user;
+
+      // Save institution name to Firestore
+      await setDoc(doc(db, "users", user.uid), {
+        email: user.email,
+        institutionName: institutionName,
+      });
+
       toast({ title: "Account Created", description: "You have been successfully signed up.", className: "bg-accent text-accent-foreground" });
       router.push('/');
     } catch (error: any) {

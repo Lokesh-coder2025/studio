@@ -41,8 +41,7 @@ export default function SignUpPage() {
 
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsSubmitting(true);
-    await signup(values.email, values.password);
-    // You might want to save institutionName to the user's profile here
+    await signup(values.institutionName, values.email, values.password);
     setIsSubmitting(false);
   };
   

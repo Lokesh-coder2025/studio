@@ -27,7 +27,9 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const publicRoutes = ['/login', '/signup', '/forgot-password', '/about'];
+const publicRoutes = ['/login', '/signup', '/forgot-password'];
+const publicAppRoutes = ['/about'];
+
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -37,33 +39,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    // This is now a mock setup since auth is disabled.
-    // It just stops showing the loader.
-    const timer = setTimeout(() => {
-        setUser(null); // Or a mock user if you want to test logged-in state
-        setLoading(false);
-    }, 200)
-
-    return () => clearTimeout(timer);
-
-    /*
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       setUser(user);
       setLoading(false);
       
-      const isPublicRoute = publicRoutes.includes(pathname);
+      const isPublicAuthRoute = publicRoutes.includes(pathname);
+      const isPublicAppRoute = publicAppRoutes.includes(pathname);
       
-      if (user && isPublicRoute) {
+      if (user && isPublicAuthRoute) {
         router.push('/');
-      } else if (!user && !isPublicRoute) {
-        router.push('/login');
+      } else if (!user && !isPublicAuthRoute && !isPublicAppRoute) {
+        router.push('/signup');
       }
     });
 
     return () => unsubscribe();
-    */
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [pathname]);
 
   const signup = async (email: string, password: string) => {
     try {
@@ -115,10 +107,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       </div>
     );
   }
+  
+  const isAuthPage = publicRoutes.includes(pathname);
+  if(!user && !isAuthPage && !publicAppRoutes.includes(pathname)){
+      return (
+         <div className="flex h-screen items-center justify-center">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+         </div>
+      );
+  }
 
   return (
     <AuthContext.Provider value={{ user, loading, signup, login, logout, sendPasswordReset }}>
-      {!loading && children}
+      {children}
     </AuthContext.Provider>
   );
 }
@@ -126,15 +127,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 export function useAuth() {
   const context = useContext(AuthContext);
   if (context === undefined) {
-    // Return a mock context if the provider is not in the tree
-    return {
-        user: null,
-        loading: false,
-        signup: async () => console.warn('Auth disabled'),
-        login: async () => console.warn('Auth disabled'),
-        logout: async () => console.warn('Auth disabled'),
-        sendPasswordReset: async () => console.warn('Auth disabled'),
-    }
+    throw new Error('useAuth must be used within an AuthProvider');
   }
   return context;
 }

@@ -21,11 +21,17 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const { user, logout } = useAuth();
+  const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(pathname);
+
 
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
     router.push('/');
   };
+
+  if (isAuthPage) {
+    return <>{children}</>;
+  }
   
   return (
       <NavigationProvider>
@@ -87,6 +93,16 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
               <div className="w-auto flex justify-end items-center gap-2">
                 <ThemePicker />
+                {user ? (
+                    <Button onClick={logout} variant="outline" size="sm">
+                        <LogOut />
+                        <span>Logout</span>
+                    </Button>
+                ) : (
+                    <>
+                        {/* The login and signup buttons are removed from here as per previous requests */}
+                    </>
+                )}
               </div>
             </NavigationHeader>
           </Navigation>

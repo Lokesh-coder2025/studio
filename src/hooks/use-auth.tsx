@@ -9,20 +9,27 @@ import {
     signInWithEmailAndPassword,
     signOut,
     sendPasswordResetEmail,
+    GoogleAuthProvider,
+    signInWithPopup,
     type User,
 } from 'firebase/auth';
-import { doc, setDoc } from 'firebase/firestore';
+import { doc, setDoc, getDoc } from 'firebase/firestore';
 import { auth, db } from '@/firebase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Loader2 } from 'lucide-react';
 
+interface AppUser extends User {
+    institutionName?: string;
+}
+
 interface AuthContextType {
-  user: User | null;
+  user: AppUser | null;
   loading: boolean;
   signup: (institutionName: string, email: string, password: string) => Promise<void>;
   login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
   sendPasswordReset: (email: string) => Promise<void>;
+  signInWithGoogle: () => Promise<void>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -32,30 +39,44 @@ const publicAppRoutes = ['/about'];
 
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<AppUser | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
   const router = useRouter();
   const pathname = usePathname();
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
-      setUser(user);
-      setLoading(false);
-      
-      const isPublicAuthRoute = publicRoutes.includes(pathname);
-      const isPublicAppRoute = publicAppRoutes.includes(pathname);
-      
-      if (user && isPublicAuthRoute) {
-        router.push('/');
-      } else if (!user && !isPublicAuthRoute && !isPublicAppRoute) {
-        router.push('/signup');
+    const unsubscribe = onAuthStateChanged(auth, async (user) => {
+      if (user) {
+        const userDocRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userDocRef);
+        if (userDoc.exists()) {
+            setUser({ ...user, institutionName: userDoc.data().institutionName });
+        } else {
+            setUser(user);
+        }
+      } else {
+        setUser(null);
       }
+      setLoading(false);
     });
 
     return () => unsubscribe();
+  }, []);
+
+  useEffect(() => {
+    if (!loading) {
+        const isPublicAuthRoute = publicRoutes.includes(pathname);
+        const isPublicAppRoute = publicAppRoutes.includes(pathname);
+        
+        if (user && isPublicAuthRoute) {
+            router.push('/');
+        } else if (!user && !isPublicAuthRoute && !isPublicAppRoute) {
+            router.push('/signup');
+        }
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [pathname]);
+  }, [user, loading, pathname]);
 
   const signup = async (institutionName: string, email: string, password: string) => {
     try {
@@ -67,6 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         email: user.email,
         institutionName: institutionName,
       });
+      setUser({ ...user, institutionName });
 
       toast({ title: "Account Created", description: "You have been successfully signed up.", className: "bg-accent text-accent-foreground" });
       router.push('/');
@@ -108,6 +130,37 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const signInWithGoogle = async () => {
+    const provider = new GoogleAuthProvider();
+    try {
+      const result = await signInWithPopup(auth, provider);
+      const user = result.user;
+      
+      const userDocRef = doc(db, "users", user.uid);
+      const userDoc = await getDoc(userDocRef);
+
+      let institutionName = user.displayName || "Google User";
+
+      if (!userDoc.exists()) {
+        await setDoc(userDocRef, {
+            email: user.email,
+            institutionName: institutionName,
+        });
+      } else {
+        institutionName = userDoc.data().institutionName;
+      }
+      
+      setUser({ ...user, institutionName });
+      toast({ title: "Signed In with Google", description: "Welcome!", className: "bg-accent text-accent-foreground" });
+      router.push('/');
+
+    } catch (error: any) {
+        console.error(error);
+        toast({ title: "Google Sign-In Failed", description: error.message, variant: "destructive" });
+    }
+  };
+
+
   if (loading) {
     return (
       <div className="flex h-screen items-center justify-center">
@@ -118,6 +171,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const isAuthPage = publicRoutes.includes(pathname);
   if(!user && !isAuthPage && !publicAppRoutes.includes(pathname)){
+      router.push('/signup');
       return (
          <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />
@@ -126,7 +180,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, loading, signup, login, logout, sendPasswordReset }}>
+    <AuthContext.Provider value={{ user, loading, signup, login, logout, sendPasswordReset, signInWithGoogle }}>
       {children}
     </AuthContext.Provider>
   );

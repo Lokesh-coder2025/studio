@@ -2,7 +2,7 @@
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
-import type { Invigilator, Examination, Assignment, SavedAllotment } from '@/types';
+import type { Invigilator, Examination, Assignment } from '@/types';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { InvigilatorsStep } from '@/components/invigilators-step';
 import { ExaminationsStep } from '@/components/examinations-step';
@@ -10,7 +10,7 @@ import { ResultsStep } from '@/components/results-step';
 import { Workflow, BookUser, FileSpreadsheet } from 'lucide-react';
 import { useSearchParams, useRouter, usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
-import { Skeleton } from '@/components/ui/skeleton';
+import { useAuth } from '@/hooks/use-auth';
 
 const STEPS = [
   { step: 1, title: "Invigilators' Details", description: "Add all available invigilators.", icon: BookUser },
@@ -31,6 +31,13 @@ function HomeClient() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
+  const { user } = useAuth();
+
+  useEffect(() => {
+    if (user?.institutionName) {
+        setCollegeName(user.institutionName);
+    }
+  }, [user]);
 
   const resetApp = () => {
     setCurrentStep(1);
@@ -38,7 +45,7 @@ function HomeClient() {
     setExaminations([]);
     setAssignments([]);
     setExamTitle('');
-    setCollegeName('');
+    setCollegeName(user?.institutionName || '');
     setAllotmentId(null);
     // Remove query params to prevent re-loading data
     if (searchParams.toString()) {
@@ -56,7 +63,7 @@ function HomeClient() {
         setExaminations(allotmentToLoad.examinations);
         setAssignments(allotmentToLoad.assignments);
         setExamTitle(allotmentToLoad.examTitle);
-        setCollegeName(allotmentToLoad.collegeName || '');
+        setCollegeName(allotmentToLoad.collegeName || user?.institutionName || '');
         setAllotmentId(allotmentToLoad.id);
         setCurrentStep(3);
       }
@@ -65,7 +72,7 @@ function HomeClient() {
         resetApp();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams]);
+  }, [searchParams, user]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

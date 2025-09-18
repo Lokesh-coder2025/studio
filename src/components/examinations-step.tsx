@@ -21,7 +21,7 @@ import type { Invigilator, Examination, Assignment, SavedAllotment } from '@/typ
 import { Calendar as CalendarIcon, Loader2, ArrowRight, ArrowLeft, Trash2, Upload } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { optimizeDutyAssignments } from '@/ai/flows/optimize-duty-assignments';
-import { useRouter } from 'next/navigation';
+import { useAuth } from '@/hooks/use-auth';
 
 const sessionSchema = z.object({
     subject: z.string().min(1, "Subject is required.").refine(val => val !== 'none', { message: "Subject is required." }),
@@ -131,7 +131,7 @@ const renderTimeFields = (form: any, sessionName: 'session', label: string) => (
 export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setExamTitle, invigilators, examinations, setExaminations, setAssignments, setAllotmentId, nextStep, prevStep, isGenerating, setIsGenerating }: ExaminationsStepProps) {
   const { toast } = useToast();
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const router = useRouter();
+  const { user } = useAuth();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -332,7 +332,7 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
 
   const handleGenerate = async () => {
     setIsGenerating(true);
-
+    
     if (!collegeName.trim() || !examTitle.trim()) {
         toast({
             title: "Missing Information",

@@ -171,7 +171,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   
   const isAuthPage = publicRoutes.includes(pathname);
   if(!user && !isAuthPage && !publicAppRoutes.includes(pathname)){
-      router.push('/signup');
+      // This block will be effectively handled by the useEffect now, 
+      // but we still need to return a loading state to prevent rendering children.
       return (
          <div className="flex h-screen items-center justify-center">
             <Loader2 className="h-12 w-12 animate-spin text-primary" />

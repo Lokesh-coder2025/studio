@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -63,7 +64,7 @@ export default function LandingPage() {
                            </div>
                         </div>
                         <h2 className="text-4xl font-headline font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                            Effortless Invigilation Duty Allotment
+                            Revolutionize Examination Duties with AI
                         </h2>
                         <p className="text-lg md:text-xl text-white/80">
                             Welcome to DutyFlow, the AI-powered solution that transforms the complex task of assigning exam duties into a simple, fair, and efficient process.

@@ -46,12 +46,12 @@ export default function LandingPage() {
             {/* Hero Section */}
             <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center text-center">
                  <Image
-                    src="https://picsum.photos/seed/50/1920/1080"
+                    src="https://picsum.photos/seed/51/1920/1080"
                     alt="Abstract background"
                     layout="fill"
                     objectFit="cover"
                     className="absolute inset-0 z-0"
-                    data-ai-hint="artificial intelligence"
+                    data-ai-hint="modern technology"
                 />
                 <div className="absolute inset-0 bg-black/60 z-10" />
                 <div className="relative z-20 container px-4 md:px-6 text-white">

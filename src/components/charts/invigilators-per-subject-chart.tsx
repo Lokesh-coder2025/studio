@@ -15,7 +15,8 @@ type ChartProps = {
   isZoomed?: boolean;
 };
 
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ff4d4d', '#4dff4d', '#4d4dff'];
+const BASE_COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#ff4d4d', '#4dff4d', '#4d4dff'];
+const PINK = '#FF69B4';
 
 export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: ChartProps) {
   const { chartData, chartConfig } = useMemo(() => {
@@ -34,10 +35,18 @@ export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: Ch
       count,
     }));
     
-    const config = formattedData.reduce((acc, item, index) => {
+    let colorIndex = 0;
+    const config = formattedData.reduce((acc, item) => {
+        let color;
+        if (item.subject.toLowerCase() === 'statistics') {
+            color = PINK;
+        } else {
+            color = BASE_COLORS[colorIndex % BASE_COLORS.length];
+            colorIndex++;
+        }
         acc[item.subject] = {
             label: item.subject,
-            color: COLORS[index % COLORS.length]
+            color: color
         }
         return acc;
     }, {} as any)
@@ -64,18 +73,18 @@ export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: Ch
                 const x  = cx + radius * Math.cos(-midAngle * RADIAN);
                 const y = cy  + radius * Math.sin(-midAngle * RADIAN);
                 return (
-                <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central">
+                <text x={x} y={y} fill="white" textAnchor={x > cx ? 'start' : 'end'} dominantBaseline="central" fontWeight="bold">
                     {`${(percent * 100).toFixed(0)}%`}
                 </text>
                 );
             }}
             >
-                {chartData.map((entry, index) => (
-                <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-            ))}
+                {chartData.map((entry) => (
+                    <Cell key={`cell-${entry.subject}`} fill={chartConfig[entry.subject]?.color} />
+                ))}
             </Pie>
             <ChartLegend 
-                content={<ChartLegendContent nameKey="subject" className="grid grid-cols-2 gap-x-8 gap-y-2" />} 
+                content={<ChartLegendContent nameKey="subject" className={cn("grid gap-x-8 gap-y-2", isZoomed ? 'grid-cols-2' : '')} />} 
             />
         </PieChart>
         </ResponsiveContainer>

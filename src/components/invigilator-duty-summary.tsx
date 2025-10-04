@@ -142,6 +142,17 @@ export function InvigilatorDutySummary({ invigilators, assignments, collegeName,
               </SelectContent>
           </Select>
         </div>
+        <Button onClick={onEmailAll} size="sm" disabled={isSendingAllEmails} className="text-white bg-gradient-to-r from-purple-500 to-indigo-600 hover:from-purple-600 hover:to-indigo-700">
+          {isSendingAllEmails ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending All...
+            </>
+          ) : (
+            <>
+              <Send className="mr-2 h-4 w-4" /> Email All Summaries
+            </>
+          )}
+        </Button>
       </div>
 
       {selectedInvigilator ? (
@@ -204,18 +215,7 @@ export function InvigilatorDutySummary({ invigilators, assignments, collegeName,
                 </Table>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between items-center p-6">
-                 <Button onClick={onEmailAll} size="sm" disabled={isSendingAllEmails}>
-                      {isSendingAllEmails ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending All...
-                        </>
-                      ) : (
-                        <>
-                          <Send className="mr-2 h-4 w-4" /> Email All Summaries
-                        </>
-                      )}
-                   </Button>
+            <CardFooter className="flex justify-end items-center p-6">
                 <div className="flex gap-2">
                    <Button id="send-email-btn" onClick={() => setIsEmailConfirmationOpen(true)} size="sm" disabled={isSendingEmail}>
                       {isSendingEmail ? (

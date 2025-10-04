@@ -48,7 +48,7 @@ export default function SignUpPage() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-background">
       <Image
-        src="https://picsum.photos/seed/geometric-forms/1920/1080"
+        src="https://picsum.photos/seed/gradient-dark/1920/1080"
         alt="Gradient & Shapes"
         fill
         className="object-cover object-center"

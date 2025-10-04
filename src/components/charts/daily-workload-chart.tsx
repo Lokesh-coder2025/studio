@@ -1,3 +1,4 @@
+
 'use client';
 
 import { useMemo } from 'react';
@@ -37,11 +38,11 @@ export function DailyWorkloadChart({ data, onTitleClick, isZoomed }: ChartProps)
   const chartConfig = {
     assigned: {
       label: 'Assigned',
-      color: 'hsl(var(--chart-1))',
+      color: '#ED6AFF',
     },
     free: {
       label: 'Free',
-      color: 'hsl(var(--chart-2))',
+      color: '#FF637E',
     },
   };
 

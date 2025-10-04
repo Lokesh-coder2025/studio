@@ -43,11 +43,11 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-background">
        <Image
-        src="https://picsum.photos/seed/5/1920/1080"
+        src="https://picsum.photos/seed/6/1920/1080"
         alt="DutyFlow Background"
         fill
         className="object-cover object-center"
-        data-ai-hint="data visualization"
+        data-ai-hint="digital network"
       />
       <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 flex w-full max-w-4xl rounded-xl">

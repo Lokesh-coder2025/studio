@@ -35,7 +35,7 @@ export function DutiesPerInvigilatorChart({ data, onTitleClick, isZoomed }: Char
   const chartConfig = {
     duties: {
       label: 'Duties',
-      color: '#C08081',
+      color: '#8A2BE2',
     },
   };
 

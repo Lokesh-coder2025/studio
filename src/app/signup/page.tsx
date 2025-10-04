@@ -48,11 +48,11 @@ export default function SignUpPage() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-background">
       <Image
-        src="https://picsum.photos/seed/9/1920/1080"
+        src="https://picsum.photos/seed/12/1920/1080"
         alt="DutyFlow Background"
         fill
         className="object-cover object-center"
-        data-ai-hint="geometric forms"
+        data-ai-hint="circuit patterns"
       />
       <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 flex w-full max-w-4xl rounded-xl">

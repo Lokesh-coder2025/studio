@@ -10,11 +10,14 @@ import { InvigilatorsPerSubjectChart } from '@/components/charts/invigilators-pe
 import { DailyWorkloadChart } from '@/components/charts/daily-workload-chart';
 import { InvigilatorsByDesignationChart } from '@/components/charts/invigilators-by-designation-chart';
 import { SessionTrendsChart } from '@/components/charts/session-trends-chart';
-import { BarChart } from 'lucide-react';
+import { BarChart, Maximize } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 
 export default function AnalyticsPage() {
   const [history, setHistory] = useState<SavedAllotment[]>([]);
   const [selectedAllotmentId, setSelectedAllotmentId] = useState<string | null>(null);
+  const [zoomedChart, setZoomedChart] = useState<{ title: string; chart: React.ReactNode } | null>(null);
+
 
   useEffect(() => {
     const savedHistory = JSON.parse(localStorage.getItem('dutyHistory') || '[]');
@@ -27,6 +30,10 @@ export default function AnalyticsPage() {
   const selectedAllotment = useMemo(() => {
     return history.find(item => item.id === selectedAllotmentId) || null;
   }, [history, selectedAllotmentId]);
+
+  const handleZoom = (title: string, chart: React.ReactNode) => {
+    setZoomedChart({ title, chart });
+  };
 
   return (
     <>
@@ -70,12 +77,27 @@ export default function AnalyticsPage() {
           
           {selectedAllotment ? (
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <InvigilatorsPerSubjectChart data={selectedAllotment} />
-                <InvigilatorsByDesignationChart data={selectedAllotment} />
-                <DutiesPerInvigilatorChart data={selectedAllotment} />
-                <DailyWorkloadChart data={selectedAllotment} />
+                <InvigilatorsPerSubjectChart 
+                  data={selectedAllotment} 
+                  onTitleClick={(chart) => handleZoom('Invigilator Allocation per Subject', chart)}
+                />
+                <InvigilatorsByDesignationChart 
+                    data={selectedAllotment} 
+                    onTitleClick={(chart) => handleZoom('Invigilator Distribution by Designation', chart)}
+                />
+                <DutiesPerInvigilatorChart 
+                    data={selectedAllotment} 
+                    onTitleClick={(chart) => handleZoom('Duties Per Invigilator', chart)}
+                />
+                <DailyWorkloadChart 
+                    data={selectedAllotment}
+                    onTitleClick={(chart) => handleZoom('Daily Invigilator Workload', chart)}
+                />
                 <div className="lg:col-span-2">
-                    <SessionTrendsChart data={selectedAllotment} />
+                    <SessionTrendsChart 
+                        data={selectedAllotment} 
+                        onTitleClick={(chart) => handleZoom('Day-wise Session Trends', chart)}
+                    />
                 </div>
              </div>
           ) : (
@@ -87,6 +109,19 @@ export default function AnalyticsPage() {
           )}
         </div>
       </div>
+      <Dialog open={!!zoomedChart} onOpenChange={(isOpen) => !isOpen && setZoomedChart(null)}>
+        {zoomedChart && (
+            <DialogContent className="max-w-[90vw] w-full h-[80vh] flex flex-col">
+                <DialogHeader>
+                    <DialogTitle>{zoomedChart.title}</DialogTitle>
+                    <DialogDescription>Full-screen view of the chart. Close this dialog to return to the dashboard.</DialogDescription>
+                </DialogHeader>
+                <div className="flex-grow h-full w-full">
+                    {zoomedChart.chart}
+                </div>
+            </DialogContent>
+        )}
+      </Dialog>
     </>
   );
 }

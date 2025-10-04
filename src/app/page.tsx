@@ -55,9 +55,16 @@ export default function LandingPage() {
                 <div className="absolute inset-0 bg-black/60 z-10" />
                 <div className="relative z-20 container px-4 md:px-6 text-white">
                     <div className="space-y-4 max-w-3xl mx-auto">
-                        <h1 className="text-4xl font-headline font-bold tracking-tighter sm:text-5xl md:text-6xl text-primary">
+                        <div className="flex justify-center items-center gap-4 mb-4">
+                           <UsersRound className="w-24 h-24 text-primary" />
+                           <div>
+                            <h1 className="text-5xl font-headline font-extrabold text-primary">DutyFlow</h1>
+                            <p className="text-lg text-white/80 mt-2">The AI-Powered Allotments</p>
+                           </div>
+                        </div>
+                        <h2 className="text-4xl font-headline font-bold tracking-tighter sm:text-5xl md:text-6xl">
                             Effortless Invigilation Duty Allotment
-                        </h1>
+                        </h2>
                         <p className="text-lg md:text-xl text-white/80">
                             Welcome to DutyFlow, the AI-powered solution that transforms the complex task of assigning exam duties into a simple, fair, and efficient process.
                         </p>

@@ -11,11 +11,9 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  dashboard,
-  landing,
+  children,
 }: Readonly<{
-  dashboard: React.ReactNode;
-  landing: React.ReactNode;
+  children: React.ReactNode;
 }>) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
@@ -28,9 +26,8 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="light">
             <AuthProvider>
               <AppLayout>
-                {dashboard}
+                {children}
               </AppLayout>
-              {landing}
             </AuthProvider>
           </ThemeProvider>
         <Toaster />

@@ -32,7 +32,7 @@ export function DutiesPerInvigilatorChart({ data }: ChartProps) {
   const chartConfig = {
     duties: {
       label: 'Duties',
-      color: 'hsl(var(--chart-3))',
+      color: 'hsl(var(--chart-4))',
     },
   };
 

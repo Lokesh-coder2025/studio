@@ -43,7 +43,7 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-background">
        <Image
-        src="https://picsum.photos/seed/8/1920/1080"
+        src="https://picsum.photos/seed/9/1920/1080"
         alt="DutyFlow Background"
         fill
         className="object-cover object-center"

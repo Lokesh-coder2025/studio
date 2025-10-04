@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Button } from '@/components/ui/button';
@@ -66,7 +67,9 @@ export default function LandingPage() {
                             Revolutionize Examination Duties with AI
                         </h2>
                         <p className="text-lg md:text-xl text-white/80">
-                            Welcome to DutyFlow, the AI-powered solution that transforms the complex task of assigning exam duties into a simple, fair, and efficient process.
+                            DutyFlow uses advanced AI algorithms 
+to automatically allocate examination duties across the platform, ensuring 
+fair distribution and optimal scheduling
                         </p>
                         <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
                             <Button

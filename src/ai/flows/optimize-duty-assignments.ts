@@ -68,11 +68,11 @@ Your task is to assign invigilators to a series of examinations based on the fol
 **Input Data:**
 -   **Invigilators (sorted by seniority):**
     \`\`\`json
-    {{{jsonStringify invigilators}}}
+    {{{invigilators}}}
     \`\`\`
 -   **Examinations:**
     \`\`\`json
-    {{{jsonStringify examinations}}}
+    {{{examinations}}}
     \`\`\`
 
 Based on this data and the rules above, generate the optimal duty assignments.

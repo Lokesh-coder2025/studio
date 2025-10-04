@@ -60,7 +60,6 @@ export default function LandingPage() {
                            <UsersRound className="w-24 h-24 text-primary" />
                            <div>
                             <h1 className="text-5xl font-headline font-extrabold text-primary">DutyFlow</h1>
-                            <p className="text-lg text-white/80 mt-2">The AI-Powered Allotments</p>
                            </div>
                         </div>
                         <h2 className="text-4xl font-headline font-bold tracking-tighter sm:text-5xl md:text-6xl">

@@ -59,7 +59,6 @@ export default function SignUpPage() {
         <div className="hidden md:flex md:w-1/2 flex-col items-center justify-center text-white p-8">
             <UsersRound className="w-24 h-24 text-primary" />
             <h1 className="text-5xl font-headline font-extrabold text-primary mt-4">DutyFlow</h1>
-            <p className="text-lg text-white/80 mt-2">The AI-Powered Allotments</p>
         </div>
         <div className="w-full md:w-1/2 p-8">
             <Card className="w-full shadow-2xl bg-card/80 backdrop-blur-sm">

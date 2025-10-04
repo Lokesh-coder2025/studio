@@ -59,6 +59,12 @@ export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: Ch
         <ResponsiveContainer width="100%" height="100%">
         <PieChart>
             <ChartTooltip cursor={false} content={<ChartTooltipContent hideLabel />} />
+             <ChartLegend 
+                content={<ChartLegendContent nameKey="subject" className="flex flex-col gap-2" />} 
+                layout="vertical"
+                verticalAlign="middle"
+                align="left"
+            />
             <Pie
             data={chartData}
             dataKey="count"
@@ -83,9 +89,6 @@ export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: Ch
                     <Cell key={`cell-${entry.subject}`} fill={chartConfig[entry.subject]?.color} />
                 ))}
             </Pie>
-            <ChartLegend 
-                content={<ChartLegendContent nameKey="subject" className={cn("flex-wrap", isZoomed ? 'justify-center' : 'grid grid-cols-2 gap-x-8 gap-y-2')} />} 
-            />
         </PieChart>
         </ResponsiveContainer>
     </ChartContainer>
@@ -109,10 +112,14 @@ export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: Ch
         <CardDescription>Distribution of total invigilator duties across subjects.</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
-        <div className="mx-auto aspect-square h-[300px]">
-            {chartComponent}
+        <div className="h-[300px] flex w-full">
+            <div className="w-[30%]"></div>
+            <div className="w-[70%]">
+                 {chartComponent}
+            </div>
         </div>
       </CardContent>
     </Card>
   );
 }
+

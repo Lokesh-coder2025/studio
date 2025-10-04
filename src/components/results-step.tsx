@@ -406,7 +406,7 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
                 <TooltipTrigger asChild>
                     <Button variant="outline" size="icon" onClick={() => setIsFullScreen(true)}>
                         <Maximize />
-                        <span className="sr-only">Full Screen</span>
+                        <span className="sr-only">View Full-Screen</span>
                     </Button>
                 </TooltipTrigger>
                 <TooltipContent>
@@ -434,6 +434,8 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
               assignments={assignments} 
               collegeName={collegeName}
               examTitle={examTitle}
+              onEmailAll={() => setIsEmailAllConfirmOpen(true)}
+              isSendingAllEmails={isSendingAllEmails}
             />
         </TabsContent>
       </Tabs>
@@ -444,17 +446,6 @@ export function ResultsStep({ invigilators, examinations, initialAssignments, pr
         <div className="flex flex-wrap gap-2 justify-end">
            <Button onClick={handleSave} disabled={isSendingAllEmails || isRebalancing} size="sm">
               <Save /> Save/Update
-            </Button>
-           <Button onClick={() => setIsEmailAllConfirmOpen(true)} disabled={isSendingAllEmails || isRebalancing} size="sm">
-              {isSendingAllEmails ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending...
-                </>
-              ) : (
-                <>
-                  <Send /> Email All Summaries
-                </>
-              )}
             </Button>
            <Button onClick={handleDownloadPdf} disabled={isSendingAllEmails || isRebalancing} size="sm">
               <Download /> Download as PDF

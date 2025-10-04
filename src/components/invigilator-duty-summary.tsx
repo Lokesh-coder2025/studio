@@ -28,9 +28,11 @@ type InvigilatorDutySummaryProps = {
   assignments: Assignment[];
   collegeName: string;
   examTitle: string;
+  onEmailAll: () => void;
+  isSendingAllEmails: boolean;
 };
 
-export function InvigilatorDutySummary({ invigilators, assignments, collegeName, examTitle }: InvigilatorDutySummaryProps) {
+export function InvigilatorDutySummary({ invigilators, assignments, collegeName, examTitle, onEmailAll, isSendingAllEmails }: InvigilatorDutySummaryProps) {
   const [selectedInvigilatorId, setSelectedInvigilatorId] = useState<string | null>(null);
   const [isEmailConfirmationOpen, setIsEmailConfirmationOpen] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
@@ -126,18 +128,20 @@ export function InvigilatorDutySummary({ invigilators, assignments, collegeName,
 
   return (
     <div className="space-y-6">
-      <div className="max-w-md">
-        <label htmlFor="invigilator-select" className="block text-sm font-medium text-foreground mb-2">Select Invigilator Name</label>
-        <Select onValueChange={setSelectedInvigilatorId}>
-            <SelectTrigger id="invigilator-select">
-                <SelectValue placeholder={<div className="flex items-center"><Search className="h-4 w-4 mr-2" /> Search for an invigilator...</div>} />
-            </SelectTrigger>
-            <SelectContent>
-                {invigilators.map(inv => (
-                    <SelectItem key={inv.id} value={inv.id}>{inv.name}</SelectItem>
-                ))}
-            </SelectContent>
-        </Select>
+      <div className="flex justify-between items-end">
+        <div className="max-w-md">
+          <label htmlFor="invigilator-select" className="block text-sm font-medium text-foreground mb-2">Select Invigilator Name</label>
+          <Select onValueChange={setSelectedInvigilatorId}>
+              <SelectTrigger id="invigilator-select">
+                  <SelectValue placeholder={<div className="flex items-center"><Search className="h-4 w-4 mr-2" /> Search for an invigilator...</div>} />
+              </SelectTrigger>
+              <SelectContent>
+                  {invigilators.map(inv => (
+                      <SelectItem key={inv.id} value={inv.id}>{inv.name}</SelectItem>
+                  ))}
+              </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {selectedInvigilator ? (
@@ -201,7 +205,17 @@ export function InvigilatorDutySummary({ invigilators, assignments, collegeName,
               </div>
             </CardContent>
             <CardFooter className="flex justify-between items-center p-6">
-                <div></div>
+                 <Button onClick={onEmailAll} size="sm" disabled={isSendingAllEmails}>
+                      {isSendingAllEmails ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Sending All...
+                        </>
+                      ) : (
+                        <>
+                          <Send className="mr-2 h-4 w-4" /> Email All Summaries
+                        </>
+                      )}
+                   </Button>
                 <div className="flex gap-2">
                    <Button id="send-email-btn" onClick={() => setIsEmailConfirmationOpen(true)} size="sm" disabled={isSendingEmail}>
                       {isSendingEmail ? (

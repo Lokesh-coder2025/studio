@@ -1,3 +1,4 @@
+
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -71,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (user && isPublicAuthRoute && pathname !== '/') {
             router.push('/dashboard');
         } else if (!user && !isPublicAuthRoute && !isPublicAppRoute) {
-            router.push('/signup');
+            router.push('/');
         }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

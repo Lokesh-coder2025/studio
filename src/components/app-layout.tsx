@@ -11,7 +11,7 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info, UsersRound, LogOut, CalendarDays } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info, UsersRound, LogOut, CalendarDays, BarChart } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
@@ -70,6 +70,14 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                             <Link href="/day-wise-schedule">
                                 <CalendarDays />
                                 <span>Day-wise Schedule</span>
+                            </Link>
+                          </Button>
+                        </NavigationMenuItem>
+                        <NavigationMenuItem>
+                          <Button asChild size="sm" className={cn('shadow-lg', pathname === '/analytics' ? '' : 'opacity-80')}>
+                            <Link href="/analytics">
+                                <BarChart />
+                                <span>Analytics</span>
                             </Link>
                           </Button>
                         </NavigationMenuItem>

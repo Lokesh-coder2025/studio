@@ -72,7 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (user && isPublicAuthRoute && pathname !== '/') {
             router.push('/dashboard');
         } else if (!user && !isPublicAuthRoute && !isPublicAppRoute) {
-            router.push('/');
+            router.push('/login');
         }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps

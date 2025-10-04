@@ -84,7 +84,7 @@ export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: Ch
                 ))}
             </Pie>
             <ChartLegend 
-                content={<ChartLegendContent nameKey="subject" className={cn("grid gap-x-8 gap-y-2", isZoomed ? 'grid-cols-3' : 'grid-cols-2')} />} 
+                content={<ChartLegendContent nameKey="subject" className={cn("flex-wrap", isZoomed ? 'justify-center' : 'grid grid-cols-2 gap-x-8 gap-y-2')} />} 
             />
         </PieChart>
         </ResponsiveContainer>

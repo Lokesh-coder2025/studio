@@ -11,10 +11,9 @@ import {
 } from '@/components/ui/navigation-menu';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { FileSpreadsheet, History, Save, Info, UsersRound, LogIn, ShieldCheck, LogOut, UserPlus, Settings, Palette, Sun, Moon, CalendarDays } from 'lucide-react';
+import { FileSpreadsheet, History, Save, Info, UsersRound, LogOut, CalendarDays } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { ThemePicker } from '@/components/theme-picker';
 import { useAuth } from '@/hooks/use-auth';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
@@ -92,7 +91,6 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     </NavigationMenu>
               </div>
               <div className="w-auto flex justify-end items-center gap-2">
-                <ThemePicker />
                 {user ? (
                     <Button onClick={logout} variant="outline" size="sm">
                         <LogOut />

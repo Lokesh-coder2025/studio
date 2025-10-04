@@ -35,7 +35,7 @@ export function DutiesPerInvigilatorChart({ data, onTitleClick, isZoomed }: Char
   const chartConfig = {
     duties: {
       label: 'Duties',
-      color: 'hsl(var(--chart-4))',
+      color: '#C08081',
     },
   };
 
@@ -60,7 +60,7 @@ export function DutiesPerInvigilatorChart({ data, onTitleClick, isZoomed }: Char
             cursor={false}
             content={<ChartTooltipContent indicator="line" />}
             />
-            <Bar dataKey="duties" fill="hsl(var(--chart-4))" radius={4} />
+            <Bar dataKey="duties" fill="var(--color-duties)" radius={4} />
         </BarChart>
         </ResponsiveContainer>
     </ChartContainer>

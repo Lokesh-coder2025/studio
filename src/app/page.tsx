@@ -104,7 +104,7 @@ export default function LandingPage() {
     <div className="flex-1 w-full">
         <main className="flex-1">
             {/* Hero Section */}
-            <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center text-center">
+            <section className="relative w-full h-[70vh] md:h-[80vh] flex flex-col text-white">
                  <Image
                     src="https://picsum.photos/seed/5/1920/1080"
                     alt="Abstract background"
@@ -114,31 +114,45 @@ export default function LandingPage() {
                     data-ai-hint="data visualization"
                 />
                 <div className="absolute inset-0 bg-black/60 z-10" />
-                <div className="relative z-20 container px-4 md:px-6 text-white">
-                    <div className="space-y-4 max-w-3xl mx-auto">
-                        <div className="flex justify-center items-center gap-4 mb-4">
-                           <UsersRound className="w-24 h-24 text-primary" />
-                           <div>
-                            <h1 className="text-5xl font-headline font-extrabold text-primary">DutyFlow</h1>
-                           </div>
+                
+                <div className="relative z-20 container mx-auto px-4 md:px-6 flex items-center justify-between py-4">
+                    <Link href="/" className="flex items-center gap-2">
+                        <UsersRound className="w-10 h-10 text-primary" />
+                        <div>
+                            <h1 className="text-3xl font-headline font-extrabold text-primary">DutyFlow</h1>
                         </div>
-                        <h2 className="text-4xl font-headline font-bold tracking-tighter sm:text-5xl md:text-6xl">
-                            Revolutionize Examination Duties with AI
-                        </h2>
-                        <p className="text-lg md:text-xl text-white/80">
-                            DutyFlow uses advanced AI algorithms 
-to automatically allocate examination duties across the platform, ensuring 
-fair distribution and optimal scheduling
-                        </p>
-                        <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
-                            <Button
-                                size="lg"
-                                className="shadow-lg"
-                                onClick={handleGetStarted}
-                                disabled={loading}
-                            >
-                                Get Started <ArrowRight className="ml-2" />
-                            </Button>
+                    </Link>
+                    <Button
+                        variant="outline"
+                        className="bg-transparent border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+                        onClick={handleGetStarted}
+                        disabled={loading}
+                    >
+                        {user ? 'Go to Dashboard' : 'Get Started'}
+                    </Button>
+                </div>
+                
+                <div className="relative z-20 flex-1 flex items-center justify-center text-center">
+                    <div className="container px-4 md:px-6">
+                        <div className="space-y-4 max-w-3xl mx-auto">
+                            <h2 className="text-4xl font-headline font-bold tracking-tighter sm:text-5xl md:text-6xl">
+                                Revolutionize Examination Duties with AI
+                            </h2>
+                            <p className="text-lg md:text-xl text-white/80">
+                                DutyFlow uses advanced AI algorithms 
+                                to automatically allocate examination duties, ensuring 
+                                fair distribution and optimal scheduling.
+                            </p>
+                            <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
+                                <Button
+                                    size="lg"
+                                    className="shadow-lg"
+                                    onClick={handleGetStarted}
+                                    disabled={loading}
+                                >
+                                    Get Started <ArrowRight className="ml-2" />
+                                </Button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -218,3 +232,5 @@ fair distribution and optimal scheduling
     </div>
   );
 }
+
+    

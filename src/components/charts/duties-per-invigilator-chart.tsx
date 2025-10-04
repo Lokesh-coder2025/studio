@@ -83,7 +83,7 @@ export function DutiesPerInvigilatorChart({ data, onTitleClick, isZoomed }: Char
         <CardDescription>Total duties assigned to each staff member.</CardDescription>
       </CardHeader>
       <CardContent>
-        <div className="h-[350px] w-full">
+        <div className="h-[440px] w-full">
           {chartComponent}
         </div>
       </CardContent>

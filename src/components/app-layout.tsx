@@ -15,6 +15,7 @@ import { FileSpreadsheet, History, Save, Info, UsersRound, LogOut, CalendarDays 
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { useAuth } from '@/hooks/use-auth';
+import { ThemeToggle } from './theme-toggle';
 
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -92,10 +93,13 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
               </div>
               <div className="w-auto flex justify-end items-center gap-2">
                 {user ? (
-                    <Button onClick={logout} variant="outline" size="sm">
-                        <LogOut />
-                        <span>Logout</span>
-                    </Button>
+                    <>
+                        <ThemeToggle />
+                        <Button onClick={logout} variant="outline" size="sm">
+                            <LogOut />
+                            <span>Logout</span>
+                        </Button>
+                    </>
                 ) : (
                     <>
                         {/* The login and signup buttons are removed from here as per previous requests */}

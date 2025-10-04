@@ -96,7 +96,7 @@ fair distribution and optimal scheduling
                 <div className="container px-4 md:px-6">
                     <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
                         <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Key Features</div>
-                        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-primary">Why Choose DutyFlow?</h2>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-primary">Built for Academic Excellence</h2>
                         <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
                             DutyFlow is designed to save you time, ensure fairness, and eliminate the headaches of manual duty allotment.
                         </p>

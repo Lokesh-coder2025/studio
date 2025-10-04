@@ -94,7 +94,7 @@ export function SessionTrendsChart({ data, onTitleClick, isZoomed }: ChartProps)
         onClick={() => onTitleClick && onTitleClick(<SessionTrendsChart data={data} isZoomed />)}
       >
         <div className="flex items-center justify-between">
-            <CardTitle>Day-wise Session Trends</CardTitle>
+            <CardTitle className="text-primary">Day-wise Session Trends</CardTitle>
             <Maximize className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
         </div>
         <CardDescription>Trends for duties, rooms, and relievers over the exam session.</CardDescription>

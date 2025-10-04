@@ -80,7 +80,7 @@ export function DailyWorkloadChart({ data, onTitleClick, isZoomed }: ChartProps)
         onClick={() => onTitleClick && onTitleClick(<DailyWorkloadChart data={data} isZoomed />)}
       >
         <div className="flex items-center justify-between">
-            <CardTitle>Daily Invigilator Workload</CardTitle>
+            <CardTitle className="text-primary">Daily Invigilator Workload</CardTitle>
             <Maximize className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
         </div>
         <CardDescription>Assigned vs. Free invigilators for each exam day.</CardDescription>

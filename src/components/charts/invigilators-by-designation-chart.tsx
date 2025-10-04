@@ -77,7 +77,7 @@ export function InvigilatorsByDesignationChart({ data, onTitleClick, isZoomed }:
         onClick={() => onTitleClick && onTitleClick(<InvigilatorsByDesignationChart data={data} isZoomed />)}
       >
         <div className="flex items-center justify-between">
-            <CardTitle>Invigilator Distribution by Designation</CardTitle>
+            <CardTitle className="text-primary">Invigilator Distribution by Designation</CardTitle>
             <Maximize className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
         </div>
         <CardDescription>Number of invigilators from each department/designation.</CardDescription>

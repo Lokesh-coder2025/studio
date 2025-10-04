@@ -103,7 +103,7 @@ export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: Ch
         onClick={() => onTitleClick && onTitleClick(<InvigilatorsPerSubjectChart data={data} isZoomed />)}
       >
         <div className="flex items-center justify-between">
-            <CardTitle>Invigilator Allocation per Subject</CardTitle>
+            <CardTitle className="text-primary">Invigilator Allocation per Subject</CardTitle>
             <Maximize className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
         </div>
         <CardDescription>Distribution of total invigilator duties across subjects.</CardDescription>

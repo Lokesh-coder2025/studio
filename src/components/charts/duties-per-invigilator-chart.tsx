@@ -77,7 +77,7 @@ export function DutiesPerInvigilatorChart({ data, onTitleClick, isZoomed }: Char
         onClick={() => onTitleClick && onTitleClick(<DutiesPerInvigilatorChart data={data} isZoomed />)}
       >
         <div className="flex items-center justify-between">
-            <CardTitle>Duties Per Invigilator</CardTitle>
+            <CardTitle className="text-primary">Duties Per Invigilator</CardTitle>
             <Maximize className="h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
         </div>
         <CardDescription>Total duties assigned to each staff member.</CardDescription>

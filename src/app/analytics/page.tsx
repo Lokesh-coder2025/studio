@@ -70,9 +70,9 @@ export default function AnalyticsPage() {
           
           {selectedAllotment ? (
              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <DutiesPerInvigilatorChart data={selectedAllotment} />
-                <InvigilatorsByDesignationChart data={selectedAllotment} />
                 <InvigilatorsPerSubjectChart data={selectedAllotment} />
+                <InvigilatorsByDesignationChart data={selectedAllotment} />
+                <DutiesPerInvigilatorChart data={selectedAllotment} />
                 <DailyWorkloadChart data={selectedAllotment} />
                 <div className="lg:col-span-2">
                     <SessionTrendsChart data={selectedAllotment} />

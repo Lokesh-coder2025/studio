@@ -43,11 +43,11 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center bg-background">
        <Image
-        src="https://picsum.photos/seed/gradient-dark/1920/1080"
-        alt="Gradient & Shapes"
+        src="https://picsum.photos/seed/digital-abstract-dark/1920/1080"
+        alt="Digital Abstract Background"
         fill
         className="object-cover object-center"
-        data-ai-hint="geometric forms"
+        data-ai-hint="digital abstract"
       />
       <div className="absolute inset-0 bg-black/50" />
       <div className="relative z-10 flex w-full max-w-4xl rounded-xl">

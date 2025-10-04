@@ -7,6 +7,7 @@ import { Pie, PieChart, ResponsiveContainer, Cell } from 'recharts';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ChartContainer, ChartLegend, ChartLegendContent, ChartTooltip, ChartTooltipContent } from '@/components/ui/chart';
 import { Maximize } from 'lucide-react';
+import { cn } from '@/lib/utils';
 
 type ChartProps = {
   data: SavedAllotment;
@@ -55,7 +56,7 @@ export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: Ch
             nameKey="subject"
             cx="50%"
             cy="50%"
-            outerRadius={isZoomed ? 180 : 80}
+            outerRadius={isZoomed ? 180 : 100}
             labelLine={false}
             label={({ cx, cy, midAngle, innerRadius, outerRadius, percent, index }) => {
                 const RADIAN = Math.PI / 180;
@@ -73,7 +74,9 @@ export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: Ch
                 <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
             ))}
             </Pie>
-            <ChartLegend content={<ChartLegendContent nameKey="subject" />} />
+            <ChartLegend 
+                content={<ChartLegendContent nameKey="subject" className="grid grid-cols-2 gap-x-8 gap-y-2" />} 
+            />
         </PieChart>
         </ResponsiveContainer>
     </ChartContainer>
@@ -97,7 +100,7 @@ export function InvigilatorsPerSubjectChart({ data, onTitleClick, isZoomed }: Ch
         <CardDescription>Distribution of total invigilator duties across subjects.</CardDescription>
       </CardHeader>
       <CardContent className="flex-1 pb-0">
-        <div className="mx-auto aspect-square h-[250px]">
+        <div className="mx-auto aspect-square h-[300px]">
             {chartComponent}
         </div>
       </CardContent>

@@ -1,158 +1,148 @@
-
 'use client';
 
-import { Suspense, useEffect, useState } from 'react';
-import type { Invigilator, Examination, Assignment } from '@/types';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { InvigilatorsStep } from '@/components/invigilators-step';
-import { ExaminationsStep } from '@/components/examinations-step';
-import { ResultsStep } from '@/components/results-step';
-import { Workflow, BookUser, FileSpreadsheet } from 'lucide-react';
-import { useSearchParams, useRouter, usePathname } from 'next/navigation';
-import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useAuth } from '@/hooks/use-auth';
+import { cn } from '@/lib/utils';
+import { ArrowRight, Bot, FileSpreadsheet, Save, UsersRound } from 'lucide-react';
+import Image from 'next/image';
+import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 
-const STEPS = [
-  { step: 1, title: "Invigilators' Details", description: "Add all available invigilators.", icon: BookUser },
-  { step: 2, title: "Examination Details", description: "Enter the details for all exams.", icon: Workflow },
-  { step: 3, title: "Duty Allotment", description: "View and export the generated schedule.", icon: FileSpreadsheet },
+const features = [
+    {
+        icon: Bot,
+        title: "Intelligent Allotment",
+        description: "Our AI-powered system distributes duties fairly, considering seniority, availability, and exam requirements to create an optimal schedule."
+    },
+    {
+        icon: FileSpreadsheet,
+        title: "Simple 3-Step Process",
+        description: "Just add your invigilators, input examination details, and let DutyFlow generate the complete allotment sheet for you."
+    },
+    {
+        icon: Save,
+        title: "Save & Continue Later",
+        description: "Never lose your work. Save your allotment sessions at any stage and pick up right where you left off."
+    }
 ];
 
-function HomeClient() {
-  const [currentStep, setCurrentStep] = useState(1);
-  const [invigilators, setInvigilators] = useState<Invigilator[]>([]);
-  const [examinations, setExaminations] = useState<Examination[]>([]);
-  const [assignments, setAssignments] = useState<Assignment[]>([]);
-  const [isGenerating, setIsGenerating] = useState(false);
-  const [examTitle, setExamTitle] = useState('');
-  const [collegeName, setCollegeName] = useState('');
-  const [allotmentId, setAllotmentId] = useState<string | null>(null);
-  
-  const searchParams = useSearchParams();
-  const router = useRouter();
-  const pathname = usePathname();
-  const { user } = useAuth();
+export default function LandingPage() {
+    const { user, loading } = useAuth();
+    const router = useRouter();
 
-  useEffect(() => {
-    if (user?.institutionName) {
-        setCollegeName(user.institutionName);
-    }
-  }, [user]);
-
-  const resetApp = () => {
-    setCurrentStep(1);
-    setInvigilators([]);
-    setExaminations([]);
-    setAssignments([]);
-    setExamTitle('');
-    setCollegeName(user?.institutionName || '');
-    setAllotmentId(null);
-    // Remove query params to prevent re-loading data
-    if (searchParams.toString()) {
-        router.push(pathname);
-    }
-  };
-
-  useEffect(() => {
-    const loadId = searchParams.get('load');
-    if (loadId) {
-      const savedAllotments = JSON.parse(localStorage.getItem('savedAllotments') || '[]');
-      const allotmentToLoad = savedAllotments.find((item: any) => item.id === loadId);
-      if (allotmentToLoad) {
-        setInvigilators(allotmentToLoad.invigilators);
-        setExaminations(allotmentToLoad.examinations);
-        setAssignments(allotmentToLoad.assignments);
-        setExamTitle(allotmentToLoad.examTitle);
-        setCollegeName(allotmentToLoad.collegeName || user?.institutionName || '');
-        setAllotmentId(allotmentToLoad.id);
-        setCurrentStep(3);
-      }
-    } else {
-        // This ensures that navigating to '/' without a query param resets the state
-        resetApp();
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, user]);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [currentStep]);
-
-  const nextStep = () => setCurrentStep((prev) => prev + 1);
-  const prevStep = () => {
-    if (searchParams.get('load')) {
-        router.push('/saved-allotments');
-    } else {
-        setCurrentStep((prev) => prev - 1);
-    }
-  };
-
-  const renderStep = () => {
-    switch (currentStep) {
-      case 1:
-        return <InvigilatorsStep invigilators={invigilators} setInvigilators={setInvigilators} nextStep={nextStep} />;
-      case 2:
-        return (
-          <ExaminationsStep
-            collegeName={collegeName}
-            setCollegeName={setCollegeName}
-            examTitle={examTitle}
-            setExamTitle={setExamTitle}
-            invigilators={invigilators}
-            examinations={examinations}
-            setExaminations={setExaminations}
-            setAssignments={setAssignments}
-            setAllotmentId={setAllotmentId}
-            nextStep={nextStep}
-            prevStep={prevStep}
-            isGenerating={isGenerating}
-            setIsGenerating={setIsGenerating}
-          />
-        );
-      case 3:
-        return <ResultsStep 
-                    invigilators={invigilators} 
-                    examinations={examinations} 
-                    initialAssignments={assignments} 
-                    resetApp={resetApp} 
-                    prevStep={prevStep} 
-                    collegeName={collegeName}
-                    setCollegeName={setCollegeName}
-                    examTitle={examTitle}
-                    setExamTitle={setExamTitle}
-                    allotmentId={allotmentId}
-                    setAllotmentId={setAllotmentId}
-                />;
-      default:
-        return <InvigilatorsStep invigilators={invigilators} setInvigilators={setInvigilators} nextStep={nextStep} />;
-    }
-  };
+    const handleGetStarted = () => {
+        if (user) {
+            router.push('/dashboard');
+        } else {
+            router.push('/signup');
+        }
+    };
 
   return (
-    <>
-      <div className="p-4 sm:p-6 md:p-8">
-        <Card className={cn(
-            "mx-auto shadow-lg",
-            currentStep === 3 ? 'w-full max-w-none' : 'max-w-6xl'
-          )}>
-          <CardHeader>
-            <CardTitle className="text-2xl font-headline">{STEPS[currentStep - 1].title}</CardTitle>
-            <CardDescription>{STEPS[currentStep - 1].description}</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {renderStep()}
-          </CardContent>
-        </Card>
-      </div>
-    </>
-  );
-}
+    <div className="flex-1 w-full">
+        <main className="flex-1">
+            {/* Hero Section */}
+            <section className="relative w-full h-[60vh] md:h-[70vh] flex items-center justify-center text-center">
+                 <Image
+                    src="https://picsum.photos/seed/1/1920/1080"
+                    alt="Abstract background"
+                    layout="fill"
+                    objectFit="cover"
+                    className="absolute inset-0 z-0"
+                    data-ai-hint="abstract graduation background"
+                />
+                <div className="absolute inset-0 bg-black/60 z-10" />
+                <div className="relative z-20 container px-4 md:px-6 text-white">
+                    <div className="space-y-4 max-w-3xl mx-auto">
+                        <h1 className="text-4xl font-headline font-bold tracking-tighter sm:text-5xl md:text-6xl text-primary">
+                            Effortless Invigilation Duty Allotment
+                        </h1>
+                        <p className="text-lg md:text-xl text-white/80">
+                            Welcome to DutyFlow, the AI-powered solution that transforms the complex task of assigning exam duties into a simple, fair, and efficient process.
+                        </p>
+                        <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
+                            <Button
+                                size="lg"
+                                className="shadow-lg"
+                                onClick={handleGetStarted}
+                                disabled={loading}
+                            >
+                                Get Started <ArrowRight className="ml-2" />
+                            </Button>
+                            {!user && (
+                                <Button asChild variant="secondary" size="lg" className="shadow-lg" disabled={loading}>
+                                    <Link href="/login">
+                                        Log In
+                                    </Link>
+                                </Button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </section>
 
-
-export default function Home() {
-  return (
-    <Suspense fallback={<div>Loading...</div>}>
-      <HomeClient />
-    </Suspense>
+            {/* Features Section */}
+            <section className="w-full py-12 md:py-24 lg:py-32">
+                <div className="container px-4 md:px-6">
+                    <div className="flex flex-col items-center justify-center space-y-4 text-center mb-12">
+                        <div className="inline-block rounded-lg bg-muted px-3 py-1 text-sm">Key Features</div>
+                        <h2 className="text-3xl font-bold tracking-tighter sm:text-5xl text-primary">Why Choose DutyFlow?</h2>
+                        <p className="max-w-[900px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                            DutyFlow is designed to save you time, ensure fairness, and eliminate the headaches of manual duty allotment.
+                        </p>
+                    </div>
+                    <div className="mx-auto grid items-start gap-8 sm:max-w-4xl sm:grid-cols-1 md:gap-12 lg:max-w-5xl lg:grid-cols-3">
+                        {features.map(feature => (
+                            <div key={feature.title} className="grid gap-2 text-center">
+                                <div className="flex justify-center">
+                                    <div className="bg-primary/10 text-primary p-3 rounded-full mb-2">
+                                        <feature.icon className="h-8 w-8" />
+                                    </div>
+                                </div>
+                                <h3 className="text-lg font-bold">{feature.title}</h3>
+                                <p className="text-sm text-muted-foreground">{feature.description}</p>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            </section>
+            
+            {/* How It Works Section */}
+            <section className="w-full py-12 md:py-24 lg:py-32 bg-muted/40">
+                <div className="container grid items-center gap-6 px-4 md:px-6 lg:grid-cols-2 lg:gap-10">
+                    <div className="space-y-4">
+                        <h2 className="text-3xl font-bold tracking-tighter md:text-4xl/tight text-primary">Get Your Allotment in 3 Simple Steps</h2>
+                        <p className="max-w-[600px] text-muted-foreground md:text-xl/relaxed lg:text-base/relaxed xl:text-xl/relaxed">
+                            Our intuitive workflow guides you through the process, making it faster than ever to create a balanced duty roster.
+                        </p>
+                    </div>
+                    <div className="flex flex-col gap-4">
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-xl">1</div>
+                            <div className="grid gap-1">
+                                <h3 className="text-lg font-bold">Add Invigilators</h3>
+                                <p className="text-sm text-muted-foreground">Quickly add your staff members manually or import them from an Excel file.</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-4">
+                            <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-xl">2</div>
+                            <div className="grid gap-1">
+                                <h3 className="text-lg font-bold">Enter Exam Details</h3>
+                                <p className="text-sm text-muted-foreground">Input the schedule of examinations, including dates, subjects, and requirements.</p>
+                            </div>
+                        </div>
+                        <div className="flex items-start gap-4">
+                             <div className="flex h-10 w-10 items-center justify-center rounded-full bg-primary text-primary-foreground font-bold text-xl">3</div>
+                            <div className="grid gap-1">
+                                <h3 className="text-lg font-bold">Generate & Export</h3>
+                                <p className="text-sm text-muted-foreground">Let the AI generate the allotment, then review, edit, and export it as a PDF or Excel file.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
   );
 }

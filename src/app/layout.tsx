@@ -1,5 +1,4 @@
-
-import type {Metadata} from 'next';
+import type { Metadata } from 'next';
 import './globals.css';
 import { Toaster } from "@/components/ui/toaster"
 import { AppLayout } from '@/components/app-layout';
@@ -12,9 +11,11 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-  children,
+  dashboard,
+  landing,
 }: Readonly<{
-  children: React.ReactNode;
+  dashboard: React.ReactNode;
+  landing: React.ReactNode;
 }>) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
@@ -27,8 +28,9 @@ export default function RootLayout({
           <ThemeProvider attribute="class" defaultTheme="light">
             <AuthProvider>
               <AppLayout>
-                {children}
+                {dashboard}
               </AppLayout>
+              {landing}
             </AuthProvider>
           </ThemeProvider>
         <Toaster />

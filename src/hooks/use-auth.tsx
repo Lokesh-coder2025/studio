@@ -1,4 +1,3 @@
-
 'use client';
 
 import { createContext, useContext, useState, useEffect, ReactNode } from 'react';
@@ -34,7 +33,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-const publicRoutes = ['/login', '/signup', '/forgot-password'];
+const publicRoutes = ['/login', '/signup', '/forgot-password', '/'];
 const publicAppRoutes = ['/about'];
 
 
@@ -69,8 +68,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         const isPublicAuthRoute = publicRoutes.includes(pathname);
         const isPublicAppRoute = publicAppRoutes.includes(pathname);
         
-        if (user && isPublicAuthRoute) {
-            router.push('/');
+        if (user && isPublicAuthRoute && pathname !== '/') {
+            router.push('/dashboard');
         } else if (!user && !isPublicAuthRoute && !isPublicAppRoute) {
             router.push('/signup');
         }
@@ -91,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser({ ...user, institutionName });
 
       toast({ title: "Account Created", description: "You have been successfully signed up.", className: "bg-accent text-accent-foreground" });
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       console.error(error);
       toast({ title: "Sign Up Failed", description: error.message, variant: "destructive" });
@@ -102,7 +101,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signInWithEmailAndPassword(auth, email, password);
       toast({ title: "Login Successful", description: "Welcome back!", className: "bg-accent text-accent-foreground" });
-      router.push('/');
+      router.push('/dashboard');
     } catch (error: any) {
       console.error(error);
       toast({ title: "Login Failed", description: error.message, variant: "destructive" });
@@ -113,7 +112,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     try {
       await signOut(auth);
       toast({ title: "Logged Out", description: "You have been successfully logged out." });
-      router.push('/login');
+      router.push('/');
     } catch (error: any) {
       console.error(error);
       toast({ title: "Logout Failed", description: error.message, variant: "destructive" });
@@ -152,7 +151,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       
       setUser({ ...user, institutionName });
       toast({ title: "Signed In with Google", description: "Welcome!", className: "bg-accent text-accent-foreground" });
-      router.push('/');
+      router.push('/dashboard');
 
     } catch (error: any) {
         console.error(error);

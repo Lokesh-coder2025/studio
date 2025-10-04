@@ -1,4 +1,3 @@
-
 'use client';
 
 import {
@@ -20,16 +19,16 @@ import { ThemeToggle } from './theme-toggle';
 export function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
-  const { user, logout } = useAuth();
+  const { user } = useAuth();
   const isAuthPage = ['/login', '/signup', '/forgot-password'].includes(pathname);
-
+  const isLandingPage = pathname === '/';
 
   const handleNewAllotmentClick = (e: React.MouseEvent<HTMLAnchorElement>) => {
     e.preventDefault();
-    router.push('/');
+    router.push('/dashboard');
   };
 
-  if (isAuthPage) {
+  if (isAuthPage || isLandingPage) {
     return <>{children}</>;
   }
   
@@ -51,7 +50,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                     <NavigationMenu>
                         <NavigationMenuItem>
                           <Button asChild size="sm" className='shadow-lg'>
-                            <Link href="/" onClick={handleNewAllotmentClick}>
+                            <Link href="/dashboard" onClick={handleNewAllotmentClick}>
                                 <FileSpreadsheet />
                                 <span>New Allotment</span>
                             </Link>
@@ -103,7 +102,7 @@ export function AppLayout({ children }: { children: React.ReactNode }) {
                 {user ? (
                     <>
                         <ThemeToggle />
-                        <Button onClick={logout} variant="outline" size="sm">
+                        <Button onClick={() => router.push('/api/auth/logout')} variant="outline" size="sm">
                             <LogOut />
                             <span>Logout</span>
                         </Button>

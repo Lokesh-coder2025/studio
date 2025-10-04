@@ -139,9 +139,7 @@ export default function LandingPage() {
                                 Revolutionize Examination Duties with AI
                             </h2>
                             <p className="text-lg md:text-xl text-white/80">
-                                DutyFlow uses advanced AI algorithms 
-                                to automatically allocate examination duties, ensuring 
-                                fair distribution and optimal scheduling.
+                                DutyFlow is an AI-powered examination duty allocation platform for modern educational institutions.
                             </p>
                             <div className="flex flex-col gap-2 min-[400px]:flex-row justify-center">
                                 <Button
@@ -232,5 +230,7 @@ export default function LandingPage() {
     </div>
   );
 }
+
+    
 
     

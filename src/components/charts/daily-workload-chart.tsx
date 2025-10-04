@@ -38,11 +38,11 @@ export function DailyWorkloadChart({ data, onTitleClick, isZoomed }: ChartProps)
   const chartConfig = {
     assigned: {
       label: 'Assigned',
-      color: '#ED6AFF',
+      color: 'hsl(var(--chart-5))',
     },
     free: {
       label: 'Free',
-      color: '#FF637E',
+      color: 'hsl(var(--chart-4))',
     },
   };
 
@@ -62,8 +62,8 @@ export function DailyWorkloadChart({ data, onTitleClick, isZoomed }: ChartProps)
             />
             <Tooltip cursor={{ fill: 'hsl(var(--muted))' }} content={<ChartTooltipContent />} />
             <Legend />
-            <Bar dataKey="assigned" stackId="a" fill={chartConfig.assigned.color} radius={[0, 4, 4, 0]} />
-            <Bar dataKey="free" stackId="a" fill={chartConfig.free.color} radius={[4, 0, 0, 4]}/>
+            <Bar dataKey="assigned" stackId="a" fill="var(--color-assigned)" radius={[0, 4, 4, 0]} />
+            <Bar dataKey="free" stackId="a" fill="var(--color-free)" radius={[4, 0, 0, 4]}/>
         </BarChart>
         </ResponsiveContainer>
     </ChartContainer>

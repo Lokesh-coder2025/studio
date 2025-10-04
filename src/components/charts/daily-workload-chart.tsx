@@ -49,7 +49,7 @@ export function DailyWorkloadChart({ data, onTitleClick, isZoomed }: ChartProps)
   const chartComponent = (
      <ChartContainer config={chartConfig} className="min-h-[200px] w-full h-full">
         <ResponsiveContainer width="100%" height="100%">
-        <BarChart data={chartData} layout="vertical" margin={{ left: 20 }} barSize={26}>
+        <BarChart data={chartData} layout="vertical" margin={{ left: 20 }} barSize={20}>
             <CartesianGrid horizontal={false} />
             <XAxis type="number" />
             <YAxis 

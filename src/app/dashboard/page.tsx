@@ -1,3 +1,4 @@
+
 'use client';
 
 import { Suspense, useEffect, useState } from 'react';
@@ -66,12 +67,12 @@ function HomeClient() {
         setAllotmentId(allotmentToLoad.id);
         setCurrentStep(3);
       }
-    } else {
-        // This ensures that navigating to '/' without a query param resets the state
+    } else if (pathname === '/dashboard') {
+        // This ensures that navigating to '/dashboard' without a query param resets the state
         resetApp();
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [searchParams, user]);
+  }, [searchParams, user, pathname]);
 
   useEffect(() => {
     window.scrollTo(0, 0);

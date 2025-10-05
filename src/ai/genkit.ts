@@ -12,5 +12,5 @@ export const ai = genkit({
     googleAI(),
   ],
   // Set a default model for all flows.
-  model: 'gemini-1.5-flash',
+  model: googleAI.model('gemini-1.5-flash'),
 });

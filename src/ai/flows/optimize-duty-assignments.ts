@@ -13,6 +13,7 @@
 
 import { ai } from '@/ai/genkit';
 import { z } from 'zod';
+import { googleAI } from '@genkit-ai/google-genai';
 
 // Define the input schema for the flow, which details invigilators and exams.
 const OptimizeDutyAssignmentsInputSchema = z.object({
@@ -51,6 +52,7 @@ const dutyAllotmentPrompt = ai.definePrompt({
     name: 'dutyAllotmentPrompt',
     input: { schema: OptimizeDutyAssignmentsInputSchema },
     output: { schema: OptimizeDutyAssignmentsOutputSchema },
+    model: googleAI.model('gemini-1.5-flash'),
     prompt: `You are an expert in academic administration, specializing in creating fair and optimized invigilation duty schedules for examinations.
 
 Your task is to assign invigilators to a series of examinations based on the following rules and data. The final output must be a valid JSON array matching the provided schema.

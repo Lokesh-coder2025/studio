@@ -10,6 +10,7 @@
 
 import {ai} from '@/ai/genkit';
 import {z} from 'genkit';
+import { googleAI } from '@genkit-ai/google-genai';
 
 const GenerateExamDescriptionsInputSchema = z.object({
   subjectName: z.string().describe('The name of the subject for the exam.'),
@@ -31,6 +32,7 @@ const prompt = ai.definePrompt({
   name: 'generateExamDescriptionsPrompt',
   input: {schema: GenerateExamDescriptionsInputSchema},
   output: {schema: GenerateExamDescriptionsOutputSchema},
+  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are an expert in creating exam descriptions for invigilators.
 
   Based on the subject name and syllabus, create a concise and engaging exam description.

@@ -32,7 +32,6 @@ const prompt = ai.definePrompt({
   name: 'generateExamDescriptionsPrompt',
   input: {schema: GenerateExamDescriptionsInputSchema},
   output: {schema: GenerateExamDescriptionsOutputSchema},
-  model: googleAI.model('gemini-1.5-flash'),
   prompt: `You are an expert in creating exam descriptions for invigilators.
 
   Based on the subject name and syllabus, create a concise and engaging exam description.

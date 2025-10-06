@@ -5,12 +5,9 @@
  */
 
 import {genkit} from 'genkit';
-import {googleAI} from '@genkit-ai/google-genai';
+import {googleAI} from '@genkit-ai/googleai';
 
 export const ai = genkit({
-  plugins: [
-    googleAI({apiKey: process.env.GEMINI_API_KEY}),
-  ],
-  // Set a default model for all flows.
-  model: 'gemini-1.5-flash-latest',
+  plugins: [googleAI()],
+ model: googleAI.model('gemini-2.5-flash'),
 });

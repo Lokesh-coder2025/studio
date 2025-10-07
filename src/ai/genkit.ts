@@ -7,6 +7,6 @@ import {genkit} from 'genkit';
 import {googleAI} from '@genkit-ai/googleai';
 
 export const ai = genkit({
-  plugins: [googleAI("AIzaSyC_tayDU12tkiw7HV0PAzlt-QJkE1Lnn3A")],
+  plugins: [googleAI()],
   model: 'googleai/gemini-1.5-flash-latest',
 });

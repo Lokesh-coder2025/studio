@@ -366,7 +366,8 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
         invigilators,
         examinations: formattedExams,
       };
-
+       console.log("aiInput")
+      console.log(aiInput)
       const result = await optimizeDutyAssignments(aiInput as any);
       setAssignments(result);
       

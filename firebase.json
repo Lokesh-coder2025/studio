@@ -1,7 +1,15 @@
 {
   "hosting": {
     "public": "public",
-    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"]
+    "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+    "run": {
+      "serviceId": "studio-1",
+      "region": "us-central1",
+      "env": {
+        "GOOGLE_API_KEY": "AIzaSyC_tayDU12tkiw7HV0PAzlt-QJkE1Lnn3A",
+        "GEMINI_API_KEY": "AIzaSyC_tayDU12tkiw7HV0PAzlt-QJkE1Lnn3A"
+      }
+    }
   },
   "functions": {
     "source": "functions"

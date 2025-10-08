@@ -399,9 +399,10 @@ export function ExaminationsStep({ collegeName, setCollegeName, examTitle, setEx
       nextStep();
     } catch (error) {
       console.error("AI Error:", error);
+      const errorMessage = error instanceof Error ? error.message : "An unknown error occurred.";
       toast({
         title: "Generation Failed",
-        description: "Could not generate the duty allotment. Please try again.",
+        description: `Could not generate the duty allotment. ${errorMessage}`,
         variant: 'destructive',
       });
     } finally {
